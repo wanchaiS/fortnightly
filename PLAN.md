@@ -547,6 +547,7 @@ Must-have screens to clear the 5-screen minimum: Today, Roster, Roster a Shift, 
 
 **Testing in the Simulator**
 - Debug-only button on Today: "Roster a test shift starting in 1 minute".
+- **To see the custom view in DeviceHub (Xcode 27's Simulator):** swipe the notification left → **View**. Long-press registers as a tap there.
 - Or push a payload straight to the Simulator: `xcrun simctl push booted com.peter.fortnightly prompt.apns` with `"aps": {"alert": {...}, "category": "SHIFT_START"}, "shiftID": "<uuid>"`.
 
 ---
@@ -588,7 +589,7 @@ The circular widget is a `Gauge` of hours / 48, coloured by status (within / app
 - **Reschedule the window** on: app launch and foreground, any roster change, clock in/out, and marking a shift not worked.
 - **Cancel by identifier** when the state changes: clocking in cancels `clockInDue` and `clockInOverdue`; clocking out or marking not worked cancels everything for that shift.
 - **"Still working":** schedule a `SHIFT_FINISH` reminder 30 min from now.
-- **Verify in the spike:** whether `UNUserNotificationCenter.current()` can cancel the app's pending reminders when called from the widget extension (an App Intent). Fallback: the app reconciles reminders on its next foreground, and the notification view handles stale prompts gracefully (section 10).
+- **Verified in the spike:** the widget extension can see and cancel the app's pending reminders, so a widget Clock in also cancels the remaining clock-in reminders. The notification view still handles stale prompts gracefully (section 10).
 
 ---
 
@@ -689,7 +690,7 @@ Created in Xcode 27 (new projects start as an untitled draft; targets added via 
 |---|---|
 | App Group / signing trouble with your Apple ID team | Milestone 1 spike; test in the Simulator early |
 | Widget shows "No data" during marking | Seed demo data from a debug menu; the widget's empty state says "No shifts rostered", never "No data" |
-| Can't cancel reminders from an extension | Reconcile on app foreground; the notification view handles stale prompts |
+| Can't cancel reminders from an extension | Resolved in the spike: the widget extension can cancel them |
 | Extension can't see the app's latest changes, or vice versa | Persistent history tracking, re-fetch on foreground, `performAndWait` repositories |
 | Fortnight bugs from region settings | Monday-first `Calendar`; tests 11–13 |
 | Scope creep | Ship the Must use cases + 5 screens + both extensions before any Could item |

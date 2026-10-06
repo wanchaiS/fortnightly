@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="1" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="NO" userDefinedModelVersionIdentifier="">
+    <entity name="EmployerEntity" representedClassName="EmployerEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="createdAt" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="isArchived" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="YES"/>
+        <attribute name="name" attributeType="String"/>
+        <attribute name="payCycle" attributeType="String" defaultValueString="fortnightly"/>
+        <attribute name="payCycleAnchor" attributeType="Date" usesScalarValueType="NO"/>
+        <relationship name="shifts" optional="YES" toMany="YES" deletionRule="Deny" destinationEntity="ShiftEntity" inverseName="employer" inverseEntity="ShiftEntity"/>
+    </entity>
+    <entity name="ShiftEntity" representedClassName="ShiftEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="clockedInAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="clockedOutAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="id" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="note" optional="YES" attributeType="String"/>
+        <attribute name="rosteredFinish" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="rosteredStart" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="status" attributeType="String" defaultValueString="rostered"/>
+        <relationship name="employer" maxCount="1" deletionRule="Nullify" destinationEntity="EmployerEntity" inverseName="shifts" inverseEntity="EmployerEntity"/>
+        <fetchIndex name="byRosteredStart">
+            <fetchIndexElement property="rosteredStart" type="Binary" order="ascending"/>
+        </fetchIndex>
+        <fetchIndex name="byStatus">
+            <fetchIndexElement property="status" type="Binary" order="ascending"/>
+        </fetchIndex>
+    </entity>
+</model>
