@@ -111,6 +111,24 @@ Report:   Section 1 (evidence), Section 2 (why not an existing tool), Section 4 
 - **Hours worked on course-break days are excluded** from the limit. Partial-overlap handling is my interpretation of "not in session"; state it in the document.
 - **Scope ranked Must / Should / Could.** Payslip comparison (manual hours paid) is a "Could".
 
+## 2026-10-06 — Spike: shared store proven across app, widget and notification extension
+Context:  Extensions that crash or show "No data" score zero, so the riskiest integration was tested before any features.
+Built:    - FortnightlyKit: `Employer` and `Shift` types, Core Data model (EmployerEntity → ShiftEntity), store in the App Group container, repositories.
+          - A temporary test panel in the app.
+Result (verified in the iPhone 17 / iOS 26.5 Simulator):
+          - The app saved a shift to the App Group store; the row was confirmed on disk.
+          - The widget (separate process) read it: "Next shift · Café Roma · Tue 11:34 pm".
+          - The notification content extension (separate process) loaded the shift from the ID in the notification, and its custom view replaced the default one.
+          - The widget extension saw the app's 2 pending reminders and cancelled one; iOS's pending list for the app was empty afterwards. So a Clock in tap on the widget can cancel the "not clocked in" reminders directly; the planned fallback isn't needed.
+          - No Team is needed in the Simulator: the App Group is delivered as simulated entitlements.
+Surprises:
+          - Core Data rejects a uniqueness constraint on an entity with a required to-one relationship. Removed the constraints; repositories find-or-create by `id` instead.
+          - Xcode 27 starts new projects as untitled drafts with multiplatform and iOS 27 defaults, and replaces the Simulator app with DeviceHub.
+          - In DeviceHub a long-press on a notification registers as a tap, so the custom view only opens via swipe left → View. The README must tell markers this.
+          - The custom view's last line was cut off at a fixed 150 pt height. The real notification feature should size it to its content.
+          - Tapping "Save test shift" 4 times created 4 overlapping shifts. A live example of why `RosterShift` must reject overlaps (rule R7).
+Report:   Section 4: extension design; architecture under pressure (de-risk the integration first)
+
 ---
 
 ## AI use log
@@ -123,6 +141,7 @@ Report:   Section 1 (evidence), Section 2 (why not an existing tool), Section 4 
 | 2026-10-06 | Whether the widget was justified | Agreed it was weak; suggested Action + Notification Content | Rejected the Action Extension as core; then proposed my own payslip and roster designs | Applied the brief's "would they notice if removed?" test |
 | 2026-10-06 | Whether payslip parsing is hard | Difficulty levels and risks | Dropped parsing; **proposed the roster + clock-prompt design myself** | — |
 | 2026-10-06 | Full plan | Web research + `PLAN.md` | (review pending) | Must verify: open the Home Affairs page in a browser (it blocked automated fetch); install Record My Hours to confirm its features |
+| 2026-10-06 | Set up the Xcode project and test the extension integration (the spike) | Target settings, App Group entitlements, data layer, spike code; ran builds and checked the store on disk | I created the targets in Xcode myself; I did the visual checks (widget, notification) | Saw the widget and custom notification in DeviceHub; AI confirmed the shared store and pending reminders from files on disk |
 
 **Lessons so far:**
 - The AI's first extension suggestion (widget) had a weak justification. Questioning it led to a better design.
@@ -135,5 +154,5 @@ Report:   Section 1 (evidence), Section 2 (why not an existing tool), Section 4 
 - [ ] Quote the Home Affairs work-restrictions page directly (opened in a browser)
 - [ ] Install Record My Hours; confirm the location-based recording, the manual option, and that there's no visa-limit feature
 - [ ] Interview 3–5 international students (questions in PLAN.md §1); record anonymised quotes here
-- [ ] Spike: does the App Group work with my signing team in the Simulator?
-- [ ] Spike: can the widget extension cancel the app's pending reminders?
+- [x] Spike: does the App Group work in the Simulator? Yes, no Team needed
+- [x] Spike: can the widget extension cancel the app's pending reminders? Yes
