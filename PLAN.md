@@ -162,7 +162,7 @@ SQLite store in App Group container  ← also read and written by both extension
 |---|---|---|
 | `Fortnightly` (app) | Views, ViewModels, `AppDependencies` (composition root), `AppDelegate` (notification delegate) | FortnightlyKit (Embed & Sign) |
 | `FortnightlyKit` (framework) | Domain, Ports, UseCases, Persistence (incl. `Fortnightly.xcdatamodeld`), Platform | — |
-| `ShiftStatusWidget` (widget extension) | TimelineProvider, widget views, `ClockIntoShiftIntent`, `ClockOutOfShiftIntent` | FortnightlyKit (Do Not Embed) |
+| `ShiftStatusWidgetExtension` (widget extension, folder `ShiftStatusWidget/`) | TimelineProvider, widget views, `ClockIntoShiftIntent`, `ClockOutOfShiftIntent` | FortnightlyKit (Do Not Embed) |
 | `ShiftPromptNotification` (notification content ext.) | `NotificationViewController`, `ShiftPromptView` | FortnightlyKit (Do Not Embed) |
 | `FortnightlyKitTests` | Use case tests, mocks | FortnightlyKit |
 
@@ -618,17 +618,23 @@ Optional integration test (separate target, in-memory store at `/dev/null`): che
 
 ---
 
-## 14. Project setup checklist
+## 14. Project setup (done, `chore/project-setup`)
 
-1. Xcode → New Project → iOS App "Fortnightly", SwiftUI, **Storage: None** (we add the Core Data model ourselves, in the framework). Deployment target iOS 17.0.
-2. File → New → Target → **Framework** `FortnightlyKit`. Add `Fortnightly.xcdatamodeld` to it. Set the entities' codegen to *Class Definition* or *Manual/None*.
-3. New Target → **Widget Extension** `ShiftStatusWidget` (untick "Include Configuration App Intent" unless needed).
-4. New Target → **Notification Content Extension** `ShiftPromptNotification`.
-5. Add the **App Groups** capability to the app and both extensions, with `group.com.peter.fortnightly`.
-6. Link FortnightlyKit: app = Embed & Sign; extensions = Do Not Embed.
-7. Unit test target `FortnightlyKitTests` that tests FortnightlyKit.
-8. **Use Core Data, not SwiftData.** SwiftData is built on Core Data, but the brief names Core Data explicitly; avoid the ambiguity.
-9. `.gitignore` for Xcode (`xcuserdata/`, `DerivedData/`, `*.xcuserstate`).
+Created in Xcode 27 (new projects start as an untitled draft; targets added via File → New → Target), then configured in the project file:
+
+| Target | Bundle ID | Notes |
+|---|---|---|
+| `Fortnightly` | `com.peter.fortnightly` | iPhone only, embeds FortnightlyKit and both extensions. Default actor isolation MainActor (SwiftUI). |
+| `FortnightlyKit` | `com.peter.fortnightly.FortnightlyKit` | `APPLICATION_EXTENSION_API_ONLY = YES`, nonisolated by default, library evolution off |
+| `FortnightlyKitTests` | `com.peter.fortnightly.FortnightlyKitTests` | Swift Testing, hosted in the app |
+| `ShiftStatusWidgetExtension` | `com.peter.fortnightly.ShiftStatusWidget` | Links FortnightlyKit (not embedded) |
+| `ShiftPromptNotification` | `com.peter.fortnightly.ShiftPromptNotification` | Links FortnightlyKit (not embedded); categories `SHIFT_START`, `SHIFT_FINISH`; default content hidden; size ratio 0.6 |
+
+- **All targets:** iOS 17.0 minimum (set once at the project level), iPhone only.
+- **App Group:** `group.com.peter.fortnightly` in `Fortnightly.entitlements`, `ShiftStatusWidget.entitlements` and `ShiftPromptNotification.entitlements`.
+- **No Team needed for the Simulator.** Simulator builds carry the App Group as simulated entitlements. Add a Team (Xcode → Settings → Accounts) only to run on a real iPhone.
+- **Shared scheme:** `Fortnightly` (committed in `xcshareddata`). ⌘R runs the app; ⌘U runs `FortnightlyKitTests`.
+- **Use Core Data, not SwiftData.** SwiftData is built on Core Data, but the brief names Core Data explicitly; avoid the ambiguity.
 
 ---
 
