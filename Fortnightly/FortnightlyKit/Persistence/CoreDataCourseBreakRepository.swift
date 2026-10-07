@@ -46,7 +46,7 @@ public struct CoreDataCourseBreakRepository: CourseBreakRepository, @unchecked S
             let request = CourseBreakEntity.fetchRequest()
             request.predicate = predicate
             request.sortDescriptors = [NSSortDescriptor(key: "startsOn", ascending: true)]
-            return try context.fetch(request).map { try $0.courseBreak() }
+            return try context.fetchFresh(request).map { try $0.courseBreak() }
         }
     }
 }
@@ -56,7 +56,7 @@ extension CourseBreakEntity {
         let request = CourseBreakEntity.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         request.fetchLimit = 1
-        return try context.fetch(request).first
+        return try context.fetchFresh(request).first
     }
 
     func courseBreak() throws -> CourseBreak {

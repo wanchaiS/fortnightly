@@ -15,7 +15,7 @@ public struct CoreDataEmployerRepository: EmployerRepository, @unchecked Sendabl
                 request.predicate = NSPredicate(format: "isArchived == NO")
             }
             request.sortDescriptors = [NSSortDescriptor(key: "name", ascending: true)]
-            return try context.fetch(request).map { try $0.employer() }
+            return try context.fetchFresh(request).map { try $0.employer() }
         }
     }
 
@@ -48,7 +48,7 @@ extension EmployerEntity {
         let request = EmployerEntity.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         request.fetchLimit = 1
-        return try context.fetch(request).first
+        return try context.fetchFresh(request).first
     }
 
     func employer() throws -> Employer {

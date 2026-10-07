@@ -19,7 +19,7 @@ public struct CoreDataShiftRepository: ShiftRepository, @unchecked Sendable {
             let request = ShiftEntity.fetchRequest()
             request.predicate = NSPredicate(format: "status == %@", ShiftStatus.onShift.rawValue)
             request.fetchLimit = 1
-            return try context.fetch(request).first?.shift()
+            return try context.fetchFresh(request).first?.shift()
         }
     }
 
@@ -31,7 +31,7 @@ public struct CoreDataShiftRepository: ShiftRepository, @unchecked Sendable {
                 ShiftStatus.rostered.rawValue, date as NSDate
             )
             request.sortDescriptors = [NSSortDescriptor(key: "rosteredStart", ascending: true)]
-            return try context.fetch(request).map { try $0.shift() }
+            return try context.fetchFresh(request).map { try $0.shift() }
         }
     }
 
@@ -40,7 +40,7 @@ public struct CoreDataShiftRepository: ShiftRepository, @unchecked Sendable {
             let request = ShiftEntity.fetchRequest()
             request.predicate = NSPredicate(format: "status == %@", ShiftStatus.rostered.rawValue)
             request.sortDescriptors = [NSSortDescriptor(key: "rosteredStart", ascending: true)]
-            return try context.fetch(request).map { try $0.shift() }
+            return try context.fetchFresh(request).map { try $0.shift() }
         }
     }
 
@@ -52,7 +52,7 @@ public struct CoreDataShiftRepository: ShiftRepository, @unchecked Sendable {
                 interval.start as NSDate, interval.end as NSDate
             )
             request.sortDescriptors = [NSSortDescriptor(key: "rosteredStart", ascending: true)]
-            return try context.fetch(request).map { try $0.shift() }
+            return try context.fetchFresh(request).map { try $0.shift() }
         }
     }
 
@@ -74,7 +74,7 @@ public struct CoreDataShiftRepository: ShiftRepository, @unchecked Sendable {
                 ),
             ])
             request.sortDescriptors = [NSSortDescriptor(key: "rosteredStart", ascending: true)]
-            return try context.fetch(request).map { try $0.shift() }
+            return try context.fetchFresh(request).map { try $0.shift() }
         }
     }
 
@@ -105,7 +105,7 @@ extension ShiftEntity {
         let request = ShiftEntity.fetchRequest()
         request.predicate = NSPredicate(format: "id == %@", id as CVarArg)
         request.fetchLimit = 1
-        return try context.fetch(request).first
+        return try context.fetchFresh(request).first
     }
 
     func shift() throws -> Shift {
