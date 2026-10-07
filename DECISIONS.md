@@ -171,6 +171,16 @@ Why:      The other two break down when a student works **two jobs in one day**,
 Recorded: direction contract in `.impeccable/surfaces/atures-fortnight-fortnightboardview-swift-7ebb1a81.md`.
 Report:   Section 2 (design before code); Section 4 (how I evaluated design options)
 
+## 2026-10-07 — Redesign: donut and day list instead of the timetable grid
+Context:  Drawing all 16 remaining screens in the timetable style (`prototype/screens.html`) showed the whole app at once.
+Problem:  A seven-column calendar grid is too much information on a phone.
+Chose:    **My redesign:** a donut of hours against the 48 cap, coloured by employer (solid worked, light rostered), and below it the fortnight's 14 days as a scrollable list. Each row is a 12-hour bar that fits two jobs, in the same colours as the donut (`prototype/board-v2.html`).
+Kept:     The timetable's world: navy shell, employer colours, solid/light/dashed/struck line forms, yellow reserved for "act now", tabular figures.
+Lost:     The one-week slide. Overlap stays visible through the switcher (this week appears in both fortnights' lists) and the before → after rows for both fortnights when adding a shift.
+Also:     The dock shows one thing: clock in/out first, then a missed shift, then the next shift. A shift that would breach the limit is saved with "Add anyway"; the visible warning plus that button is the acknowledgement, with no extra dialog.
+Found while drawing: four use cases the screens need that don't exist yet (log a past shift or enter a missed shift's times; change or correct times; add and archive employers; course breaks and the research-degree setting).
+Report:   Section 4: how the design changed and why (the strongest "my understanding changed" example); AI tools (I overrode the AI-rolled direction)
+
 ---
 
 ## AI use log
