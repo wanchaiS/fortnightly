@@ -60,9 +60,40 @@ public struct AddEmployer: Sendable {
     }
 
     /// Two current jobs can't share a name: their hours would split across two slices of the donut.
+    /// Names match ignoring case, accents and extra spaces, so "cafe roma " is Café Roma.
     @discardableResult
     public func execute(_ details: EmployerDetails) throws(AddEmployerError) -> Employer {
-        // TDD red: not implemented yet.
-        Employer(name: details.name, colour: .violet, payCycle: details.payCycle, payCycleStartsOn: details.payCycleStartsOn)
+        let name = details.name.split(whereSeparator: \.isWhitespace).joined(separator: " ")
+        guard !name.isEmpty else { throw .nameMissing }
+        let currentEmployers = try read { try employers.employers(includingArchived: false) }
+        let sameName = currentEmployers.first {
+            $0.id != details.editing && $0.name.compare(name, options: [.caseInsensitive, .diacriticInsensitive]) == .orderedSame
+        }
+        if let sameName { throw .nameAlreadyUsed(existingName: sameName.name) }
+
+        var employer: Employer
+        if let editedID = details.editing {
+            guard let edited = try read({ try employers.employer(withID: editedID) }) else { throw .employerNotFound }
+            employer = edited
+        } else {
+            let takenColours = currentEmployers.map(\.colour)
+            // Six colours cover nearly every student; a seventh current job starts again from the first.
+            let colour = EmployerColour.allCases.first { !takenColours.contains($0) } ?? .violet
+            employer = Employer(name: name, colour: colour, payCycleStartsOn: details.payCycleStartsOn)
+        }
+        employer.name = name
+        employer.payCycle = details.payCycle
+        employer.payCycleStartsOn = details.payCycleStartsOn
+        try read { try employers.save(employer) }
+        display.shiftsDidChange()
+        return employer
+    }
+
+    private func read<Value>(_ operation: () throws -> Value) throws(AddEmployerError) -> Value {
+        do {
+            return try operation()
+        } catch {
+            throw .recordsUnavailable
+        }
     }
 }

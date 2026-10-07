@@ -20,7 +20,6 @@ public enum RecordCourseBreakError: Error, Equatable {
     case endsBeforeItStarts
     case unrealisticallyLong(days: Int)
     case overlaps(CourseBreak)
-    case courseBreakNotFound
     case recordsUnavailable
 }
 
@@ -33,8 +32,6 @@ extension RecordCourseBreakError: LocalizedError {
             "That break is \(days) days long."
         case let .overlaps(existing):
             "This overlaps \(existing.name) (\(existing.datesDescription))."
-        case .courseBreakNotFound:
-            "This course break is no longer in your list."
         case .recordsUnavailable:
             "This course break couldn't be saved."
         }
@@ -48,8 +45,6 @@ extension RecordCourseBreakError: LocalizedError {
             "Check the year on the last day."
         case let .overlaps(existing):
             "Change the dates, or edit \(existing.name) instead."
-        case .courseBreakNotFound:
-            "Check your course breaks in Jobs."
         case .recordsUnavailable:
             "Your shifts are safe. Try again."
         }
@@ -71,10 +66,33 @@ public struct RecordCourseBreak: Sendable {
         self.calendar = calendar
     }
 
-    /// Breaks can't share a day.
+    /// Breaks can't share a day: a break's last day belongs to it, so the next break starts the day after at the earliest.
     @discardableResult
     public func execute(_ details: CourseBreakDetails) throws(RecordCourseBreakError) -> CourseBreak {
-        // TDD red: not implemented yet.
-        CourseBreak(name: details.name, startsOn: details.startsOn, endsOn: details.endsOn)
+        let firstDay = calendar.startOfDay(for: details.startsOn)
+        let lastDay = calendar.startOfDay(for: details.endsOn)
+        guard lastDay >= firstDay else { throw .endsBeforeItStarts }
+        let days = calendar.dateComponents([.day], from: firstDay, to: lastDay).day! + 1
+        guard days <= Self.longestBreakDays else { throw .unrealisticallyLong(days: days) }
+
+        let name = details.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let courseBreak = CourseBreak(id: details.editing ?? UUID(), name: name.isEmpty ? "Course break" : name, startsOn: firstDay, endsOn: lastDay)
+        let breakDays = courseBreak.interval(in: calendar)
+        let otherBreaks = try read { try courseBreaks.allCourseBreaks() }.filter { $0.id != courseBreak.id }
+        if let clash = otherBreaks.first(where: { $0.interval(in: calendar).overlaps(breakDays) }) {
+            throw .overlaps(clash)
+        }
+
+        try read { try courseBreaks.save(courseBreak) }
+        display.shiftsDidChange()
+        return courseBreak
+    }
+
+    private func read<Value>(_ operation: () throws -> Value) throws(RecordCourseBreakError) -> Value {
+        do {
+            return try operation()
+        } catch {
+            throw .recordsUnavailable
+        }
     }
 }
