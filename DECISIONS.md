@@ -217,6 +217,12 @@ Findings:
           - **App icon:** the AI drew the donut on navy with a script (`tools/make_app_icon.py`); I approved it.
 Report:   Section 4: architecture under pressure (iOS 26 bar, cross-process data, warn don't block); extension design (both extensions proven end to end); AI tools (how output was checked)
 
+## 2026-10-08 — Submission: public repository and the Required Document
+Chose:    A **public** GitHub repository (github.com/wanchaiS/fortnightly), committed as peter.wanchai@shinko1.ai. The brief asks only for a link, so a public repo needs no tutor invitation. All branches were pushed so the feature-branch history is visible.
+Found:    Checking the sources corrected four claims before they reached the PDF: condition 8105(1) says 40 hours and (2A) raises it to 48 for subclass 500; the 65% figure is for migrant *employees*; Berg's words are "visa concerns or fear of job loss"; the Ombudsman says iPhone recording "may … experience issues", not that it fails.
+Diagram:  Drawn as HTML and exported to PNG (draw.io isn't installed on this Mac); the brief allows any tool. It shows the layers in all three processes, the App Group store, the human–system boundary, and the primary use case (clocking in from the prompt) as eight numbered steps.
+Report:   Section 1 (sources); Section 3 (the diagram); Section 4 (AI tools: how output was checked)
+
 ---
 
 ## AI use log
@@ -237,6 +243,7 @@ Report:   Section 4: architecture under pressure (iOS 26 bar, cross-process data
 | 2026-10-07 | Tests for the screens' use cases | 18 candidates, each naming the bug it catches | **I chose 11** (tests 21–31) | Each group failed red first, then passed; all 31 pass |
 | 2026-10-07 | Build the app, widget and notification view | SwiftUI screens, platform adapters, App Intents, notification actions | Mid-build **I asked for simplicity and fewer comments**; the AI dropped an extra colour rule and reused `LogPastShift` instead of a new use case | Tapped through every screen and both extensions in the Simulator with AXe; screenshots in light, dark and large text |
 | 2026-10-07 | Finish the design | Inline finish review, `DESIGN.md`, `.impeccable/design.json`, app icon | I named the system "The Honest Fortnight" and approved the icon | The review found 2 problems (contrast, a missing "?"); both fixed and rechecked on new screenshots |
+| 2026-10-08 | Write the README, architecture diagram and Required Document; publish the repo | README, diagram (HTML → PNG), the four-section PDF, a public GitHub repo | I chose a public repo and my commit email; I still owe the interviews | A separate source check against the primary pages corrected four claims before they went in the PDF; the reflective report is 820 words |
 
 **Lessons so far:**
 - The AI's first extension suggestion (widget) had a weak justification. Questioning it led to a better design.
@@ -248,11 +255,12 @@ Report:   Section 4: architecture under pressure (iOS 26 bar, cross-process data
 
 ## Open questions / to verify
 
-- [ ] Quote the Home Affairs work-restrictions page directly (opened in a browser)
-- [ ] Install Record My Hours; confirm the location-based recording, the manual option, and that there's no visa-limit feature
-- [ ] Interview 3–5 international students (questions in PLAN.md §1); record anonymised quotes here
+- [x] Home Affairs wording: the work-restrictions page now returns 401 to everyone (since about Nov 2024), so the report quotes its archived copy (30 Jul 2024, last updated 17 May 2024) for the weeks 2–3 example and the live subclass 500 page for the 48-hour rule
+- [x] Record My Hours: checked against the Fair Work Ombudsman's own pages (location or manual recording; "iPhone users may also experience issues … if the app has been backgrounded for an extended period"; no mention of visa limits). Not installed.
+- [ ] Interview 3–5 international students (not done before submission; the report says so honestly and relies on published evidence)
 - [x] Spike: does the App Group work in the Simulator? Yes, no Team needed
 - [x] Spike: can the widget extension cancel the app's pending reminders? Yes
 - [x] After the screen design: recovery messages now name the real screens (the Fortnight screen, Jobs, a day's "Log a past shift")
 - [x] App icon approved (drawn from the donut; regenerate with `python3 tools/make_app_icon.py`)
 - [x] README written, including how markers load sample data (`-sampleRoster`, listed in the shared scheme)
+- [x] Required Document written (`report/Fortnightly-Report.pdf`), with the architecture diagram (`report/architecture.png`, source `report/architecture.html`)

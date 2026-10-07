@@ -1,6 +1,6 @@
 # Session handoff — Fortnightly (UTS iOS Assessment 3)
 
-Read this first, then `ASSIGNMENT.md` (the brief; local only, gitignored), `PRODUCT.md`, `DESIGN.md`, `DECISIONS.md` and the relevant `PLAN.md` sections. Last updated 2026-10-08.
+Read this first, then `ASSIGNMENT.md` (the brief; local only, gitignored), `PRODUCT.md`, `DESIGN.md`, `DECISIONS.md` and the relevant `PLAN.md` sections. Last updated 2026-10-08 (submission day).
 
 ## What the project is
 
@@ -56,11 +56,11 @@ An iPhone app for international students on a subclass 500 visa working casual h
 
 ## Next steps
 
-Done: app icon approved; `README.md` written (all the brief's sections, sample data, how to try both extensions). `-sampleRoster` is listed, switched off, in the shared scheme.
+Done 2026-10-08: public repo https://github.com/wanchaiS/fortnightly (all branches pushed); `README.md`; the Required Document `report/Fortnightly-Report.pdf` (8 pages: Sections 1–4 and references; source `report/report.html`, diagram `report/architecture.html` → `architecture.png`); submission copies in `~/Desktop/Fortnightly submission/`.
 
-1. PDF: Sections 1–4 and the draw.io architecture diagram. DECISIONS.md has the material; the two extensions are proven end to end (see the 2026-10-07 build entry). Interviews and the Home Affairs quote strengthen Section 1, so they come first.
-2. User's open items: interviews, Home Affairs quote (the README links the page but doesn't quote it), Record My Hours check, commit email, private GitHub repo with tutor access.
-3. Push, then zip the Xcode project and submit with the PDF and the repo link.
+1. The user submits on Canvas: the PDF, the project zip and the repo link.
+2. Still open: student interviews (the report says honestly that none were done); install Record My Hours (the report relies on the Fair Work Ombudsman's own pages).
+3. To change the PDF: edit `report/report.html`, open it through a local server from the repo root (images use `../.impeccable/review/`), print to PDF (A4, background graphics on). Section 3 uses a landscape named page.
 4. Optional polish noticed in review (not material): animate the donut when switching fortnights; the native segmented control on navy uses its dark style rather than the mock's white selected segment.
 
 ## Environment gotchas
