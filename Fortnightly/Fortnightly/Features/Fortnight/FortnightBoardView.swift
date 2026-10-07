@@ -166,7 +166,7 @@ struct FortnightBoardView: View {
                 }
                 .lineLimit(1)
                 .minimumScaleFactor(0.5)
-                .frame(width: 120)
+                .frame(width: 110)
                 .foregroundStyle(Palette.ink)
             }
             Text(hoursLeftLine(summary))
@@ -257,7 +257,7 @@ struct FortnightBoardView: View {
                             segments: day.shifts.map { DayBarSegment(listing: $0, now: model.now) },
                             hours: day.hours,
                             isToday: Calendar.current.isDateInToday(day.date),
-                            needsAnswer: day.shifts.contains(where: isMissed)
+                            needsAnswer: day.hasMissedShift(asOf: model.now)
                         )
                         .contentShape(.rect)
                     }
@@ -272,7 +272,7 @@ struct FortnightBoardView: View {
     /// At the largest text sizes the bars give way to a plain list of the days that have shifts.
     private func dayList(_ fortnight: FortnightBoardModel.Fortnight) -> some View {
         VStack(spacing: 0) {
-            ForEach(fortnight.days.filter { !$0.shifts.isEmpty }.reversed()) { day in
+            ForEach(fortnight.days.filter { !$0.shifts.isEmpty }) { day in
                 Button { sheet = .day(day) } label: {
                     HStack {
                         VStack(alignment: .leading, spacing: 2) {

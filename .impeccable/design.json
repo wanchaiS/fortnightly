@@ -1,0 +1,436 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-07T13:08:13+00:00",
+  "title": "Design System: Fortnightly",
+  "extensions": {
+    "colorMeta": {
+      "shell": {
+        "role": "primary",
+        "displayName": "Timetable Navy",
+        "canonical": "#16204A",
+        "tonalRamp": [
+          "#12193B",
+          "#1E2C66",
+          "#2B3F91",
+          "#3852BD",
+          "#6277D0",
+          "#91A0DE",
+          "#C0C9EC",
+          "#EBEEF9"
+        ],
+        "darkModeToken": "shell-dark"
+      },
+      "ground": {
+        "role": "neutral",
+        "displayName": "Cool Paper",
+        "canonical": "#EEF0F6",
+        "tonalRamp": [
+          "#1A2032",
+          "#2E3857",
+          "#41507B",
+          "#5568A0",
+          "#7A89B8",
+          "#A2ADCE",
+          "#CAD0E3",
+          "#EEF0F6"
+        ],
+        "darkModeToken": "ground-dark"
+      },
+      "card": {
+        "role": "neutral",
+        "displayName": "Card White",
+        "canonical": "#FFFFFF",
+        "tonalRamp": [
+          "#262626",
+          "#424242",
+          "#5E5E5E",
+          "#7A7A7A",
+          "#999999",
+          "#B8B8B8",
+          "#D6D6D6",
+          "#F2F2F2"
+        ],
+        "darkModeToken": "card-dark"
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Navy Ink",
+        "canonical": "#16204A",
+        "tonalRamp": [
+          "#12193B",
+          "#1E2C66",
+          "#2B3F91",
+          "#3852BD",
+          "#6277D0",
+          "#91A0DE",
+          "#C0C9EC",
+          "#EBEEF9"
+        ],
+        "darkModeToken": "ink-dark"
+      },
+      "muted": {
+        "role": "neutral",
+        "displayName": "Slate",
+        "canonical": "#5B6275",
+        "tonalRamp": [
+          "#21242B",
+          "#3A3E4B",
+          "#53596A",
+          "#6B738A",
+          "#8C93A6",
+          "#AFB3C1",
+          "#D1D4DB",
+          "#F1F2F4"
+        ],
+        "darkModeToken": "muted-dark"
+      },
+      "track": {
+        "role": "neutral",
+        "displayName": "Track Grey",
+        "canonical": "#E3E6EF",
+        "tonalRamp": [
+          "#1C2131",
+          "#303954",
+          "#455178",
+          "#596A9C",
+          "#7D8BB5",
+          "#A4AECB",
+          "#CBD1E1",
+          "#EFF1F6"
+        ],
+        "darkModeToken": "track-dark"
+      },
+      "tint-dark": {
+        "role": "neutral",
+        "displayName": "Lifted Periwinkle",
+        "canonical": "#A5B4FC",
+        "tonalRamp": [
+          "#020F4A",
+          "#041A80",
+          "#0625B7",
+          "#082FED",
+          "#3A5AF8",
+          "#758CFA",
+          "#B0BDFC",
+          "#E6EAFE"
+        ]
+      },
+      "act-now": {
+        "role": "tertiary",
+        "displayName": "Act-Now Yellow",
+        "canonical": "#FFC21A",
+        "tonalRamp": [
+          "#4C3800",
+          "#856100",
+          "#BD8A00",
+          "#F5B400",
+          "#FFC933",
+          "#FFD970",
+          "#FFE9AD",
+          "#FFF8E5"
+        ]
+      },
+      "within-limit": {
+        "role": "tertiary",
+        "displayName": "Within",
+        "canonical": "#237A35",
+        "tonalRamp": [
+          "#113B1A",
+          "#1E672D",
+          "#2A9340",
+          "#37BE53",
+          "#60D278",
+          "#90DFA0",
+          "#C0EDC9",
+          "#EBF9EE"
+        ],
+        "darkModeToken": "within-limit-dark"
+      },
+      "near-limit": {
+        "role": "tertiary",
+        "displayName": "Near",
+        "canonical": "#B8400E",
+        "tonalRamp": [
+          "#471905",
+          "#7B2B09",
+          "#AF3D0D",
+          "#E34F11",
+          "#F17541",
+          "#F59E7A",
+          "#F9C8B3",
+          "#FDEEE7"
+        ],
+        "darkModeToken": "near-limit-dark"
+      },
+      "over-limit": {
+        "role": "tertiary",
+        "displayName": "Over",
+        "canonical": "#C92A2A",
+        "tonalRamp": [
+          "#3F0D0D",
+          "#6E1717",
+          "#9C2121",
+          "#CA2A2A",
+          "#DC5656",
+          "#E68989",
+          "#F1BCBC",
+          "#FBEAEA"
+        ],
+        "darkModeToken": "over-limit-dark"
+      },
+      "employer-violet": {
+        "role": "secondary",
+        "displayName": "Subject Violet",
+        "canonical": "#6F45E8",
+        "tonalRamp": [
+          "#180844",
+          "#290F76",
+          "#3B15A8",
+          "#4C1BDA",
+          "#7249E9",
+          "#9D80EF",
+          "#C7B6F6",
+          "#EDE8FC"
+        ],
+        "darkModeToken": "employer-violet-dark"
+      },
+      "employer-teal": {
+        "role": "secondary",
+        "displayName": "Subject Teal",
+        "canonical": "#0F8FA8",
+        "tonalRamp": [
+          "#063C46",
+          "#0B687A",
+          "#0F93AD",
+          "#14BFE1",
+          "#44D2EE",
+          "#7CE0F3",
+          "#B4EDF8",
+          "#E8F9FD"
+        ],
+        "darkModeToken": "employer-teal-dark"
+      },
+      "employer-magenta": {
+        "role": "secondary",
+        "displayName": "Subject Magenta",
+        "canonical": "#C2378A",
+        "tonalRamp": [
+          "#3C112A",
+          "#671D49",
+          "#932A69",
+          "#BF3688",
+          "#D260A4",
+          "#DF90BF",
+          "#EDBFDB",
+          "#F9EBF4"
+        ],
+        "darkModeToken": "employer-magenta-dark"
+      },
+      "employer-cobalt": {
+        "role": "secondary",
+        "displayName": "Subject Cobalt",
+        "canonical": "#2F66D0",
+        "tonalRamp": [
+          "#0E1F3E",
+          "#18356C",
+          "#234B9A",
+          "#2D62C8",
+          "#5985D9",
+          "#8BA9E5",
+          "#BCCEF0",
+          "#EAF0FA"
+        ],
+        "darkModeToken": "employer-cobalt-dark"
+      },
+      "employer-bronze": {
+        "role": "secondary",
+        "displayName": "Subject Bronze",
+        "canonical": "#9A5B2B",
+        "tonalRamp": [
+          "#3C2311",
+          "#683D1D",
+          "#945729",
+          "#BF7135",
+          "#D29160",
+          "#E0B28F",
+          "#EDD3BF",
+          "#F9F1EB"
+        ],
+        "darkModeToken": "employer-bronze-dark"
+      },
+      "employer-moss": {
+        "role": "secondary",
+        "displayName": "Subject Moss",
+        "canonical": "#5F7A1F",
+        "tonalRamp": [
+          "#303D0F",
+          "#526A1B",
+          "#759626",
+          "#98C332",
+          "#B2D65C",
+          "#C9E28D",
+          "#E0EEBE",
+          "#F5FAEB"
+        ],
+        "darkModeToken": "employer-moss-dark"
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "The Fortnight title, the donut centre number, onboarding headings."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Dock sentence, compact summary, button labels."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "List rows and form fields."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Day rows and the hours-left line."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Week headers, employer key, widget captions."
+      }
+    },
+    "shadows": [
+      {
+        "name": "preview-lift",
+        "value": "0 6px 12px rgba(0,0,0,0.12)",
+        "purpose": "Only the onboarding notification preview; cards are flat."
+      }
+    ],
+    "motion": [
+      {
+        "name": "donut-collapse",
+        "value": "ease-out 0.2s, crossfade; none with Reduce Motion",
+        "purpose": "The donut collapsing into the shell on scroll."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Act-Now Button",
+      "kind": "button",
+      "refersTo": "button-act-now",
+      "description": "The due clock-in or clock-out, in the dock and the widget. Yellow means act now and nothing else.",
+      "html": "<button class=\"ds-btn-act\">Started 5:00 pm</button>",
+      "css": ".ds-btn-act{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:#FFC21A;color:#16204A;font-weight:700;font-size:17px;border:0;border-radius:12px;min-height:48px;padding:0 18px;transition:opacity .15s} .ds-btn-act:hover{opacity:.9} .ds-btn-act:active{opacity:.75} .ds-btn-act:focus-visible{outline:2px solid #A5B4FC;outline-offset:2px}"
+    },
+    {
+      "name": "Dock Plain Button",
+      "kind": "button",
+      "refersTo": "button-dock-plain",
+      "description": "An action that is not urgent, on the navy dock.",
+      "html": "<div class=\"ds-dockbg\"><button class=\"ds-btn-plain\">Roster a shift</button></div>",
+      "css": ".ds-dockbg{background:#16204A;padding:12px;border-radius:18px 18px 0 0} .ds-btn-plain{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:#fff;color:#16204A;font-weight:700;font-size:17px;border:0;border-radius:12px;min-height:48px;width:100%;transition:opacity .15s} .ds-btn-plain:hover{opacity:.92} .ds-btn-plain:active{opacity:.75} .ds-btn-plain:focus-visible{outline:2px solid #FFC21A;outline-offset:2px}"
+    },
+    {
+      "name": "Dock Secondary Button",
+      "kind": "button",
+      "refersTo": "button-dock-secondary",
+      "description": "The second choice beside a primary action: \"Just now\", \"No, I didn't\".",
+      "html": "<div class=\"ds-dockbg2\"><button class=\"ds-btn-sec\">Just now</button></div>",
+      "css": ".ds-dockbg2{background:#16204A;padding:12px} .ds-btn-sec{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:rgba(255,255,255,.14);color:#fff;font-weight:700;font-size:17px;border:0;border-radius:12px;min-height:48px;width:100%;transition:background .15s} .ds-btn-sec:hover{background:rgba(255,255,255,.2)} .ds-btn-sec:focus-visible{outline:2px solid #FFC21A;outline-offset:2px}"
+    },
+    {
+      "name": "Day Row",
+      "kind": "custom",
+      "refersTo": "day-row",
+      "description": "One day of the fortnight: label, 12-hour bar with two jobs, total. Forms: solid worked, hatched rostered, yellow edge when due.",
+      "html": "<div class=\"ds-days\"><div class=\"ds-row\"><span class=\"ds-dl\"><b>Sat</b> 17</span><span class=\"ds-track\"><i class=\"ds-w\" style=\"--c:#6F45E8;width:calc(6.25/12.25*100% - 2px)\"></i><i class=\"ds-w\" style=\"--c:#0F8FA8;width:calc(6/12.25*100% - 2px)\"></i></span><span class=\"ds-h\">12.25</span></div><div class=\"ds-row\"><span class=\"ds-dl\"><b class=\"ds-today\">Mon</b> 19</span><span class=\"ds-track\"><i class=\"ds-r ds-due\" style=\"--c:#6F45E8;width:calc(5.5/12*100% - 2px)\"></i></span><span class=\"ds-h\">5.5</span></div><div class=\"ds-row\"><span class=\"ds-dl ds-empty\"><b>Tue</b> 20</span><span class=\"ds-track\"></span><span class=\"ds-h ds-empty\">–</span></div></div>",
+      "css": ".ds-days{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:#fff;border-radius:14px;padding:0 14px;color:#16204A;font-size:15px;width:340px} .ds-row{display:grid;grid-template-columns:72px 1fr 44px;gap:8px;align-items:center;min-height:44px;border-top:1px solid #E1E4ED} .ds-row:first-child{border-top:0} .ds-today{background:#16204A;color:#fff;border-radius:7px;padding:0 6px} .ds-track{display:flex;gap:2px;height:16px;border-radius:5px;background:#E3E6EF;overflow:hidden} .ds-w{background:var(--c);border-radius:4px} .ds-r{border-radius:4px;background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--c) 55%,#fff) 0 3px,color-mix(in srgb,var(--c) 22%,#fff) 3px 6px);box-shadow:inset 0 0 0 1.5px var(--c)} .ds-due{box-shadow:inset 0 0 0 2.5px #FFC21A} .ds-h{text-align:right;font-weight:600} .ds-empty{color:#5B6275;font-weight:400} .ds-row:hover{background:#F7F8FB}"
+    },
+    {
+      "name": "Fortnight Donut",
+      "kind": "custom",
+      "refersTo": "fortnight-donut",
+      "description": "The signature: 48 hours as a ring, worked slices then rostered (42%), employer colours, tick at 48.",
+      "html": "<div class=\"ds-donut\"><svg viewBox=\"0 0 200 200\" width=\"200\" height=\"200\"><circle cx=\"100\" cy=\"100\" r=\"83.5\" fill=\"none\" stroke=\"#E3E6EF\" stroke-width=\"22\"/><circle cx=\"100\" cy=\"100\" r=\"83.5\" fill=\"none\" stroke=\"#6F45E8\" stroke-width=\"22\" stroke-dasharray=\"197 525\" transform=\"rotate(-90 100 100)\"/><circle cx=\"100\" cy=\"100\" r=\"83.5\" fill=\"none\" stroke=\"#0F8FA8\" stroke-width=\"22\" stroke-dasharray=\"124 525\" stroke-dashoffset=\"-199\" transform=\"rotate(-90 100 100)\"/><circle cx=\"100\" cy=\"100\" r=\"83.5\" fill=\"none\" stroke=\"#6F45E8\" stroke-opacity=\".42\" stroke-width=\"22\" stroke-dasharray=\"58 525\" stroke-dashoffset=\"-325\" transform=\"rotate(-90 100 100)\"/><circle cx=\"100\" cy=\"100\" r=\"83.5\" fill=\"none\" stroke=\"#0F8FA8\" stroke-opacity=\".42\" stroke-width=\"22\" stroke-dasharray=\"113 525\" stroke-dashoffset=\"-385\" transform=\"rotate(-90 100 100)\"/><line x1=\"100\" y1=\"0.5\" x2=\"100\" y2=\"38\" stroke=\"#16204A\" stroke-width=\"3\" stroke-linecap=\"round\"/></svg><div class=\"ds-centre\"><b>46.25</b><span>of 48 hours</span></div></div>",
+      "css": ".ds-donut{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;font-variant-numeric:tabular-nums;position:relative;width:200px;height:200px;color:#16204A} .ds-centre{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center} .ds-centre b{font-size:34px;font-weight:700} .ds-centre span{font-size:15px;color:#5B6275}"
+    },
+    {
+      "name": "Did You Work It Row",
+      "kind": "card",
+      "refersTo": "answer-row",
+      "description": "A missed clock-in on the board, until the student answers.",
+      "html": "<button class=\"ds-answer\"><span class=\"ds-q\">?</span><span class=\"ds-at\"><b>Thai Express, Sun 18</b> finished without a clock-in. Did you work it?</span><span class=\"ds-chev\">›</span></button>",
+      "css": ".ds-answer{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;font-variant-numeric:tabular-nums;display:flex;align-items:center;gap:10px;width:340px;text-align:left;background:#fff;color:#16204A;border:0;border-radius:12px;padding:12px;font-size:15px;transition:background .15s} .ds-answer:hover{background:#F7F8FB} .ds-answer:focus-visible{outline:2px solid #16204A;outline-offset:2px} .ds-q{flex:none;width:20px;height:20px;border-radius:10px;background:#B8400E;color:#fff;font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center} .ds-at{flex:1} .ds-chev{color:#5B6275;font-size:20px}"
+    },
+    {
+      "name": "Shell Header",
+      "kind": "nav",
+      "refersTo": "shell-header",
+      "description": "Navy shell: large title, Jobs and plus, the switcher for the two fortnights containing today.",
+      "html": "<div class=\"ds-shell\"><div class=\"ds-top\"><span class=\"ds-title\">Fortnight</span><span class=\"ds-tools\">Jobs <span>+</span></span></div><div class=\"ds-seg\"><button class=\"ds-on\">From Mon 12 Oct</button><button>From Mon 19 Oct</button></div></div>",
+      "css": ".ds-shell{font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;font-variant-numeric:tabular-nums;background:#16204A;color:#fff;padding:8px 16px 12px;width:370px} .ds-top{display:flex;justify-content:space-between;align-items:flex-end} .ds-title{font-size:34px;font-weight:700} .ds-tools{font-weight:600;padding-bottom:6px} .ds-seg{display:flex;margin-top:10px;background:rgba(255,255,255,.14);border-radius:9px;padding:2px} .ds-seg button{flex:1;border:0;background:none;color:rgba(255,255,255,.88);font:inherit;font-size:13px;font-weight:600;border-radius:7px;padding:7px 4px} .ds-seg .ds-on{background:rgba(255,255,255,.28);color:#fff} .ds-seg button:hover{color:#fff} .ds-seg button:focus-visible{outline:2px solid #FFC21A}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Honest Fortnight",
+    "overview": "The whole system serves one reading: how close the student is to 48 hours in each work fortnight around today, and what to do right now. The fortnight is drawn as one honest number, a donut of the 48 hours coloured by employer, and as its 14 days, each a 12-hour bar in the same colours. Nothing is rounded away, nothing is hidden: a missed clock-in stays marked until answered, and a shift that wasn't worked stays on its day, struck through.\n\nThe look comes from the semester timetable the student already lives by: a deep navy shell for the navigation bar and the dock, a cool grey ground, white cards, and employers as timetable subject colours. It is an Operate surface on iOS: native navigation, native sheets, grouped lists and system controls carry the structure; the world speaks through palette, line form, the donut and the day bars. The density is a working tool's, not a dashboard's: one number, one line of status, one action.\n\nIt refuses the calendar grid (too much on a phone), the dashboard of cards, gamified progress, and anything alarming. An over-limit fortnight turns one line red and moves the tick; nothing flashes.",
+    "keyCharacteristics": [
+      "One colour system: an employer's colour is identical in the donut slice, the day bar, the widget and the prompt.",
+      "State carried by line form, never by colour alone.",
+      "A single reserved \"act now\" yellow.",
+      "Tabular figures for every hour and time.",
+      "Navy shell top and bottom, grey ground, white cards, in light and dark."
+    ],
+    "rules": [
+      {
+        "name": "The One Colour System Rule",
+        "body": "A shift's bar and its slice of the donut are the same employer colour, everywhere the shift appears. Never recolour a job for emphasis.",
+        "section": "colors"
+      },
+      {
+        "name": "The Act-Now Rule",
+        "body": "Yellow appears only where the student should act now: a due clock-in or clock-out. It is never decoration and never an employer.",
+        "section": "colors"
+      },
+      {
+        "name": "The Hours-Line Rule",
+        "body": "Green, orange and red belong to the hours left against 48 and nothing else: not jobs, not bars, not buttons.",
+        "section": "colors"
+      },
+      {
+        "name": "The Tabular Figures Rule",
+        "body": "Hours and times always use tabular figures (`monospacedDigit`), on the board, the dock, the widget and the prompt.",
+        "section": "typography"
+      },
+      {
+        "name": "The Dynamic Type Rule",
+        "body": "Every size is a system text style. At accessibility sizes the day bars give way to a plain list of the days with shifts, and the dock keeps only its sentence and buttons.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat Card Rule",
+        "body": "Cards are separated by tone and spacing, never by shadow or coloured edges.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Line-Form Rule",
+        "body": "State is carried by form: solid for worked, light hatched with a 1.5 pt edge for rostered, a yellow edge for started without a clock-in, outlined and struck through for not worked, dashed for the shift being added, and an orange \"?\" on the day of a missed clock-in.",
+        "section": "shapes"
+      }
+    ],
+    "dos": [
+      "**Do** give every new employer one of the six subject colours and use it identically in the donut and the bars.",
+      "**Do** keep yellow for the action that is due now, with navy text.",
+      "**Do** show worked and rostered hours in the same slice colour, worked solid and rostered at 42%.",
+      "**Do** keep a missed or not-worked shift visible on its day, marked by its form.",
+      "**Do** set every hour and time in tabular figures and every size as a Dynamic Type style.",
+      "**Do** use native sheets, grouped lists and system controls; express the world through palette, line form, the donut and the day bars."
+    ],
+    "donts": [
+      "**Don't** draw a calendar grid of the fortnight.",
+      "**Don't** build the board from dashboard cards, progress badges or anything gamified.",
+      "**Don't** make an over-limit fortnight alarming: one red line and the moved tick are enough.",
+      "**Don't** use green, orange or red for jobs, bars or buttons.",
+      "**Don't** add shadows or coloured edges to cards."
+    ]
+  }
+}

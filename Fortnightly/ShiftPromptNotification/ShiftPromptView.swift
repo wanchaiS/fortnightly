@@ -153,7 +153,8 @@ struct ShiftPromptView: View {
                     date: day.date,
                     segments: day.shifts.map { DayBarSegment(listing: $0, now: .now) },
                     hours: day.hours,
-                    isToday: Calendar.current.isDateInToday(day.date)
+                    isToday: Calendar.current.isDateInToday(day.date),
+                    needsAnswer: day.hasMissedShift(asOf: .now)
                 )
                 .padding(.horizontal, 12)
                 .background(Palette.card, in: .rect(cornerRadius: 12))

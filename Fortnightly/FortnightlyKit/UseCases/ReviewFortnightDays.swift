@@ -26,6 +26,11 @@ public struct WorkDay: Identifiable, Equatable, Sendable {
     public let isInCourseBreak: Bool
 
     public var id: Date { date }
+
+    /// A shift on this day finished without a clock-in and still needs an answer.
+    public func hasMissedShift(asOf now: Date) -> Bool {
+        shifts.contains { $0.shift.status == .rostered && $0.shift.rosteredFinish <= now }
+    }
 }
 
 public struct ReviewFortnightDays: Sendable {

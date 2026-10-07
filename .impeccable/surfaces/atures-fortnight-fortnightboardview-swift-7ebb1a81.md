@@ -14,7 +14,7 @@ Scope: the app's home screen, plus the surfaces that reuse its language: the ros
 - **Constraints:** native iOS controls and navigation, the use cases' wording; nothing alarming, gamified, finance-dashboard or template-like (confirmed 2026-10-07). Two jobs on one day must stay readable. No calendar grid: too much information on a phone (the student's redesign, 2026-10-07).
 - **Decided:** the dock shows one thing, in this order: clock in or out, then a missed shift, then the next shift. A shift that would breach the limit is saved with "Add anyway" (the inline warning is the acknowledgement). Screens drawn in `prototype/board-v2.html` and `prototype/screens.html` (branch `prototype/ui-variants`).
 - **Memorable moment:** the donut and the day bars are one colour system; a shift's bar is the same colour as its slice of the donut.
-- **Unresolved:** onboarding's illustration (was the timetable; redo with day rows showing one week in two fortnights); how employer colours are assigned (a fixed set of six, given in order of adding); Lock Screen accessory widgets render in one colour, so state there is carried by words and the plain donut.
+- **Resolved after the build (2026-10-07):** onboarding's illustration is three week rows with two brackets (weeks 1+2 = 42 h, weeks 2+3 = 54 h, over); employer colours are a fixed set of six (violet, teal, magenta, cobalt, bronze, moss), each new employer taking the first one no current employer uses; Lock Screen accessories carry state in words, with a plain capacity gauge. The system is recorded in DESIGN.md.
 
 ## Direction contract
 

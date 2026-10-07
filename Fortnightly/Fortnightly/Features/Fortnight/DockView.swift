@@ -8,15 +8,19 @@ struct DockView: View {
     let actions: ShiftActions
     let enterTimes: (ShiftListing) -> Void
     let rosterShift: () -> Void
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             VStack(alignment: .leading, spacing: 2) {
                 Text(headline)
                     .font(.headline)
-                Text(detail)
-                    .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.75))
+                // At the largest text sizes the dock keeps only what to do, leaving room for the board.
+                if !typeSize.isAccessibilitySize {
+                    Text(detail)
+                        .font(.footnote)
+                        .foregroundStyle(.white.opacity(0.75))
+                }
             }
             buttons
         }

@@ -22,7 +22,7 @@ struct JobsView: View {
                         HStack(spacing: 10) {
                             Circle().fill(employer.colour.color).frame(width: 10, height: 10)
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(employer.name)
+                                Text(employer.name).foregroundStyle(Palette.ink)
                                 Text("Paid \(employer.payCycle.rawValue)").font(.subheadline).foregroundStyle(Palette.muted)
                             }
                         }
@@ -70,7 +70,6 @@ struct JobsView: View {
                 Text("Fortnightly helps you track your hours. It isn't legal advice: check your own visa conditions in VEVO.")
             }
         }
-        .foregroundStyle(Palette.ink)
         .scrollContentBackground(.hidden)
         .background(Palette.ground)
         .navyNavigationBar(title: "Jobs")
