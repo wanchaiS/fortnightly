@@ -47,7 +47,26 @@ public struct MarkShiftNotWorked: Sendable {
         self.display = display
     }
 
+    /// Only a shift that was never clocked into can be marked; its prompts stop and the widget refreshes.
     public func execute(shiftID: Shift.ID) throws(MarkShiftNotWorkedError) {
-        // TDD red: not implemented yet.
+        guard var shift = try read({ try shifts.shift(withID: shiftID) }) else { throw .shiftNotFound }
+        switch shift.status {
+        case .rostered: break
+        case .onShift: throw .alreadyClockedIn(since: shift.clockedInAt ?? shift.rosteredStart)
+        case .worked: throw .alreadyWorked
+        case .notWorked: return
+        }
+        shift.status = .notWorked
+        try read { try shifts.save(shift) }
+        reminders.cancelAllReminders(for: shift.id)
+        display.shiftsDidChange()
+    }
+
+    private func read<Value>(_ operation: () throws -> Value) throws(MarkShiftNotWorkedError) -> Value {
+        do {
+            return try operation()
+        } catch {
+            throw .recordsUnavailable
+        }
     }
 }

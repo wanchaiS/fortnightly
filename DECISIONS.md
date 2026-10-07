@@ -201,3 +201,4 @@ Report:   Section 2 (design before code); Section 4 (how I evaluated design opti
 - [ ] Interview 3–5 international students (questions in PLAN.md §1); record anonymised quotes here
 - [x] Spike: does the App Group work in the Simulator? Yes, no Team needed
 - [x] Spike: can the widget extension cancel the app's pending reminders? Yes
+- [ ] After the screen design: update recovery messages that name prototype-A screens ("in Roster", "in Hours", "in Employers", "Log a past shift") in `ClockIntoShift`, `ClockOutOfShift` and `RosterShift` to the final screen names

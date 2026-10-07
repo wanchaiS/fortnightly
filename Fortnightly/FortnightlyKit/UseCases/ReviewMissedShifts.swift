@@ -31,8 +31,17 @@ public struct ReviewMissedShifts: Sendable {
         self.now = now
     }
 
+    /// Rostered shifts whose rostered finish has passed with no clock-in, earliest first, each with its employer's name.
     public func execute() throws(ReviewMissedShiftsError) -> [ShiftListing] {
-        // TDD red: not implemented yet.
-        []
+        let currentTime = now()
+        do {
+            return try shifts.rosteredShifts()
+                .filter { $0.rosteredFinish <= currentTime }
+                .map { shift in
+                    ShiftListing(shift: shift, employerName: try employers.employer(withID: shift.employerID)?.name ?? "Unknown employer")
+                }
+        } catch {
+            throw .recordsUnavailable
+        }
     }
 }
