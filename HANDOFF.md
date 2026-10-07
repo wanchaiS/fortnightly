@@ -56,11 +56,11 @@ An iPhone app for international students on a subclass 500 visa working casual h
 
 ## Next steps
 
-Done 2026-10-08: public repo https://github.com/wanchaiS/fortnightly (all branches pushed); `README.md`; the Required Document `report/Fortnightly-Report.pdf` (8 pages: Sections 1–4 and references; source `report/report.html`, diagram `report/architecture.html` → `architecture.png`); submission copies in `~/Desktop/Fortnightly submission/`.
+Done 2026-10-08: public repo https://github.com/wanchaiS/fortnightly (all branches pushed); `README.md`; the Required Document `report/Fortnightly-Report.pdf` (8 pages: Sections 1–4 and references; source `report/report.html`, diagram `report/architecture.excalidraw` → `architecture.png`); submission copies in `~/Desktop/Fortnightly submission/`.
 
 1. The user submits on Canvas: the PDF, the project zip and the repo link.
 2. Still open: student interviews (the report says honestly that none were done); install Record My Hours (the report relies on the Fair Work Ombudsman's own pages).
-3. To change the PDF: edit `report/report.html`, open it through a local server from the repo root (images use `../.impeccable/review/`), print to PDF (A4, background graphics on). Section 3 uses a landscape named page.
+3. To change the PDF: edit `report/report.html`, open it through a local server from the repo root (images use `../.impeccable/review/`), print to PDF (A4, background graphics on). Section 3 uses a landscape named page. To change the diagram: edit `report/architecture.excalidraw` (excalidraw.com, or the generator in this session), open `report/render-excalidraw.html` through the same server, and save the rendered SVG as `architecture.png` at 2x.
 4. Optional polish noticed in review (not material): animate the donut when switching fortnights; the native segmented control on navy uses its dark style rather than the mock's white selected segment.
 
 ## Environment gotchas

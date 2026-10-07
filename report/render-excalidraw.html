@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Render architecture.excalidraw</title>
+<style>body { margin: 0; background: #fff; } #out svg { display: block; }</style>
+</head>
+<body>
+<div id="out"></div>
+<script type="module">
+  // Renders report/architecture.excalidraw with Excalidraw's own exporter, so the image matches excalidraw.com.
+  import { exportToSvg } from "https://esm.sh/@excalidraw/excalidraw@0.18.0?deps=react@18.3.1,react-dom@18.3.1";
+  try {
+    const scene = await (await fetch("architecture.excalidraw")).json();
+    const svg = await exportToSvg({
+      elements: scene.elements,
+      appState: { ...scene.appState, exportBackground: true, exportWithDarkMode: false },
+      files: scene.files,
+      exportPadding: 24,
+    });
+    document.getElementById("out").appendChild(svg);
+    document.title = "rendered";
+  } catch (error) {
+    document.title = "failed: " + error;
+  }
+</script>
+</body>
+</html>

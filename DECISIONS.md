@@ -220,7 +220,7 @@ Report:   Section 4: architecture under pressure (iOS 26 bar, cross-process data
 ## 2026-10-08 — Submission: public repository and the Required Document
 Chose:    A **public** GitHub repository (github.com/wanchaiS/fortnightly), committed as peter.wanchai@shinko1.ai. The brief asks only for a link, so a public repo needs no tutor invitation. All branches were pushed so the feature-branch history is visible.
 Found:    Checking the sources corrected four claims before they reached the PDF: condition 8105(1) says 40 hours and (2A) raises it to 48 for subclass 500; the 65% figure is for migrant *employees*; Berg's words are "visa concerns or fear of job loss"; the Ombudsman says iPhone recording "may … experience issues", not that it fails.
-Diagram:  Drawn as HTML and exported to PNG (draw.io isn't installed on this Mac); the brief allows any tool. It shows the layers in all three processes, the App Group store, the human–system boundary, and the primary use case (clocking in from the prompt) as eight numbered steps.
+Diagram:  First drawn as HTML; then **I asked for Excalidraw and a simpler diagram**. Redrawn as an Excalidraw scene (`report/architecture.excalidraw`, editable at excalidraw.com) with fewer boxes: the student and the human–system boundary, the three processes (Views → ViewModels), FortnightlyKit (use cases → repositories and platform adapters), the App Group store, iOS, and the primary use case in six numbered steps. The PNG is rendered by Excalidraw's own exporter (`report/render-excalidraw.html`).
 Report:   Section 1 (sources); Section 3 (the diagram); Section 4 (AI tools: how output was checked)
 
 ---
@@ -263,4 +263,4 @@ Report:   Section 1 (sources); Section 3 (the diagram); Section 4 (AI tools: how
 - [x] After the screen design: recovery messages now name the real screens (the Fortnight screen, Jobs, a day's "Log a past shift")
 - [x] App icon approved (drawn from the donut; regenerate with `python3 tools/make_app_icon.py`)
 - [x] README written, including how markers load sample data (`-sampleRoster`, listed in the shared scheme)
-- [x] Required Document written (`report/Fortnightly-Report.pdf`), with the architecture diagram (`report/architecture.png`, source `report/architecture.html`)
+- [x] Required Document written (`report/Fortnightly-Report.pdf`), with the architecture diagram (`report/architecture.png`, Excalidraw source `report/architecture.excalidraw`)
