@@ -37,6 +37,18 @@ public struct RefreshShiftReminders: Sendable {
     }
 
     public func execute() throws(RefreshShiftRemindersError) {
-        // TDD red: not implemented yet.
+        let currentTime = now()
+        let window: [ShiftReminder]
+        do {
+            let open = try shifts.openShift()
+            let upcoming = try shifts.upcomingShifts(after: currentTime).prefix(Self.shiftsAhead)
+            window = try ([open].compactMap { $0 } + upcoming).flatMap { shift in
+                let employerName = try employers.employer(withID: shift.employerID)?.name ?? "Your shift"
+                return shift.reminders(employerName: employerName, after: currentTime)
+            }
+        } catch {
+            throw .recordsUnavailable
+        }
+        reminders.replaceAllReminders(with: window)
     }
 }

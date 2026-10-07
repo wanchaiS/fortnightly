@@ -25,7 +25,20 @@ extension Shift {
     /// The prompts this shift still needs after `now`: at the rostered start and finish, and again
     /// if the student hasn't clocked in or out a little later.
     public func reminders(employerName: String, after now: Date) -> [ShiftReminder] {
-        // TDD red: not implemented yet.
-        []
+        let clockOut: [(ShiftReminder.Moment, Date)] = [
+            (.clockOutDue, rosteredFinish),
+            (.clockOutOverdue, rosteredFinish.addingTimeInterval(Self.clockOutOverdueMinutes * 60)),
+        ]
+        let moments: [(ShiftReminder.Moment, Date)] = switch status {
+        case .rostered:
+            [(.clockInDue, rosteredStart), (.clockInOverdue, rosteredStart.addingTimeInterval(Self.clockInOverdueMinutes * 60))] + clockOut
+        case .onShift:
+            clockOut
+        case .worked, .notWorked:
+            []
+        }
+        return moments
+            .filter { $0.1 > now }
+            .map { ShiftReminder(shiftID: id, moment: $0.0, firesAt: $0.1, employerName: employerName) }
     }
 }

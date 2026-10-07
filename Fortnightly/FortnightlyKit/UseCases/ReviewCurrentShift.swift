@@ -40,7 +40,27 @@ public struct ReviewCurrentShift: Sendable {
 
     /// In the dock's order: clocking out or in comes first, then a missed shift, then the next shift.
     public func execute() throws(ReviewCurrentShiftError) -> CurrentShift {
-        // TDD red: not implemented yet.
-        .nothingRostered
+        let currentTime = now()
+        do {
+            func listing(_ shift: Shift) throws -> ShiftListing {
+                ShiftListing(shift: shift, employer: try employers.employer(withID: shift.employerID))
+            }
+            if let open = try shifts.openShift() {
+                return open.rosteredFinish <= currentTime ? .clockOutDue(try listing(open)) : .onShift(try listing(open))
+            }
+            let rostered = try shifts.rosteredShifts()
+            if let started = rostered.first(where: { $0.rosteredStart <= currentTime && currentTime < $0.rosteredFinish }) {
+                return .clockInDue(try listing(started))
+            }
+            if let missed = rostered.first(where: { $0.rosteredFinish <= currentTime }) {
+                return .missed(try listing(missed))
+            }
+            if let next = rostered.first(where: { $0.rosteredStart > currentTime }) {
+                return .next(try listing(next))
+            }
+            return .nothingRostered
+        } catch {
+            throw .recordsUnavailable
+        }
     }
 }
