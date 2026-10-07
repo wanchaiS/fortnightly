@@ -1,0 +1,181 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway test storyboard, not the app.
+  For each candidate test: what the student sees when the rule works, next to what they'd see
+  with the bug the test exists to catch. Timetable direction, same fake data as the mocks.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · Test storyboard</title>
+<style>
+* { box-sizing: border-box; }
+:root { --ink: #16204a; --ground: #eef0f6; --rule: #d9dde8; --muted: #5b6275; --act: #ffc21a; --ok: #2b8a3e; --near: #d9480f; --over: #c92a2a; --roma: #6f45e8; --thai: #0f8fa8; }
+body { margin: 0; background: #d5d9e1; color: var(--ink); font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+.note { background: #101418; color: #e7e9ec; padding: 10px 20px; font-size: 13px; }
+.note b { color: #fff; }
+section { max-width: 1120px; margin: 28px auto 8px; padding: 0 20px; }
+section > h2 { margin: 0 0 4px; font-size: 22px; letter-spacing: -.3px; }
+section > p { margin: 0 0 16px; max-width: 75ch; color: #333a4d; }
+.cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.case { background: #fff; border-radius: 16px; overflow: hidden; box-shadow: 0 10px 24px -14px rgba(15, 20, 40, .35); display: flex; flex-direction: column; }
+.case header { padding: 12px 16px; font-weight: 700; font-size: 15px; display: flex; gap: 8px; align-items: center; }
+.case header svg { flex: none; }
+.case.good header { background: #e6f4ea; color: #1e6b32; }
+.case.bad header { background: #fdecec; color: #a32020; }
+.screen { background: var(--ground); padding: 14px; flex: 1; }
+.verdict { padding: 12px 16px 16px; font-size: 14px; color: #333a4d; border-top: 1px solid var(--rule); }
+.verdict b { color: var(--ink); }
+.num { font-variant-numeric: tabular-nums; }
+
+/* readout */
+.read { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; }
+.read b { display: block; font-size: 24px; letter-spacing: -.4px; line-height: 1.1; }
+.read span { font-size: 12.5px; color: var(--muted); }
+.read .hl { color: var(--ink); font-weight: 700; }
+
+/* week strip */
+.week { background: #fff; border-radius: 12px; padding: 8px 6px 6px; display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.week .h { text-align: center; font-size: 10.5px; font-weight: 600; color: var(--muted); }
+.day { height: 92px; border-top: 1px solid var(--rule); display: flex; flex-direction: column; padding-top: 3px; }
+.day .d { font-size: 10.5px; color: var(--muted); padding-left: 2px; }
+.day.today .d { color: #fff; background: var(--ink); border-radius: 8px; width: 16px; height: 16px; line-height: 16px; text-align: center; font-weight: 700; }
+.blocks { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; padding: 0 1px; }
+.blk { border-radius: 4px; overflow: hidden; display: flex; flex-direction: column; }
+.seg-w { background: var(--c); }
+.seg-r { border: 2px solid var(--c); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 18%, #fff) 0 3px, #fff 3px 6px); }
+.blk .seg-r + .seg-w { border-top: 0; }
+.blk.split .seg-r { border-radius: 4px 4px 0 0; border-bottom: 0; }
+.blk.split .seg-w { border-radius: 0 0 4px 4px; }
+.blk.ghost { outline: 2px dashed var(--over); outline-offset: 2px; }
+.day .t { font-size: 11px; font-weight: 600; text-align: center; padding: 2px 0 1px; }
+.dock { margin-top: 10px; background: var(--ink); color: #fff; border-radius: 12px; padding: 10px 12px; font-size: 13px; }
+.dock b { display: block; font-size: 14.5px; }
+.dock span { color: rgba(255,255,255,.75); }
+
+/* roster sheet preview */
+.sheet { background: #fff; border-radius: 12px; padding: 12px; }
+.sheet h3 { margin: 0 0 2px; font-size: 15px; }
+.sheet .when { font-size: 12.5px; color: var(--muted); margin-bottom: 10px; }
+.pf { display: flex; justify-content: space-between; align-items: center; border-radius: 9px; padding: 8px 10px; margin-bottom: 6px; font-size: 13px; background: var(--ground); }
+.pf .s { width: 8px; height: 8px; border-radius: 4px; margin-right: 8px; flex: none; }
+.pf .name { display: flex; align-items: center; }
+.warn { background: #fff4e6; border-radius: 9px; padding: 9px 10px; font-size: 12.5px; margin-top: 4px; }
+.warn b { display: block; font-size: 13px; margin-bottom: 2px; }
+.ok-msg { background: #e6f4ea; border-radius: 9px; padding: 9px 10px; font-size: 12.5px; margin-top: 4px; color: #1e6b32; font-weight: 600; }
+.after { margin-top: 10px; font-size: 12px; color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="note"><b>PROTOTYPE — test storyboard.</b> Each row is one candidate test. Green: what the student sees when the rule works. Red: what they'd see with the bug the test catches. Pick the tests whose red pictures you'd never want a student to see.</div>
+
+<section>
+  <h2>Test: an open shift splits at "now"</h2>
+  <p>Mon 19 Oct, <b>7:00pm</b>. The student clocked in at Café Roma at 5:00pm; the shift is rostered until 10:30pm. So far they've worked 2 hours, and 3.5 hours are still to come.</p>
+  <div class="cols">
+    <div class="case good">
+      <header><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Rule works</header>
+      <div class="screen">
+        <div class="read"><div><b class="num">46.25 h</b><span>of 48 · <span class="hl num">31.75 worked</span>, <span class="num">14.5 rostered</span></span></div></div>
+        <div class="week" id="w-good"></div>
+        <div class="dock"><b>On shift at Café Roma</b><span class="num">Since 5:00pm · 2:00 so far · until 10:30pm</span></div>
+      </div>
+      <div class="verdict">Today's block is <b>solid for the 2 hours worked</b> and outlined for the 3.5 still to come. The record matches what's happened.</div>
+    </div>
+    <div class="case bad">
+      <header><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Bug: whole shift counted as worked</header>
+      <div class="screen">
+        <div class="read"><div><b class="num">46.25 h</b><span>of 48 · <span class="hl num">35.25 worked</span>, <span class="num">11 rostered</span></span></div></div>
+        <div class="week" id="w-bad1"></div>
+        <div class="dock"><b>On shift at Café Roma</b><span class="num">Since 5:00pm · 2:00 so far · until 10:30pm</span></div>
+      </div>
+      <div class="verdict">At 7pm the record already says <b>5.5 hours worked</b>, 3.5 of which haven't happened. If they leave early, the record is wrong until they fix it.</div>
+    </div>
+    <div class="case bad">
+      <header><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Bug: stays "rostered" until clock-out</header>
+      <div class="screen">
+        <div class="read"><div><b class="num">46.25 h</b><span>of 48 · <span class="hl num">29.75 worked</span>, <span class="num">16.5 rostered</span></span></div></div>
+        <div class="week" id="w-bad2"></div>
+        <div class="dock"><b>On shift at Café Roma</b><span class="num">Since 5:00pm · 2:00 so far · until 10:30pm</span></div>
+      </div>
+      <div class="verdict">The 2 hours already worked <b>don't show as worked</b>. Less harmful: nothing claims hours that didn't happen.</div>
+    </div>
+  </div>
+  <p style="margin-top:14px">In all three the <b>total stays 46.25</b>, so the visa check isn't affected either way. This test protects what the student sees, not the limit.</p>
+</section>
+
+<section>
+  <h2>Test: a preview covers both fortnights and saves nothing</h2>
+  <p>Mon 19 Oct, 5:05pm. The student is about to add <b>Thai Express, Sat 24 Oct, 10am–2pm</b> (4 hours). Sat 24 belongs to two work fortnights: the one from Mon 12 Oct (46.25 h so far) and the one from Mon 19 Oct (11.5 h so far).</p>
+  <div class="cols">
+    <div class="case good">
+      <header><svg width="16" height="16" viewBox="0 0 16 16"><path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>Rule works</header>
+      <div class="screen">
+        <div class="sheet">
+          <h3>Roster a shift</h3><div class="when">Thai Express · Sat 24 Oct · 10:00am – 2:00pm · 4 h</div>
+          <div class="pf"><span class="name"><span class="s" style="background:var(--over)"></span>From Mon 12 Oct</span><span class="num">46.25 → <b style="color:var(--over)">50.25</b> of 48</span></div>
+          <div class="pf"><span class="name"><span class="s" style="background:var(--ok)"></span>From Mon 19 Oct</span><span class="num">11.5 → <b>15.5</b> of 48</span></div>
+          <div class="warn"><b>This shift would take you to 50.25 of 48 hours for Mon 12 – Sun 25 Oct.</b>Ask your manager to shorten or swap it. You can still save it so your record stays accurate.</div>
+        </div>
+        <div class="after">After Cancel, the timetable is unchanged:</div>
+        <div class="week" id="w-prev-good" style="margin-top:6px"></div>
+      </div>
+      <div class="verdict">The student sees the breach <b>before</b> saying yes to the shift. Cancel leaves nothing behind.</div>
+    </div>
+    <div class="case bad">
+      <header><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Bug: only checks the fortnight starting this week</header>
+      <div class="screen">
+        <div class="sheet">
+          <h3>Roster a shift</h3><div class="when">Thai Express · Sat 24 Oct · 10:00am – 2:00pm · 4 h</div>
+          <div class="pf"><span class="name"><span class="s" style="background:var(--ok)"></span>From Mon 19 Oct</span><span class="num">11.5 → <b>15.5</b> of 48</span></div>
+          <div class="ok-msg">Within your limit.</div>
+        </div>
+        <div class="after">They save it. Real total for Mon 12 – Sun 25 Oct:</div>
+        <div class="read" style="margin-top:6px"><div><b class="num" style="color:var(--over)">50.25 h</b><span>of 48 · over the limit</span></div></div>
+      </div>
+      <div class="verdict">Says <b>"within your limit"</b> while the other fortnight goes to 50.25. This is the exact mistake the app exists to prevent: the overlapping-fortnight trap.</div>
+    </div>
+    <div class="case bad">
+      <header><svg width="16" height="16" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>Bug: the preview saves the shift</header>
+      <div class="screen">
+        <div class="sheet">
+          <h3>Roster a shift</h3><div class="when">Thai Express · Sat 24 Oct · 10:00am – 2:00pm · 4 h</div>
+          <div class="pf"><span class="name"><span class="s" style="background:var(--over)"></span>From Mon 12 Oct</span><span class="num">46.25 → <b style="color:var(--over)">50.25</b> of 48</span></div>
+          <div class="pf"><span class="name"><span class="s" style="background:var(--ok)"></span>From Mon 19 Oct</span><span class="num">11.5 → <b>15.5</b> of 48</span></div>
+        </div>
+        <div class="after">After Cancel, the shift is on the timetable anyway:</div>
+        <div class="week" id="w-prev-bad" style="margin-top:6px"></div>
+      </div>
+      <div class="verdict">Just <b>looking</b> at a shift rosters it. Its reminders fire and its hours count toward the limit even though the student said no.</div>
+    </div>
+  </div>
+</section>
+<div style="height:40px"></div>
+
+<script>
+const H = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+const px = h => Math.round(h / 12 * 52);
+// shift = [employer, hours worked so far, hours still rostered, ghost?]
+function week(days) {
+  return H.map(h => `<div class="h">${h}</div>`).join('') + days.map(day => {
+    const total = day.s.reduce((a, s) => a + s[1] + s[2], 0);
+    const blocks = day.s.map(([e, w, r, ghost]) => {
+      const split = w > 0 && r > 0;
+      return `<div class="blk ${split ? 'split' : ''} ${ghost ? 'ghost' : ''}" style="--c:var(--${e})">${r ? `<div class="seg-r" style="height:${px(r)}px"></div>` : ''}${w ? `<div class="seg-w" style="height:${px(w)}px"></div>` : ''}</div>`;
+    }).join('');
+    return `<div class="day ${day.today ? 'today' : ''}"><span class="d num">${day.d}</span><div class="blocks">${blocks}</div><div class="t num">${total ? String(total) : ''}</div></div>`;
+  }).join('');
+}
+const base = (today, extra = []) => [
+  { d: 19, s: [today], today: true }, { d: 20, s: [] }, { d: 21, s: [] }, { d: 22, s: [['thai', 0, 6]] },
+  { d: 23, s: [] }, { d: 24, s: extra }, { d: 25, s: [] },
+];
+document.getElementById('w-good').innerHTML = week(base(['roma', 2, 3.5]));
+document.getElementById('w-bad1').innerHTML = week(base(['roma', 5.5, 0]));
+document.getElementById('w-bad2').innerHTML = week(base(['roma', 0, 5.5]));
+document.getElementById('w-prev-good').innerHTML = week(base(['roma', 0, 5.5]));
+document.getElementById('w-prev-bad').innerHTML = week(base(['roma', 0, 5.5], [['thai', 0, 4, true]]));
+</script>
+</body>
+</html>
