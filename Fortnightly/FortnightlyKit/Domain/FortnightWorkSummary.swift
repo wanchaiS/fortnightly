@@ -6,6 +6,13 @@ public enum WorkLimitStatus: Equatable, Sendable {
     case overLimit
 }
 
+/// One employer's share of a work fortnight: a slice of the donut.
+public struct EmployerHours: Equatable, Sendable {
+    public let employerID: Employer.ID
+    public let hoursWorked: Double
+    public let hoursRostered: Double
+}
+
 /// How many hours of one work fortnight count toward the student visa work limit.
 public struct FortnightWorkSummary: Equatable, Sendable {
     public let fortnight: WorkFortnight
@@ -16,11 +23,14 @@ public struct FortnightWorkSummary: Equatable, Sendable {
     /// Hours still to come: rostered shifts, plus the rest of an open shift.
     public let hoursRostered: Double
     public let status: WorkLimitStatus
+    /// Each employer with hours in this fortnight, in order of their first shift.
+    public let hoursByEmployer: [EmployerHours]
 
     init(fortnight: WorkFortnight, shifts: [Shift], courseBreaks: [CourseBreak], calendar: Calendar, now: Date) {
         let breakDays = courseBreaks.map { $0.interval(in: calendar) }
-        var worked: TimeInterval = 0
-        var rostered: TimeInterval = 0
+        var employerOrder: [Employer.ID] = []
+        var workedByEmployer: [Employer.ID: TimeInterval] = [:]
+        var rosteredByEmployer: [Employer.ID: TimeInterval] = [:]
         for shift in shifts {
             // Only the part of a shift inside this fortnight counts, so a shift crossing
             // Sunday midnight is split between the weeks it was worked in.
@@ -28,25 +38,28 @@ public struct FortnightWorkSummary: Equatable, Sendable {
                   let insideFortnight = time.intersection(with: fortnight.interval)
             else { continue }
             let counted = insideFortnight.duration(excluding: breakDays)
+            let worked: TimeInterval
             switch shift.status {
             case .worked:
-                worked += counted
-            case .rostered:
-                rostered += counted
+                worked = counted
+            case .rostered, .notWorked:
+                worked = 0
             case .onShift:
                 // Worked up to now; the rest of the shift is still to come.
-                let workedSoFar = now > insideFortnight.start
+                worked = now > insideFortnight.start
                     ? DateInterval(start: insideFortnight.start, end: Swift.min(now, insideFortnight.end)).duration(excluding: breakDays)
                     : 0
-                worked += workedSoFar
-                rostered += counted - workedSoFar
-            case .notWorked:
-                break
             }
+            if !employerOrder.contains(shift.employerID) { employerOrder.append(shift.employerID) }
+            workedByEmployer[shift.employerID, default: 0] += worked
+            rosteredByEmployer[shift.employerID, default: 0] += counted - worked
         }
         self.fortnight = fortnight
-        hoursWorked = worked / 3600
-        hoursRostered = rostered / 3600
+        hoursByEmployer = employerOrder.map {
+            EmployerHours(employerID: $0, hoursWorked: workedByEmployer[$0, default: 0] / 3600, hoursRostered: rosteredByEmployer[$0, default: 0] / 3600)
+        }
+        hoursWorked = workedByEmployer.values.reduce(0, +) / 3600
+        hoursRostered = rosteredByEmployer.values.reduce(0, +) / 3600
         hoursTowardLimit = hoursWorked + hoursRostered
         status = WorkLimitPolicy.status(forHours: hoursTowardLimit)
     }

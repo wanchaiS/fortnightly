@@ -12,4 +12,20 @@ final class InMemoryCourseBreakRepository: CourseBreakRepository, @unchecked Sen
     func courseBreaks(overlapping interval: DateInterval) throws -> [CourseBreak] {
         savedCourseBreaks
     }
+
+    func allCourseBreaks() throws -> [CourseBreak] {
+        savedCourseBreaks.sorted { $0.startsOn < $1.startsOn }
+    }
+
+    func save(_ courseBreak: CourseBreak) throws {
+        if let index = savedCourseBreaks.firstIndex(where: { $0.id == courseBreak.id }) {
+            savedCourseBreaks[index] = courseBreak
+        } else {
+            savedCourseBreaks.append(courseBreak)
+        }
+    }
+
+    func remove(_ id: CourseBreak.ID) throws {
+        savedCourseBreaks.removeAll { $0.id == id }
+    }
 }

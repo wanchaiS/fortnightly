@@ -44,7 +44,7 @@ final class SpikePanelModel {
         guard let shifts, let employers else { return }
         do {
             let cafe = try employers.employers(includingArchived: false).first { $0.name == "Café Roma" }
-                ?? Employer(name: "Café Roma", payCycleStartsOn: .now)
+                ?? Employer(name: "Café Roma", colour: .violet, payCycleStartsOn: .now)
             try employers.save(cafe)
             let start = Date.now.addingTimeInterval(2 * 60)
             try shifts.save(Shift(employerID: cafe.id, rosteredStart: start, rosteredFinish: start.addingTimeInterval(5.5 * 3600)))

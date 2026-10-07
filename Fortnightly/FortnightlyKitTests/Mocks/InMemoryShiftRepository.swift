@@ -2,8 +2,8 @@ import Foundation
 @testable import FortnightlyKit
 
 /// Plain in-memory storage standing in for Core Data.
-/// The work-limit query deliberately returns every stored shift, so tests prove the
-/// use cases themselves count only the hours inside a fortnight.
+/// The interval queries deliberately return every stored shift, so tests prove the
+/// use cases themselves pick the hours and days inside a fortnight.
 final class InMemoryShiftRepository: ShiftRepository, @unchecked Sendable {
     private(set) var savedShifts: [Shift] = []
 
@@ -28,6 +28,10 @@ final class InMemoryShiftRepository: ShiftRepository, @unchecked Sendable {
     }
 
     func shiftsCountingTowardWorkLimit(overlapping interval: DateInterval) throws -> [Shift] {
+        savedShifts
+    }
+
+    func shifts(rosteredToStartIn interval: DateInterval) throws -> [Shift] {
         savedShifts
     }
 

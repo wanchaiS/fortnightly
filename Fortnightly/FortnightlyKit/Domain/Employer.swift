@@ -10,6 +10,7 @@ public enum PayCycle: String, Sendable, CaseIterable {
 public struct Employer: Identifiable, Equatable, Sendable {
     public let id: UUID
     public var name: String
+    public var colour: EmployerColour
     public var payCycle: PayCycle
     /// Any known pay-period start date; later pay periods are counted from it.
     public var payCycleStartsOn: Date
@@ -19,12 +20,14 @@ public struct Employer: Identifiable, Equatable, Sendable {
     public init(
         id: UUID = UUID(),
         name: String,
+        colour: EmployerColour,
         payCycle: PayCycle = .fortnightly,
         payCycleStartsOn: Date,
         isArchived: Bool = false
     ) {
         self.id = id
         self.name = name
+        self.colour = colour
         self.payCycle = payCycle
         self.payCycleStartsOn = payCycleStartsOn
         self.isArchived = isArchived

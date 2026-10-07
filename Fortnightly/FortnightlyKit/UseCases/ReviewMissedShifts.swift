@@ -37,9 +37,7 @@ public struct ReviewMissedShifts: Sendable {
         do {
             return try shifts.rosteredShifts()
                 .filter { $0.rosteredFinish <= currentTime }
-                .map { shift in
-                    ShiftListing(shift: shift, employerName: try employers.employer(withID: shift.employerID)?.name ?? "Unknown employer")
-                }
+                .map { shift in ShiftListing(shift: shift, employer: try employers.employer(withID: shift.employerID)) }
         } catch {
             throw .recordsUnavailable
         }

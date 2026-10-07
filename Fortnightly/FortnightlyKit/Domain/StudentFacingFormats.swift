@@ -18,9 +18,17 @@ extension WorkFortnight {
     }
 }
 
+extension CourseBreak {
+    /// "19 Oct – 25 Oct"
+    public var datesDescription: String {
+        let style = Date.FormatStyle.dateTime.day().month(.abbreviated)
+        return "\(startsOn.formatted(style)) – \(endsOn.formatted(style))"
+    }
+}
+
 extension Double {
-    /// "51" or "50.5"
-    var hoursDescription: String {
-        formatted(.number.precision(.fractionLength(0 ... 1)))
+    /// "51" or "50.25": shifts are often quarter hours, so two decimals are kept.
+    public var hoursDescription: String {
+        formatted(.number.precision(.fractionLength(0 ... 2)))
     }
 }

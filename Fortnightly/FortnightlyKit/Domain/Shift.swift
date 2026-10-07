@@ -72,14 +72,20 @@ extension Shift {
 
 extension Collection<Shift> {
     /// The first shift that takes up time inside `interval`, with that time.
-    /// Touching end to start isn't a clash: finishing at 5pm and starting elsewhere at 5pm is fine.
     func firstClash(with interval: DateInterval, asOf now: Date) -> (shift: Shift, time: DateInterval)? {
         for shift in self {
             guard let taken = shift.timeTowardWorkLimit(asOf: now) else { continue }
-            if taken.start < interval.end && interval.start < taken.end {
+            if taken.overlaps(interval) {
                 return (shift, taken)
             }
         }
         return nil
+    }
+}
+
+extension DateInterval {
+    /// Touching end to start isn't overlapping (unlike `intersects`): finishing at 5pm and starting elsewhere at 5pm is fine.
+    func overlaps(_ other: DateInterval) -> Bool {
+        start < other.end && other.start < end
     }
 }

@@ -188,6 +188,18 @@ Rule:     Archiving an employer is refused while they still have upcoming roster
 Tests:    I chose 4 more (PLAN §13, group 6): a missed shift's real times; a past shift can't overlap; editing a shift doesn't clash with itself; archiving keeps hours counting.
 Report:   Section 4 (scope decisions)
 
+## 2026-10-07 — Before building the screens: colours, onboarding, empty board, undo, 11 more tests
+Context:  Three design points were still open, and the screens need use cases that didn't exist yet. A mock (`prototype/open-designs.html`, prototype branch) showed the options.
+Chose:    My decisions:
+          - **Employer colours:** six fixed colours given in order of adding: violet, teal, magenta, cobalt, bronze, moss. None is yellow, green, orange or red, so a job never looks like "act now" or a limit warning. No colour control.
+          - **Onboarding picture:** three week rows with two brackets (weeks 1+2 = 42 h, weeks 2+3 = 54 h, over): the Home Affairs example, with numbers big enough to read. The alternative (two tiny day lists a week apart) was closer to the board but unreadable.
+          - **Empty board:** as drawn: empty ring with the 48 tick, "48 h left", a one-line hint, the 14 empty days, and a white "Roster a shift" button in the dock (white, not yellow: it isn't urgent).
+          - **Undo "Not working":** a not-working shift's details offer "Put back on my roster" (if it hasn't finished) or "I worked it, enter my times" (if it has). An error message already promised this.
+          - **Tests 21–31** (PLAN §13, groups 7–10), chosen from 18 candidates. Declined as low-risk: re-adding an archived job's name, editing a break's dates, a correction over 48 hours, undo, a shift past midnight, daylight-saving days, the dock's clock-out-first order.
+Simple:   I asked for simplicity over cleverness: no over-engineering, readable code, and comments only where a business rule or an outside factor (iOS limits, Core Data) isn't obvious from the code. The AI had proposed an extra colour rule for a rare case (a new job sharing a colour with a just-archived job in the same fortnight); I kept my simple rule instead.
+          Following that: "Correct times" reuses `LogPastShift` (a third kind of request, `.workedShift`) instead of a new use case, because the rules are the same (times in the past, at most 16 hours, no overlap, keep the rostered times). Undo reuses `RosterShift` and `LogPastShift` the same way.
+Report:   Section 4 (design before code; how the design changed); AI tools (keeping AI output simple)
+
 ---
 
 ## AI use log

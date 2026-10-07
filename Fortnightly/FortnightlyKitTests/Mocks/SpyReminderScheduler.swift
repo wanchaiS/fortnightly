@@ -6,6 +6,7 @@ final class SpyReminderScheduler: ShiftReminderScheduling, @unchecked Sendable {
     private(set) var scheduledShiftIDs: [Shift.ID] = []
     private(set) var clockInRemindersCancelledFor: [Shift.ID] = []
     private(set) var allRemindersCancelledFor: [Shift.ID] = []
+    private(set) var reminderWindow: [ShiftReminder] = []
 
     func scheduleReminders(for shift: Shift, employerName: String) {
         scheduledShiftIDs.append(shift.id)
@@ -17,6 +18,10 @@ final class SpyReminderScheduler: ShiftReminderScheduling, @unchecked Sendable {
 
     func cancelAllReminders(for shiftID: Shift.ID) {
         allRemindersCancelledFor.append(shiftID)
+    }
+
+    func replaceAllReminders(with reminders: [ShiftReminder]) {
+        reminderWindow = reminders
     }
 }
 
