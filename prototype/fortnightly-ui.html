@@ -1,0 +1,780 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway. Not the app; delete freely.
+  Question: which screen structure fits an international student's working week?
+  Three variants of the whole app on fake in-memory data, switchable via ?variant=A|B|C,
+  the bar at the bottom, or the ← → keys. Rules mirror FortnightlyKit (48 hrs per Monday-start
+  fortnight, overlap rejection, warn-don't-block) so the numbers behave like the real thing.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · Fortnightly screens (throwaway)</title>
+<style>
+:root {
+  --ok: #15803d; --near: #b45309; --over: #b91c1c;
+  --ink: #111827; --muted: #6b7280; --line: #e5e7eb; --bg: #f2f2f7; --brand: #2563eb;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font: 14px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", sans-serif; color: var(--ink); background: #d6dae1; }
+button { font: inherit; cursor: pointer; }
+.proto-banner { background: #111827; color: #fde68a; padding: 8px 16px; font-size: 13px; }
+.proto-banner b { color: #fff; }
+.stage { display: flex; gap: 28px; padding: 20px 24px 96px; align-items: flex-start; justify-content: center; flex-wrap: wrap; }
+
+/* phone */
+.phone { width: 390px; height: 844px; border-radius: 54px; background: #0b0b0c; padding: 12px; box-shadow: 0 20px 60px rgba(0,0,0,.35); flex: none; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; background: var(--bg); display: flex; flex-direction: column; }
+.statusbar { height: 50px; flex: none; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 6px; font-weight: 600; font-size: 15px; }
+.statusbar.light { color: #fff; }
+.content { flex: 1; overflow-y: auto; padding: 4px 16px 24px; }
+h1.large { font-size: 32px; margin: 6px 0 0; letter-spacing: -.5px; }
+.sub { color: var(--muted); margin-bottom: 12px; }
+h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin: 20px 4px 8px; font-weight: 600; }
+.card { background: #fff; border-radius: 14px; padding: 14px; margin-bottom: 10px; }
+.empty { color: var(--muted); background: #fff; border-radius: 14px; padding: 16px; text-align: center; }
+.row-head { display: flex; justify-content: space-between; align-items: center; }
+.topbar { display: flex; justify-content: space-between; align-items: center; }
+.link { background: none; border: 0; color: var(--brand); font-weight: 600; padding: 6px 0; }
+
+/* buttons */
+.btn { display: block; width: 100%; border: 0; border-radius: 12px; padding: 12px; font-weight: 600; margin-top: 8px; text-align: center; }
+.btn.primary { background: var(--brand); color: #fff; }
+.btn.secondary { background: #e8eefc; color: var(--brand); }
+.btn.danger-text { background: none; color: var(--over); }
+.btn.plain { background: none; color: var(--muted); }
+.btns-inline { display: flex; gap: 8px; }
+.btns-inline .btn { margin-top: 6px; padding: 9px 6px; font-size: 13px; }
+
+/* status */
+.chip { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 99px; color: #fff; white-space: nowrap; }
+.chip.ok { background: var(--ok); } .chip.near { background: var(--near); } .chip.over { background: var(--over); }
+.tone-ok { color: var(--ok); } .tone-near { color: var(--near); } .tone-over { color: var(--over); }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+/* meter */
+.meter { background: #fff; border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; }
+.meter-head { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; }
+.bar { position: relative; display: flex; height: 12px; background: #eef0f3; border-radius: 6px; margin: 10px 0 6px; overflow: visible; }
+.bar i { display: block; height: 100%; }
+.bar i:first-child { border-radius: 6px 0 0 6px; }
+.meter.ok .w { background: var(--ok); } .meter.near .w { background: var(--near); } .meter.over .w { background: var(--over); }
+.bar .r { background: repeating-linear-gradient(45deg, #cbd5e1, #cbd5e1 4px, #e2e8f0 4px, #e2e8f0 8px); }
+.meter.over .r { background: repeating-linear-gradient(45deg, #fca5a5, #fca5a5 4px, #fee2e2 4px, #fee2e2 8px); }
+.bar .limit { position: absolute; top: -4px; bottom: -4px; width: 2px; background: var(--ink); }
+.meter-foot { font-size: 12px; color: var(--muted); }
+.meter-foot b { color: var(--ink); font-size: 14px; }
+
+/* shift rows */
+.shift-row { display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 12px; padding: 10px 12px; margin-bottom: 6px; border: 0; width: 100%; text-align: left; }
+.shift-row .grow { flex: 1; }
+.shift-row .when { font-size: 12px; color: var(--muted); }
+.badge { font-size: 11px; padding: 2px 7px; border-radius: 6px; background: #eef0f3; color: var(--muted); font-weight: 600; }
+.badge.onShift { background: #dbeafe; color: var(--brand); } .badge.missed { background: #fef3c7; color: var(--near); }
+.badge.notWorked { text-decoration: line-through; }
+
+/* banners */
+.banner { border-radius: 14px; padding: 12px 14px; margin-bottom: 10px; font-size: 13px; }
+.banner.near { background: #fef3c7; } .banner.over { background: #fee2e2; } .banner.info { background: #e0e7ff; }
+.banner b { display: block; margin-bottom: 2px; }
+
+/* tab bar (A) */
+.tabbar { flex: none; display: flex; background: rgba(249,249,251,.96); border-top: 1px solid var(--line); padding: 6px 8px 26px; }
+.tabbar button { flex: 1; background: none; border: 0; font-size: 10px; color: var(--muted); display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.tabbar button span { font-size: 20px; line-height: 24px; }
+.tabbar button.on { color: var(--brand); }
+
+/* hours (A) */
+.picker { display: flex; justify-content: space-between; align-items: center; background: #fff; border-radius: 12px; padding: 6px; margin-bottom: 10px; }
+.picker button { border: 0; background: #eef0f3; border-radius: 8px; width: 36px; height: 32px; font-size: 18px; }
+.days { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px; align-items: end; height: 130px; background: #fff; border-radius: 14px; padding: 12px 10px 4px; position: relative; }
+.days .col { display: flex; flex-direction: column-reverse; height: 100%; border-radius: 4px; position: relative; }
+.days .col.brk { background: #f1f5f9; }
+.days .col i { display: block; width: 100%; }
+.days .col .dw { background: var(--brand); } .days .col .dr { background: #c7d2fe; }
+.days .col.today { outline: 2px solid var(--ink); outline-offset: 1px; }
+.daylabels { display: grid; grid-template-columns: repeat(14, 1fr); gap: 3px; font-size: 10px; color: var(--muted); text-align: center; padding: 4px 10px 0; }
+
+/* B timeline */
+.b-hero { flex: none; background: linear-gradient(160deg, #1e3a8a, #0f172a); color: #fff; padding: 0 18px 16px; }
+.b-hero.clockInDue, .b-hero.clockOutDue { background: linear-gradient(160deg, #92400e, #1c1917); }
+.b-hero .cap { font-size: 12px; text-transform: uppercase; letter-spacing: .6px; opacity: .75; margin-top: 4px; }
+.b-hero .title { font-size: 26px; font-weight: 700; margin: 2px 0; letter-spacing: -.3px; }
+.b-hero .detail { opacity: .85; font-size: 13px; }
+.b-hero .btn.primary { background: #fff; color: #0f172a; }
+.b-hero .btn.secondary { background: rgba(255,255,255,.15); color: #fff; }
+.b-hero .btn.danger-text, .b-hero .btn.plain { color: #fecaca; padding: 6px; }
+.b-gauge { margin-top: 12px; background: rgba(255,255,255,.1); border-radius: 12px; padding: 8px 10px; cursor: pointer; border: 0; width: 100%; color: #fff; text-align: left; }
+.b-gauge .meter { background: none; padding: 0; margin: 0 0 4px; color: #fff; }
+.b-gauge .bar { background: rgba(255,255,255,.2); }
+.b-gauge .meter-foot { color: rgba(255,255,255,.8); } .b-gauge .meter-foot b { color: #fff; }
+.b-gauge .bar .limit { background: #fff; }
+.b-timeline { padding-bottom: 90px; }
+.week-head { display: flex; justify-content: space-between; margin: 16px 2px 6px; font-size: 12px; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .3px; }
+.day { display: flex; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.day .date { width: 42px; flex: none; text-align: center; color: var(--muted); font-size: 11px; font-weight: 600; }
+.day .date b { display: block; font-size: 20px; color: var(--ink); }
+.day.today .date b { color: #fff; background: var(--brand); border-radius: 50%; width: 32px; height: 32px; line-height: 32px; margin: 0 auto; }
+.day .chips { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: center; min-height: 40px; }
+.chip-shift { border: 0; text-align: left; background: #fff; border-radius: 10px; padding: 7px 10px; border-left: 4px solid; font-size: 13px; }
+.chip-shift small { color: var(--muted); }
+.day .total { width: 40px; text-align: right; font-size: 12px; color: var(--muted); align-self: center; }
+.now-line { font-size: 11px; color: var(--over); font-weight: 700; border-top: 2px solid var(--over); padding-top: 2px; }
+.fab { position: absolute; right: 20px; bottom: 34px; width: 58px; height: 58px; border-radius: 50%; border: 0; background: var(--brand); color: #fff; font-size: 30px; box-shadow: 0 6px 18px rgba(37,99,235,.45); }
+.gear { position: absolute; right: 18px; top: 56px; border: 0; background: rgba(255,255,255,.15); color: #fff; border-radius: 50%; width: 34px; height: 34px; font-size: 17px; }
+
+/* C board */
+.seg { display: flex; background: #e4e4e9; border-radius: 9px; padding: 2px; margin: 6px 0 12px; }
+.seg button { flex: 1; border: 0; background: none; border-radius: 7px; padding: 7px 4px; font-size: 12px; font-weight: 600; color: var(--ink); }
+.seg button.on { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.ring-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 8px; }
+.ring circle { fill: none; stroke-width: 16; }
+.ring .track { stroke: #e5e7eb; }
+.ring.ok .work { stroke: var(--ok); } .ring.near .work { stroke: var(--near); } .ring.over .work { stroke: var(--over); }
+.ring .rost { stroke: #cbd5e1; } .ring.over .rost { stroke: #fca5a5; }
+.ring .big { font-size: 34px; font-weight: 700; text-anchor: middle; fill: var(--ink); }
+.ring .small { font-size: 13px; text-anchor: middle; fill: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.grid .h { text-align: center; font-size: 11px; color: var(--muted); font-weight: 600; }
+.cell { background: #fff; border: 0; border-radius: 10px; height: 64px; padding: 5px; display: flex; flex-direction: column; justify-content: space-between; align-items: flex-start; }
+.cell .n { font-size: 12px; color: var(--muted); }
+.cell .hrs { font-size: 15px; font-weight: 700; }
+.cell.past { background: #f8fafc; }
+.cell.today { outline: 2px solid var(--brand); }
+.cell.sel { background: #dbeafe; }
+.cell.brk { background: repeating-linear-gradient(45deg, #f1f5f9, #f1f5f9 5px, #fff 5px, #fff 10px); }
+.dock { flex: none; background: #fff; border-top: 1px solid var(--line); padding: 10px 16px 28px; }
+.dock .title { font-weight: 700; }
+.dock .detail { font-size: 12px; color: var(--muted); }
+
+/* sheets, alerts, toast */
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,.3); z-index: 20; }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; max-height: 86%; overflow-y: auto; background: var(--bg); border-radius: 16px 16px 0 0; z-index: 21; padding: 0 16px 34px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; position: sticky; top: 0; background: var(--bg); }
+.sheet label { display: block; font-size: 12px; color: var(--muted); margin: 12px 2px 4px; font-weight: 600; }
+.sheet input { width: 100%; font: inherit; padding: 10px; border-radius: 10px; border: 1px solid var(--line); background: #fff; }
+.row2 { display: flex; gap: 10px; } .row2 > div { flex: 1; }
+.preview-line { margin: 12px 2px 4px; color: var(--muted); }
+.preview-title { font-size: 12px; color: var(--muted); margin: 12px 2px 4px; font-weight: 600; }
+.pf { display: flex; justify-content: space-between; background: #fff; border-radius: 10px; padding: 8px 10px; margin-bottom: 4px; font-size: 13px; border-left: 4px solid var(--ok); }
+.pf.near { border-left-color: var(--near); } .pf.over { border-left-color: var(--over); }
+.msg { border-radius: 12px; padding: 12px; margin-top: 10px; font-size: 13px; }
+.msg.error { background: #fee2e2; } .msg.warn { background: #fef3c7; }
+.msg b { display: block; margin-bottom: 4px; }
+.alert-wrap { position: absolute; inset: 0; background: rgba(0,0,0,.35); z-index: 30; display: flex; align-items: center; justify-content: center; }
+.alert { width: 270px; background: rgba(250,250,252,.98); border-radius: 14px; text-align: center; overflow: hidden; }
+.alert .t { font-weight: 700; padding: 18px 16px 4px; }
+.alert .m { font-size: 13px; padding: 0 16px 16px; }
+.alert button { width: 100%; border: 0; border-top: 1px solid var(--line); background: none; padding: 12px; color: var(--brand); font-weight: 600; }
+.toast { position: absolute; left: 20px; right: 20px; bottom: 100px; background: #111827; color: #fff; border-radius: 12px; padding: 12px 14px; z-index: 40; font-size: 13px; text-align: center; }
+
+/* side panels */
+.side { width: 420px; display: flex; flex-direction: column; gap: 14px; }
+.panel { background: #fff; border-radius: 14px; padding: 14px 16px; }
+.panel h3 { margin: 0 0 8px; font-size: 14px; }
+.panel h3 small { color: var(--muted); font-weight: 400; }
+.time-now { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.controls button { border: 1px solid var(--line); background: #f8fafc; border-radius: 8px; padding: 6px 10px; }
+.controls button.go { background: var(--brand); color: #fff; border-color: var(--brand); }
+.lock { background: linear-gradient(170deg, #1e3a8a, #312e81 55%, #0f172a); border-radius: 18px; padding: 16px; color: #fff; }
+.lock-date { text-align: center; font-size: 15px; opacity: .85; }
+.lock-time { text-align: center; font-size: 56px; font-weight: 600; line-height: 1; letter-spacing: -1px; margin-bottom: 10px; }
+.lock-widgets { display: flex; gap: 10px; justify-content: center; margin-bottom: 14px; }
+.w-rect { background: rgba(255,255,255,.18); border-radius: 14px; padding: 8px 10px; width: 200px; font-size: 12px; }
+.w-rect b { display: block; font-size: 13px; }
+.w-circ { width: 64px; height: 64px; border-radius: 50%; background: rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; }
+.notif { background: rgba(255,255,255,.95); color: var(--ink); border-radius: 18px; overflow: hidden; }
+.notif-head { display: flex; gap: 8px; align-items: center; padding: 10px 12px 0; font-size: 12px; color: var(--muted); font-weight: 600; }
+.notif-head span:last-child { margin-left: auto; font-weight: 400; }
+.app-ico { width: 20px; height: 20px; border-radius: 5px; background: var(--brand); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; }
+.notif-custom { padding: 8px 14px 12px; }
+.notif-custom .cap { font-size: 12px; color: var(--muted); }
+.notif-custom .emp { font-size: 19px; font-weight: 700; }
+.notif-actions .btn { border-radius: 0; margin: 0; border-top: 1px solid var(--line); background: #fff; color: var(--brand); font-weight: 500; }
+.notif-actions .btn.danger-text { color: var(--over); }
+.lock-empty { text-align: center; opacity: .6; font-size: 12px; padding: 10px; }
+.w-small { width: 170px; height: 170px; border-radius: 22px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.12); padding: 14px; display: flex; flex-direction: column; justify-content: space-between; }
+.w-small .w-cap { font-size: 11px; color: var(--muted); font-weight: 600; text-transform: uppercase; }
+.w-small .w-cap.warn { color: var(--near); }
+.w-small .w-title { font-size: 17px; font-weight: 700; line-height: 1.15; }
+.w-small .w-line { font-size: 13px; }
+.w-small .w-foot { font-size: 11px; color: var(--muted); }
+.w-small .btn { margin: 0; padding: 7px; font-size: 13px; }
+.state-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.state-table td, .state-table th { border-bottom: 1px solid var(--line); padding: 4px 4px; text-align: left; vertical-align: top; }
+.findings { margin: 0; padding-left: 18px; font-size: 13px; }
+.findings li { margin-bottom: 6px; }
+
+/* variant switcher (prototype chrome, not part of the design) */
+.switcher { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; background: #111827; color: #fff; border-radius: 99px; padding: 6px; box-shadow: 0 8px 24px rgba(0,0,0,.35); z-index: 100; }
+.switcher button { background: #374151; color: #fff; border: 0; border-radius: 99px; width: 36px; height: 36px; font-size: 18px; }
+.switcher span { padding: 0 14px; font-weight: 600; min-width: 210px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="proto-banner"><b>PROTOTYPE — throwaway, not the app.</b> Question: which screen structure fits a student's working week? Flip variants with <b>← →</b> or the bar at the bottom. Fake data, in memory; <b>Reset</b> restores it. Use the time controls to reach the 5:00pm shift and act on its prompt.</div>
+<main class="stage">
+  <div class="phone"><div class="screen" id="app"></div></div>
+  <div class="side">
+    <div class="panel" id="clock-panel"></div>
+    <div class="panel" id="lock-panel"></div>
+    <div class="panel" id="findings-panel"></div>
+    <div class="panel" id="state-panel"></div>
+  </div>
+</main>
+<nav class="switcher" id="switcher"></nav>
+
+<script>
+// ---------- time & formatting ----------
+const MIN = 60e3, HOUR = 3600e3;
+const at = (day, h = 0, m = 0, month = 10, year = 2026) => new Date(year, month - 1, day, h, m).getTime();
+const addDays = (t, n) => { const x = new Date(t); x.setDate(x.getDate() + n); return x.getTime(); };
+const startOfDay = t => { const x = new Date(t); x.setHours(0, 0, 0, 0); return x.getTime(); };
+const mondayOf = t => { const x = new Date(startOfDay(t)); return addDays(x.getTime(), -((x.getDay() + 6) % 7)); };
+const DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const fmtTime = t => { const x = new Date(t); const h = x.getHours(); return `${h % 12 || 12}:${String(x.getMinutes()).padStart(2, '0')}${h >= 12 ? 'pm' : 'am'}`; };
+const fmtClock = t => { const x = new Date(t); return `${x.getHours() % 12 || 12}:${String(x.getMinutes()).padStart(2, '0')}`; };
+const fmtDay = t => { const x = new Date(t); return `${DOW[x.getDay()]} ${x.getDate()} ${MON[x.getMonth()]}`; };
+const fmtDayLong = t => new Date(t).toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+const fmtRange = (a, b) => `${fmtTime(a)} – ${fmtTime(b)}`;
+const fmtFortnight = f => `${fmtDay(f.start)} – ${fmtDay(addDays(f.end, -1))}`;
+const fmtH = h => String(Math.round(h * 100) / 100);
+const fmtDur = ms => { const m = Math.max(0, Math.floor(ms / MIN)); return `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`; };
+const isoDate = t => { const x = new Date(t); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
+const parseLocal = (date, time) => { const [y, mo, d] = date.split('-').map(Number); const [h, mi] = time.split(':').map(Number); return new Date(y, mo - 1, d, h, mi).getTime(); };
+const relative = ms => {
+  const m = Math.round(ms / MIN);
+  if (m < 60) return `in ${m} min`;
+  if (m < 24 * 60) return `in ${Math.floor(m / 60)} h${m % 60 ? ` ${m % 60} min` : ''}`;
+  return `in ${Math.round(m / 1440)} days`;
+};
+
+// ---------- fake data ----------
+const employers = [
+  { id: 'cafe', name: 'Café Roma', colour: '#c2410c' },
+  { id: 'thai', name: 'Thai Express', colour: '#0f766e' },
+];
+const emp = s => employers.find(e => e.id === s.emp);
+let uid = 1;
+const worked = (e, a, b) => ({ id: uid++, emp: e, rs: a, rf: b, ci: a, co: b, status: 'worked' });
+const rostered = (e, a, b) => ({ id: uid++, emp: e, rs: a, rf: b, ci: null, co: null, status: 'rostered' });
+
+function initialState() {
+  uid = 1;
+  return {
+    now: at(19, 16, 50), // Mon 19 Oct 2026, 4:50pm
+    shifts: [
+      worked('cafe', at(7, 7), at(7, 13)),
+      worked('cafe', at(10, 9), at(10, 15)),
+      worked('cafe', at(12, 7), at(12, 13)),
+      worked('thai', at(13, 17), at(13, 22, 30)),
+      worked('cafe', at(14, 7), at(14, 13)),
+      worked('thai', at(16, 17), at(16, 23)),
+      worked('cafe', at(17, 9), at(17, 15, 15)),
+      rostered('thai', at(18, 17), at(18, 22)), // finished, never clocked in: a "missed" shift
+      rostered('cafe', at(19, 17), at(19, 22, 30)), // tonight
+      rostered('thai', at(22, 17), at(22, 23)),
+    ],
+    breaks: [{ name: 'Summer break', start: at(23, 0, 0, 11), end: at(22, 0, 0, 2, 2027) }],
+    ui: { tab: 'today', sheet: null, detail: null, alert: null, banner: null, toast: null, hoursStart: null, bFortnight: null, bSettings: false, cIndex: 1, cDay: null },
+  };
+}
+let S = initialState();
+
+// ---------- domain rules (mirror FortnightlyKit) ----------
+const LIMIT = 48, APPROACHING = 40;
+const STATUS = { ok: 'Within limit', near: 'Close to limit', over: 'Over limit' };
+const fortnightFrom = monday => ({ start: monday, end: addDays(monday, 14) });
+const fortnightsContaining = t => { const m = mondayOf(t); return [fortnightFrom(addDays(m, -7)), fortnightFrom(m)]; };
+function fortnightsOverlapping(a, b) {
+  const out = []; let f = fortnightFrom(addDays(mondayOf(a), -7));
+  while (f.start < b) { out.push(f); f = fortnightFrom(addDays(f.start, 7)); }
+  return out;
+}
+function shiftSpan(s) {
+  if (s.status === 'notWorked') return null;
+  if (s.status === 'rostered') return [s.rs, s.rf];
+  if (s.status === 'onShift') return [s.ci, Math.max(s.rf, s.ci)];
+  return [s.ci, s.co];
+}
+const overlapMs = (a0, a1, b0, b1) => Math.max(0, Math.min(a1, b1) - Math.max(a0, b0));
+function countedMs(a, b, start, end) {
+  const s = Math.max(a, start), e = Math.min(b, end);
+  if (e <= s) return 0;
+  return (e - s) - S.breaks.reduce((sum, br) => sum + overlapMs(s, e, br.start, br.end), 0);
+}
+function hoursIn(start, end, shifts = S.shifts, empId = null) {
+  let w = 0, r = 0;
+  for (const s of shifts) {
+    if (empId && s.emp !== empId) continue;
+    const sp = shiftSpan(s); if (!sp) continue;
+    const c = countedMs(sp[0], sp[1], start, end); if (!c) continue;
+    if (s.status === 'worked') w += c;
+    else if (s.status === 'rostered') r += c;
+    else { const soFar = countedMs(sp[0], Math.min(sp[1], Math.max(S.now, sp[0])), start, end); w += soFar; r += c - soFar; }
+  }
+  return { worked: w / HOUR, rostered: r / HOUR, total: (w + r) / HOUR };
+}
+function summary(f, shifts = S.shifts) {
+  const h = hoursIn(f.start, f.end, shifts);
+  return { f, ...h, status: h.total > LIMIT ? 'over' : h.total >= APPROACHING ? 'near' : 'ok' };
+}
+const riskier = () => fortnightsContaining(S.now).map(f => summary(f)).sort((a, b) => b.total - a.total)[0];
+
+function currentState() {
+  const open = S.shifts.find(s => s.status === 'onShift');
+  if (open) return { kind: open.rf <= S.now ? 'clockOutDue' : 'onShift', shift: open };
+  const upcoming = S.shifts.filter(s => s.status === 'rostered').sort((a, b) => a.rs - b.rs);
+  const due = upcoming.find(s => s.rs <= S.now && s.rf > S.now);
+  if (due) return { kind: 'clockInDue', shift: due };
+  const next = upcoming.find(s => s.rs > S.now);
+  return next ? { kind: 'next', shift: next } : { kind: 'nothing' };
+}
+const missedShifts = () => S.shifts.filter(s => s.status === 'rostered' && s.rf <= S.now);
+const err = (title, message) => ({ error: { title, message } });
+
+// Use cases (same rules and messages as the Swift ones)
+function clockIn(id, mode) {
+  const s = S.shifts.find(x => x.id === id);
+  if (!s) return err('This shift is no longer on your roster.', 'Check your upcoming shifts in Roster.');
+  if (s.status === 'onShift') return err(`You clocked in to this shift at ${fmtTime(s.ci)}.`, 'Nothing to do: your hours are being tracked.');
+  if (s.status !== 'rostered') return err('This shift is already finished.', 'Correct its times from the shift details if they are wrong.');
+  const open = S.shifts.find(x => x.status === 'onShift');
+  if (open) return err(`You're still clocked in at ${emp(open).name} (since ${fmtTime(open.ci)}).`, 'Clock out of that shift first, then clock in here.');
+  const t = mode === 'rostered' ? s.rs : S.now;
+  if (t > S.now) return err(`You can't clock in at a time that hasn't happened yet.`, 'Choose "Started just now".');
+  if (t < s.rs - HOUR) return err(`This shift isn't rostered to start until ${fmtTime(s.rs)}.`, 'You can clock in up to 60 minutes early. If your start time changed, edit the shift first.');
+  if (t >= s.rf) return err(`That's after this shift was rostered to finish (${fmtTime(s.rf)}).`, 'Choose "Started on time", or edit the shift if it was moved.');
+  s.ci = t; s.status = 'onShift';
+  return { toast: `Clocked in at ${fmtTime(t)} ✓` };
+}
+function clockOut(id, mode) {
+  const s = S.shifts.find(x => x.id === id);
+  if (!s || s.status !== 'onShift') return err(`You're not clocked in to this shift.`, 'If you worked it, add it with Log a past shift.');
+  if (mode === 'rostered' && s.rf > S.now) return err(`Your rostered finish (${fmtTime(s.rf)}) hasn't happened yet.`, 'If you finished early, choose "Finished just now".');
+  const t = mode === 'rostered' ? s.rf : S.now;
+  const hrs = (t - s.ci) / HOUR;
+  if (hrs > 16) return err(`That would record a ${fmtH(hrs)}-hour shift.`, 'If you forgot to clock out, enter the time you actually finished.');
+  s.co = t; s.status = 'worked';
+  const over = fortnightsOverlapping(s.ci, s.co).map(f => summary(f)).find(x => x.status === 'over');
+  if (over) S.ui.banner = { tone: 'over', title: `Recorded. ${fmtFortnight(over.f)} is now at ${fmtH(over.total)} of 48 hrs.`, message: 'Your record matches what you worked. Talk to your manager before accepting more shifts in this fortnight.' };
+  return { toast: `Clocked out at ${fmtTime(t)} · ${fmtH(hrs)} hrs recorded ✓` };
+}
+function markNotWorked(id) {
+  const s = S.shifts.find(x => x.id === id);
+  if (!s || s.status !== 'rostered') return err('Only shifts you haven\'t clocked into can be marked as not worked.', 'Clock out instead if you worked it.');
+  s.status = 'notWorked';
+  return { toast: `${emp(s).name} ${fmtDay(s.rs)} marked as not worked.` };
+}
+function candidate(sh) {
+  if (!sh.date || !sh.start || !sh.finish) return null;
+  const rs = parseLocal(sh.date, sh.start); let rf = parseLocal(sh.date, sh.finish);
+  const nextDay = rf <= rs; if (nextDay) rf = addDays(rf, 1);
+  return { id: 0, emp: sh.emp, rs, rf, ci: null, co: null, status: 'rostered', nextDay };
+}
+function checkRoster(c) {
+  const hrs = (c.rf - c.rs) / HOUR;
+  if (hrs > 14) return err(`This shift would be ${fmtH(hrs)} hours long.`, `Check AM and PM on the start and finish. Shifts longer than 14 hours can't be rostered.`);
+  if (c.rf <= S.now) return err('This shift has already finished.', `Add hours you've already worked with Log a past shift in Hours.`);
+  const clash = S.shifts.find(s => { const sp = shiftSpan(s); return sp && sp[0] < c.rf && c.rs < sp[1]; });
+  if (clash) { const sp = shiftSpan(clash); return err(`This overlaps your ${emp(clash).name} shift (${fmtDay(sp[0])}, ${fmtRange(sp[0], sp[1])}).`, `You can't be at two shifts at once. Change these times or edit the other shift.`); }
+  const sums = fortnightsOverlapping(c.rs, c.rf).map(f => ({ before: summary(f), after: summary(f, [...S.shifts, c]) }));
+  return { sums, breach: sums.find(x => x.after.status === 'over') };
+}
+
+// ---------- shared pieces ----------
+const btn = (act, id, mode, label, kind) => `<button class="btn ${kind}" data-act="${act}" data-id="${id}" data-mode="${mode}">${label}</button>`;
+function clockActions(st) {
+  const s = st.shift;
+  switch (st.kind) {
+    case 'next': return s.rs - S.now <= HOUR ? btn('clockIn', s.id, 'now', `Started early (${fmtTime(S.now)})`, 'secondary') : '';
+    case 'clockInDue': return btn('clockIn', s.id, 'rostered', `Started on time (${fmtTime(s.rs)})`, 'primary') + btn('clockIn', s.id, 'now', `Started just now (${fmtTime(S.now)})`, 'secondary') + btn('notWorked', s.id, '', 'Not working this shift', 'danger-text');
+    case 'onShift': return btn('clockOut', s.id, 'now', `Finished early (${fmtTime(S.now)})`, 'secondary');
+    case 'clockOutDue': return btn('clockOut', s.id, 'rostered', `Finished on time (${fmtTime(s.rf)})`, 'primary') + btn('clockOut', s.id, 'now', `Finished just now (${fmtTime(S.now)})`, 'secondary') + btn('snooze', s.id, '', 'Still working – remind me in 30 min', 'plain');
+    default: return '';
+  }
+}
+function headline(st) {
+  const s = st.shift;
+  switch (st.kind) {
+    case 'nothing': return { cap: 'Today', title: 'No shifts rostered', detail: 'Add your next shift so Fortnightly can remind you to clock in.' };
+    case 'next': return { cap: 'Next shift', title: emp(s).name, detail: `${fmtDay(s.rs)} · ${fmtRange(s.rs, s.rf)} · ${relative(s.rs - S.now)}` };
+    case 'clockInDue': return { cap: 'Not clocked in', title: `${emp(s).name} started ${fmtTime(s.rs)}`, detail: `Rostered until ${fmtTime(s.rf)}. Clock in so this fortnight's hours stay accurate.` };
+    case 'onShift': return { cap: 'On shift', title: emp(s).name, detail: `Since ${fmtTime(s.ci)} · ${fmtDur(S.now - s.ci)} so far · rostered until ${fmtTime(s.rf)}` };
+    case 'clockOutDue': return { cap: 'Still clocked in', title: emp(s).name, detail: `Rostered finish was ${fmtTime(s.rf)} · ${fmtDur(S.now - s.ci)} since you clocked in` };
+  }
+}
+function meter(sum, label) {
+  const cap = Math.max(LIMIT * 1.15, sum.total);
+  const pct = h => `${(h / cap * 100).toFixed(2)}%`;
+  return `<div class="meter ${sum.status}">
+    <div class="meter-head"><span>${label ? `<b>${label}</b> · ` : ''}${fmtFortnight(sum.f)}</span><span class="chip ${sum.status}">${STATUS[sum.status]}</span></div>
+    <div class="bar"><i class="w" style="width:${pct(sum.worked)}"></i><i class="r" style="width:${pct(sum.rostered)}"></i><b class="limit" style="left:${pct(LIMIT)}"></b></div>
+    <div class="meter-foot"><b>${fmtH(sum.total)}</b> of 48 hrs · ${fmtH(sum.worked)} worked, ${fmtH(sum.rostered)} rostered</div></div>`;
+}
+function statusBadge(s) {
+  if (s.status === 'rostered' && s.rf <= S.now) return `<span class="badge missed">Not clocked in</span>`;
+  return `<span class="badge ${s.status}">${{ rostered: 'Rostered', onShift: 'On shift', worked: 'Worked', notWorked: 'Not worked' }[s.status]}</span>`;
+}
+const shiftTimes = s => s.status === 'worked' ? fmtRange(s.ci, s.co) : s.status === 'onShift' ? `${fmtTime(s.ci)} – now` : fmtRange(s.rs, s.rf);
+const shiftHours = s => { const sp = shiftSpan(s); return sp ? fmtH((sp[1] - sp[0]) / HOUR) : '0'; };
+function shiftRow(s) {
+  return `<button class="shift-row" data-act="detail" data-id="${s.id}"><span class="dot" style="background:${emp(s).colour}"></span>
+    <span class="grow"><b>${emp(s).name}</b><div class="when">${fmtDay(s.rs)} · ${shiftTimes(s)}</div></span>
+    <span style="text-align:right">${statusBadge(s)}<div class="when">${shiftHours(s)} hrs</div></span></button>`;
+}
+function missedBanner() {
+  return missedShifts().map(s => `<div class="banner near"><b>Did you work ${emp(s).name} on ${fmtDay(s.rs)}?</b>${fmtRange(s.rs, s.rf)} finished without a clock-in. It still counts as rostered hours.
+    <div class="btns-inline">${btn('stub', s.id, '', 'Log the real times', 'secondary').replace('data-mode=""', 'data-what="Log a past shift"')}${btn('notWorked', s.id, '', 'I didn\'t work it', 'secondary')}</div></div>`).join('');
+}
+function resultBanner() {
+  const b = S.ui.banner; if (!b) return '';
+  return `<div class="banner ${b.tone}"><b>${b.title}</b>${b.message}<button class="link" data-act="dismissBanner">Dismiss</button></div>`;
+}
+const statusBar = (cls = '') => `<div class="statusbar ${cls}"><span>${fmtClock(S.now)}</span><span>5G ▮▮▮</span></div>`;
+function employersBody() {
+  const sum = riskier();
+  return `${employers.map(e => { const h = hoursIn(sum.f.start, sum.f.end, S.shifts, e.id); return `<div class="shift-row"><span class="dot" style="background:${e.colour}"></span><span class="grow"><b>${e.name}</b><div class="when">Paid fortnightly</div></span><span class="when">${fmtH(h.total)} hrs this fortnight</span></div>`; }).join('')}
+    <button class="btn secondary" data-act="stub" data-what="Add employer">Add an employer</button>
+    <h2>Course breaks</h2><p class="when" style="margin:0 4px 6px">The 48-hour limit doesn't apply while your course isn't in session.</p>
+    ${S.breaks.map(b => `<div class="shift-row"><span class="grow"><b>${b.name}</b><div class="when">${fmtDay(b.start)} – ${fmtDay(addDays(b.end, -1))} ${new Date(addDays(b.end, -1)).getFullYear()}</div></span></div>`).join('')}
+    <button class="btn secondary" data-act="stub" data-what="Add course break">Add a course break</button>
+    <h2>Visa</h2><div class="card">Research masters or PhD student? Your hours aren't limited. <button class="link" data-act="stub" data-what="Research degree setting">Turn off the limit</button></div>
+    <p class="when" style="margin:12px 4px">Fortnightly helps you track your hours. Check your visa conditions in VEVO.</p>`;
+}
+
+// ---------- shared overlays ----------
+function rosterSheet() {
+  const sh = S.ui.sheet;
+  return `<div class="scrim" data-act="closeSheet"></div><div class="sheet">
+    <div class="sheet-head"><button class="link" data-act="closeSheet">Cancel</button><b>Roster a shift</b><button class="link" data-act="saveShift">Add</button></div>
+    <label>Employer</label><div class="seg">${employers.map(e => `<button data-act="sheetEmp" data-emp="${e.id}" class="${sh.emp === e.id ? 'on' : ''}">${e.name}</button>`).join('')}</div>
+    <label>Day</label><input type="date" data-field="date" value="${sh.date}">
+    <div class="row2"><div><label>Start</label><input type="time" data-field="start" value="${sh.start}"></div><div><label>Finish</label><input type="time" data-field="finish" value="${sh.finish}"></div></div>
+    <div id="sheet-preview">${sheetPreview()}</div></div>`;
+}
+function sheetPreview() {
+  const sh = S.ui.sheet; const c = candidate(sh); if (!c) return '';
+  const r = checkRoster(c);
+  let html = `<div class="preview-line">${c.nextDay ? `Finishes ${fmtDay(c.rf)} ${fmtTime(c.rf)} · ` : ''}${fmtH((c.rf - c.rs) / HOUR)} hrs</div>`;
+  if (r.error) return html + `<div class="msg error"><b>${r.error.title}</b>${r.error.message}</div>`;
+  html += `<div class="preview-title">What this does to your work fortnights</div>` +
+    r.sums.map(x => `<div class="pf ${x.after.status}"><span>${fmtFortnight(x.after.f)}</span><span>${fmtH(x.before.total)} → <b>${fmtH(x.after.total)}</b> of 48</span></div>`).join('');
+  if (sh.breach) {
+    html += `<div class="msg warn"><b>This shift would take you to ${fmtH(sh.breach.after.total)} of 48 hours for ${fmtFortnight(sh.breach.after.f)}.</b>Your student visa allows 48 hours a fortnight during semester. Ask your manager to shorten or swap this shift. You can still save it so your record stays accurate.
+      <div class="btns-inline"><button class="btn secondary" data-act="clearBreach">Change times</button><button class="btn primary" data-act="saveAnyway">Save anyway</button></div></div>`;
+  } else if (r.breach) {
+    html += `<div class="msg warn">Adding this takes ${fmtFortnight(r.breach.after.f)} over 48 hrs. You'll be asked to confirm.</div>`;
+  }
+  return html;
+}
+function detailSheet() {
+  const s = S.shifts.find(x => x.id === S.ui.detail); if (!s) return '';
+  const st = currentState();
+  const actions = st.shift && st.shift.id === s.id ? clockActions(st) : s.status === 'rostered' ? btn('notWorked', s.id, '', 'Not working this shift', 'danger-text') : '';
+  return `<div class="scrim" data-act="closeDetail"></div><div class="sheet">
+    <div class="sheet-head"><span></span><b>Shift details</b><button class="link" data-act="closeDetail">Done</button></div>
+    <div class="card"><div class="row-head"><b style="font-size:18px">${emp(s).name}</b>${statusBadge(s)}</div>
+      <div class="when" style="margin-top:6px">Rostered: ${fmtDay(s.rs)}, ${fmtRange(s.rs, s.rf)}</div>
+      <div class="when">Actual: ${s.ci ? `${fmtTime(s.ci)} – ${s.co ? fmtTime(s.co) : 'still on shift'}` : 'not clocked in'}</div></div>
+    ${actions}<button class="btn plain" data-act="stub" data-what="Edit shift">Edit times</button></div>`;
+}
+function settingsSheet(title) {
+  return `<div class="scrim" data-act="closeSettings"></div><div class="sheet"><div class="sheet-head"><span></span><b>${title}</b><button class="link" data-act="closeSettings">Done</button></div>${employersBody()}</div>`;
+}
+function overlays() {
+  return (S.ui.sheet ? rosterSheet() : '') + (S.ui.detail ? detailSheet() : '') +
+    (S.ui.alert ? `<div class="alert-wrap"><div class="alert"><div class="t">${S.ui.alert.title}</div><div class="m">${S.ui.alert.message}</div><button data-act="alertOk">OK</button></div></div>` : '') +
+    (S.ui.toast ? `<div class="toast">${S.ui.toast}</div>` : '');
+}
+
+// ---------- Variant A: tab bar (Today / Roster / Hours / Employers) ----------
+function variantA() {
+  const tabs = [['today', 'Today', '◷'], ['roster', 'Roster', '☰'], ['hours', 'Hours', '▤'], ['employers', 'Employers', '⌂']];
+  const body = { today: aToday, roster: aRoster, hours: aHours, employers: () => `<h1 class="large">Employers</h1><div class="sub">Where you work</div>${employersBody()}` }[S.ui.tab]();
+  return `${statusBar()}<div class="content">${body}</div>
+    <nav class="tabbar">${tabs.map(([k, l, i]) => `<button data-act="tab" data-tab="${k}" class="${S.ui.tab === k ? 'on' : ''}"><span>${i}</span>${l}</button>`).join('')}</nav>`;
+}
+function aToday() {
+  const st = currentState(); const h = headline(st);
+  const [f0, f1] = fortnightsContaining(S.now).map(f => summary(f));
+  const next = S.shifts.filter(s => s.status === 'rostered' && s.rs > S.now && (!st.shift || s.id !== st.shift.id)).sort((a, b) => a.rs - b.rs).slice(0, 3);
+  return `<h1 class="large">Today</h1><div class="sub">${fmtDayLong(S.now)}</div>
+    ${resultBanner()}${missedBanner()}
+    <div class="card"><div class="when">${h.cap}</div><div style="font-size:20px;font-weight:700">${h.title}</div><div class="when">${h.detail}</div>${clockActions(st)}</div>
+    <h2>Your work fortnights</h2>${meter(f0, 'Started last week')}${meter(f1, 'Started this week')}
+    <h2>Coming up</h2>${next.map(shiftRow).join('') || '<div class="empty">Nothing else rostered.</div>'}`;
+}
+function aRoster() {
+  const from = mondayOf(S.now);
+  const list = S.shifts.filter(s => s.rf > from && s.status !== 'worked').sort((a, b) => a.rs - b.rs);
+  const weeks = {};
+  list.forEach(s => (weeks[mondayOf(s.rs)] ??= []).push(s));
+  const risky = fortnightsOverlapping(from, addDays(from, 21)).map(f => summary(f)).filter(x => x.status !== 'ok');
+  return `<div class="topbar"><h1 class="large">Roster</h1><button class="link" data-act="openSheet" style="font-size:16px">＋ Add</button></div>
+    <div class="sub">Add shifts as soon as your manager sends them.</div>
+    ${risky.map(x => `<div class="banner ${x.status}"><b>${fmtFortnight(x.f)}: ${fmtH(x.total)} of 48 hrs</b>${x.status === 'over' ? 'Over your visa work limit. Ask to swap or shorten a shift.' : 'Close to your limit. Check before accepting extra shifts.'}</div>`).join('')}
+    ${Object.entries(weeks).map(([m, shifts]) => `<h2>Week of ${fmtDay(+m)} · ${fmtH(hoursIn(+m, addDays(+m, 7)).total)} hrs</h2>${shifts.map(shiftRow).join('')}`).join('') || '<div class="empty">Your roster is empty. Add shifts as soon as your manager sends them.</div>'}`;
+}
+function aHours() {
+  const start = S.ui.hoursStart ?? addDays(mondayOf(S.now), -7);
+  const sum = summary(fortnightFrom(start));
+  const days = [...Array(14)].map((_, i) => addDays(start, i));
+  const per = days.map(d => hoursIn(d, addDays(d, 1)));
+  const scale = h => `${Math.min(h / 12, 1) * 100}%`;
+  const inBreak = d => S.breaks.some(b => d >= b.start && d < b.end);
+  return `<h1 class="large">Hours</h1><div class="sub">Every Monday starts a new work fortnight.</div>
+    <div class="picker"><button data-act="hoursShift" data-by="-7">‹</button><b>${fmtFortnight(sum.f)}</b><button data-act="hoursShift" data-by="7">›</button></div>
+    ${meter(sum)}
+    <div class="days">${days.map((d, i) => `<div class="col ${inBreak(d) ? 'brk' : ''} ${startOfDay(S.now) === d ? 'today' : ''}" title="${fmtDay(d)}: ${fmtH(per[i].total)} hrs"><i class="dw" style="height:${scale(per[i].worked)}"></i><i class="dr" style="height:${scale(per[i].rostered)}"></i></div>`).join('')}</div>
+    <div class="daylabels">${days.map(d => `<span>${DOW[new Date(d).getDay()][0]}</span>`).join('')}</div>
+    <h2>By employer</h2>${employers.map(e => { const h = hoursIn(sum.f.start, sum.f.end, S.shifts, e.id); return `<div class="shift-row"><span class="dot" style="background:${e.colour}"></span><span class="grow"><b>${e.name}</b><div class="when">${fmtH(h.worked)} worked · ${fmtH(h.rostered)} rostered</div></span><b>${fmtH(h.total)} h</b></div>`; }).join('')}
+    <button class="btn secondary" data-act="stub" data-what="Log a past shift">Log a past shift</button>
+    <button class="btn plain" data-act="stub" data-what="Pay period hours">Compare with a payslip</button>`;
+}
+
+// ---------- Variant B: one timeline under a live status header ----------
+function variantB() {
+  const st = currentState(); const h = headline(st);
+  const sums = fortnightsContaining(S.now).map(f => summary(f));
+  const idx = S.ui.bFortnight ?? (sums[0].total >= sums[1].total ? 0 : 1);
+  return `<div class="b-hero ${st.kind}">${statusBar('light')}
+      <div class="cap">${h.cap}</div><div class="title">${h.title}</div><div class="detail">${h.detail}</div>
+      ${clockActions(st)}
+      <button class="b-gauge" data-act="bToggle" data-i="${idx}">${meter(sums[idx], idx === 0 ? 'Started last week' : 'Started this week').replace('class="meter', 'class="meter b')}<div class="meter-foot">Tap to see the other fortnight containing today</div></button>
+    </div>
+    <div class="content b-timeline" id="b-timeline">${resultBanner()}${missedBanner()}${timeline()}</div>
+    <button class="gear" data-act="bSettings">⚙︎</button>
+    <button class="fab" data-act="openSheet">＋</button>
+    ${S.ui.bSettings ? settingsSheet('Jobs & breaks') : ''}`;
+}
+function timeline() {
+  const first = addDays(mondayOf(S.now), -7);
+  let html = '';
+  for (let i = 0; i < 21; i++) {
+    const day = addDays(first, i);
+    if (i % 7 === 0) {
+      const f = summary(fortnightFrom(day));
+      html += `<div class="week-head"><span>Week of ${fmtDay(day)}</span><span class="tone-${f.status}">Fortnight from here: ${fmtH(f.total)} / 48</span></div>`;
+    }
+    const shifts = S.shifts.filter(s => startOfDay(s.rs) === day).sort((a, b) => a.rs - b.rs);
+    const isToday = day === startOfDay(S.now);
+    let chips = '', nowPlaced = !isToday;
+    for (const s of shifts) {
+      if (!nowPlaced && s.rs > S.now) { chips += `<div class="now-line">now ${fmtTime(S.now)}</div>`; nowPlaced = true; }
+      chips += `<button class="chip-shift" style="border-left-color:${emp(s).colour}" data-act="detail" data-id="${s.id}"><b>${emp(s).name}</b> ${shiftTimes(s)} <small>· ${shiftHours(s)} h · ${statusBadge(s)}</small></button>`;
+    }
+    if (!nowPlaced) chips += `<div class="now-line">now ${fmtTime(S.now)}</div>`;
+    const total = hoursIn(day, addDays(day, 1)).total;
+    html += `<div class="day ${isToday ? 'today' : ''}" ${isToday ? 'id="b-today"' : ''}><div class="date">${DOW[new Date(day).getDay()].toUpperCase()}<b>${new Date(day).getDate()}</b></div><div class="chips">${chips}</div><div class="total">${total ? `${fmtH(total)} h` : ''}</div></div>`;
+  }
+  return html;
+}
+
+// ---------- Variant C: fortnight board (gauge + 14-day grid + docked shift) ----------
+function variantC() {
+  const fs = fortnightsContaining(S.now); const sum = summary(fs[S.ui.cIndex]);
+  const st = currentState(); const h = headline(st);
+  return `${statusBar()}<div class="content">
+      <div class="topbar"><h1 class="large">Fortnight</h1><button class="link" data-act="bSettings">Jobs</button></div>
+      <div class="seg">${fs.map((f, i) => `<button data-act="cFortnight" data-i="${i}" class="${S.ui.cIndex === i ? 'on' : ''}">${fmtFortnight(f)}</button>`).join('')}</div>
+      ${resultBanner()}
+      <div class="ring-wrap">${ring(sum)}<div><span class="chip ${sum.status}">${STATUS[sum.status]}</span> <span class="when">${fmtH(sum.worked)} worked · ${fmtH(sum.rostered)} rostered</span></div></div>
+      ${missedBanner()}
+      <div class="grid">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(d => `<div class="h">${d}</div>`).join('')}${[...Array(14)].map((_, i) => cell(addDays(sum.f.start, i))).join('')}</div>
+      <p class="when" style="text-align:center">Tap a day to see or add shifts.</p>
+    </div>
+    <div class="dock"><div class="title">${h.title}</div><div class="detail">${h.detail}</div><div class="btns-inline">${clockActions(st)}</div></div>
+    ${S.ui.cDay ? daySheet(S.ui.cDay) : ''}${S.ui.bSettings ? settingsSheet('Jobs & breaks') : ''}`;
+}
+function ring(sum) {
+  const r = 70, C = 2 * Math.PI * r, cap = Math.max(LIMIT, sum.total);
+  const w = Math.min(sum.worked / cap, 1) * C, ro = Math.min(sum.rostered / cap, 1) * C;
+  const tick = (LIMIT / cap) * 2 * Math.PI - Math.PI / 2;
+  const tx = 90 + Math.cos(tick) * 88, ty = 90 + Math.sin(tick) * 88, ix = 90 + Math.cos(tick) * 60, iy = 90 + Math.sin(tick) * 60;
+  return `<svg viewBox="0 0 180 180" width="180" height="180" class="ring ${sum.status}">
+    <g transform="rotate(-90 90 90)"><circle cx="90" cy="90" r="${r}" class="track"/><circle cx="90" cy="90" r="${r}" class="rost" stroke-dasharray="${w + ro} ${C}"/><circle cx="90" cy="90" r="${r}" class="work" stroke-dasharray="${w} ${C}"/></g>
+    ${cap > LIMIT ? `<line x1="${ix}" y1="${iy}" x2="${tx}" y2="${ty}" stroke="#111827" stroke-width="3"/>` : ''}
+    <text x="90" y="92" class="big">${fmtH(sum.total)}</text><text x="90" y="114" class="small">of 48 hrs</text></svg>`;
+}
+function cell(day) {
+  const h = hoursIn(day, addDays(day, 1));
+  const dots = [...new Set(S.shifts.filter(s => startOfDay(s.rs) === day && s.status !== 'notWorked').map(s => emp(s).colour))];
+  const cls = [day < startOfDay(S.now) ? 'past' : '', day === startOfDay(S.now) ? 'today' : '', S.ui.cDay === day ? 'sel' : '', S.breaks.some(b => day >= b.start && day < b.end) ? 'brk' : ''].join(' ');
+  return `<button class="cell ${cls}" data-act="cDay" data-day="${day}"><span class="n">${new Date(day).getDate()}</span><span class="hrs">${h.total ? fmtH(h.total) : ''}</span><span>${dots.map(c => `<span class="dot" style="background:${c};margin-right:2px"></span>`).join('')}</span></button>`;
+}
+function daySheet(day) {
+  const shifts = S.shifts.filter(s => startOfDay(s.rs) === day).sort((a, b) => a.rs - b.rs);
+  return `<div class="scrim" data-act="closeDay"></div><div class="sheet">
+    <div class="sheet-head"><span></span><b>${fmtDayLong(day)}</b><button class="link" data-act="closeDay">Done</button></div>
+    ${shifts.map(shiftRow).join('') || '<div class="empty">No shifts this day.</div>'}
+    ${day + 86400e3 > S.now ? `<button class="btn primary" data-act="openSheet" data-date="${isoDate(day)}">Add a shift on ${fmtDay(day)}</button>` : `<button class="btn secondary" data-act="stub" data-what="Log a past shift">Log a past shift on ${fmtDay(day)}</button>`}</div>`;
+}
+
+// ---------- side panels ----------
+function clockPanel() {
+  return `<h3>Simulated time <small>(drives prompts and widget)</small></h3>
+    <div class="time-now">${fmtDayLong(S.now)}, ${fmtTime(S.now)}</div>
+    <div class="controls"><button class="go" data-act="nextEvent">Jump to next prompt</button><button data-act="advance" data-min="5">+5 min</button><button data-act="advance" data-min="30">+30 min</button><button data-act="advance" data-min="120">+2 h</button><button data-act="advance" data-min="1440">+1 day</button><button data-act="reset">Reset</button></div>`;
+}
+function promptFor(st) {
+  if (st.kind === 'clockInDue') return { kind: 'start', s: st.shift, title: S.now - st.shift.rs >= 20 * MIN ? `Still not clocked in at ${emp(st.shift).name}` : `${emp(st.shift).name} shift starting`, at: st.shift.rs };
+  if (st.kind === 'clockOutDue') return { kind: 'finish', s: st.shift, title: `${emp(st.shift).name} shift finishing`, at: st.shift.rf };
+  return null;
+}
+function lockPanel() {
+  const st = currentState(); const p = promptFor(st); const sum = riskier();
+  let notif = '<div class="lock-empty">No Fortnightly notifications right now.<br>Jump to the next prompt to see one.</div>';
+  if (p) {
+    const s = p.s;
+    const rows = fortnightsOverlapping(s.rs, s.rf).map(f => ({ f, before: summary(f, S.shifts.filter(x => x !== s)), after: summary(f) }));
+    notif = `<div class="notif"><div class="notif-head"><span class="app-ico">F</span>FORTNIGHTLY<span>${Math.round((S.now - p.at) / MIN)} min ago</span></div>
+      <div class="notif-custom"><div class="cap">${p.title}</div><div class="emp">${emp(s).name}</div><div>Rostered ${fmtRange(s.rs, s.rf)}</div>
+      <div class="preview-title">This shift's effect on your fortnights</div>${rows.map(x => `<div class="pf ${x.after.status}"><span>${fmtFortnight(x.f)}</span><span>${fmtH(x.before.total)} → <b>${fmtH(x.after.total)}</b> of 48</span></div>`).join('')}</div>
+      <div class="notif-actions">${clockActions(st)}</div></div>`;
+  }
+  return `<h3>Lock Screen <small>(widget + expanded notification extension)</small></h3>
+    <div class="lock"><div class="lock-date">${fmtDayLong(S.now)}</div><div class="lock-time">${fmtClock(S.now)}</div>
+      <div class="lock-widgets">${widgetRect(st, sum)}<div class="w-circ">${miniGauge(sum)}</div></div>${notif}</div>
+    <h3 style="margin-top:14px">Home Screen widget <small>(small)</small></h3>${widgetSmall(st, sum)}`;
+}
+function widgetRect(st, sum) {
+  const h = headline(st);
+  const line = { nothing: 'No shifts rostered', next: `Next: ${h.title} ${fmtTime(st.shift?.rs)}`, clockInDue: `⚠︎ ${h.title}, not clocked in`, onShift: `On shift · ${h.title} · ${st.shift ? fmtDur(S.now - st.shift.ci) : ''}`, clockOutDue: `⚠︎ Still clocked in · ${h.title}` }[st.kind];
+  return `<div class="w-rect"><b>${line}</b>${fmtH(sum.total)} of 48 hrs · ${fmtFortnight(sum.f)}</div>`;
+}
+function miniGauge(sum) {
+  const r = 24, C = 2 * Math.PI * r, p = Math.min(sum.total / LIMIT, 1);
+  const col = { ok: '#86efac', near: '#fcd34d', over: '#fca5a5' }[sum.status];
+  return `<svg width="56" height="56" viewBox="0 0 56 56"><circle cx="28" cy="28" r="${r}" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="5"/><circle cx="28" cy="28" r="${r}" fill="none" stroke="${col}" stroke-width="5" stroke-dasharray="${p * C} ${C}" transform="rotate(-90 28 28)" stroke-linecap="round"/><text x="28" y="33" fill="#fff" font-size="14" font-weight="700" text-anchor="middle">${Math.round(sum.total)}</text></svg>`;
+}
+function widgetSmall(st, sum) {
+  const s = st.shift; const h = headline(st);
+  const foot = `<div class="w-foot">${fmtH(sum.total)} / 48 hrs this fortnight</div>`;
+  const body = {
+    nothing: `<div class="w-cap">Fortnightly</div><div class="w-title">No shifts rostered</div>${foot}`,
+    next: `<div class="w-cap">Next shift</div><div><div class="w-title">${h.title}</div><div class="w-line">${s ? `${DOW[new Date(s.rs).getDay()]} ${fmtTime(s.rs)}` : ''}</div></div>${foot}`,
+    clockInDue: `<div class="w-cap warn">Not clocked in</div><div><div class="w-title">${s ? emp(s).name : ''}</div><div class="w-line">Started ${s ? fmtTime(s.rs) : ''}</div></div>${s ? btn('clockIn', s.id, 'now', 'Clock in', 'primary') : ''}`,
+    onShift: `<div class="w-cap">On shift</div><div><div class="w-title">${h.title}</div><div class="w-line">${s ? fmtDur(S.now - s.ci) : ''}</div></div>${s ? btn('clockOut', s.id, 'now', 'Clock out', 'secondary') : ''}`,
+    clockOutDue: `<div class="w-cap warn">Still clocked in</div><div><div class="w-title">${h.title}</div><div class="w-line">Rostered finish ${s ? fmtTime(s.rf) : ''}</div></div>${s ? btn('clockOut', s.id, 'now', 'Clock out', 'primary') : ''}`,
+  }[st.kind];
+  return `<div class="w-small">${body}</div>`;
+}
+function findingsPanel() {
+  return `<h3>Questions this prototype raises <small>(for the real use cases)</small></h3><ol class="findings">
+    <li><b>Worked vs rostered.</b> Every meter splits solid (worked) from striped (still rostered). <code>FortnightWorkSummary</code> only returns a total.</li>
+    <li><b>"Before → after" for one shift.</b> The roster sheet and the notification preview a shift's effect without saving it. <code>RosterShift</code> has no preview.</li>
+    <li><b>Missed shifts.</b> A shift that finished without a clock-in still counts as rostered hours. Needs its own query and a "Did you work it?" prompt.</li>
+    <li><b>Widget Clock in records the tap time.</b> A widget can't ask "on time or just now?". Is the tap time right?</li>
+    <li><b>Which fortnight does the small widget show?</b> Here: whichever of the two containing today has more hours.</li>
+    <li><b>Employer names everywhere.</b> Every list shows a shift with its employer; screens need them together, not two lookups.</li></ol>`;
+}
+function statePanel() {
+  const fs = [...fortnightsContaining(S.now), fortnightFrom(addDays(mondayOf(S.now), 7))].map(f => summary(f));
+  return `<h3>State <small>(in memory)</small></h3>
+    <table class="state-table"><tr><th>Fortnight</th><th>Worked</th><th>Rostered</th><th>Total</th></tr>${fs.map(x => `<tr><td>${fmtFortnight(x.f)}</td><td>${fmtH(x.worked)}</td><td>${fmtH(x.rostered)}</td><td class="tone-${x.status}"><b>${fmtH(x.total)}</b></td></tr>`).join('')}</table>
+    <table class="state-table" style="margin-top:10px"><tr><th>Employer</th><th>Rostered</th><th>Actual</th><th>Status</th></tr>${[...S.shifts].sort((a, b) => a.rs - b.rs).map(s => `<tr><td>${emp(s).name}</td><td>${fmtDay(s.rs)} ${fmtRange(s.rs, s.rf)}</td><td>${s.ci ? `${fmtTime(s.ci)}–${s.co ? fmtTime(s.co) : '…'}` : '—'}</td><td>${s.status}</td></tr>`).join('')}</table>`;
+}
+
+// ---------- variants, rendering, events ----------
+const VARIANTS = [{ key: 'A', name: 'Tabs', render: variantA }, { key: 'B', name: 'Timeline', render: variantB }, { key: 'C', name: 'Fortnight board', render: variantC }];
+let variant = (new URLSearchParams(location.search).get('variant') || 'A').toUpperCase();
+if (!VARIANTS.some(v => v.key === variant)) variant = 'A';
+let scrollToToday = true;
+function setVariant(key) {
+  variant = key; scrollToToday = true;
+  const url = new URL(location.href); url.searchParams.set('variant', key);
+  try { history.replaceState(null, '', url); } catch { /* file:// in some browsers */ }
+}
+function render() {
+  const v = VARIANTS.find(x => x.key === variant);
+  document.getElementById('app').innerHTML = v.render() + overlays();
+  document.getElementById('clock-panel').innerHTML = clockPanel();
+  document.getElementById('lock-panel').innerHTML = lockPanel();
+  document.getElementById('findings-panel').innerHTML = findingsPanel();
+  document.getElementById('state-panel').innerHTML = statePanel();
+  document.getElementById('switcher').innerHTML = `<button data-act="prevVariant" aria-label="Previous variant">‹</button><span>${v.key} · ${v.name}</span><button data-act="nextVariant" aria-label="Next variant">›</button>`;
+  if (variant === 'B' && scrollToToday) { document.getElementById('b-today')?.scrollIntoView({ block: 'start' }); scrollToToday = false; }
+}
+function toast(text) {
+  S.ui.toast = text;
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => { S.ui.toast = null; render(); }, 2600);
+}
+function apply(result) {
+  if (result.error) S.ui.alert = result.error;
+  if (result.toast) { toast(result.toast); S.ui.detail = null; S.ui.cDay = null; }
+}
+function newSheet(date) {
+  const day = date || isoDate(S.now);
+  return { emp: 'cafe', date: day, start: '17:00', finish: '22:00', breach: null };
+}
+function saveShift(acknowledged) {
+  const sh = S.ui.sheet; const c = candidate(sh); if (!c) return;
+  const r = checkRoster(c);
+  if (r.error) return;
+  if (r.breach && !acknowledged) { sh.breach = r.breach; return; }
+  S.shifts.push({ ...c, id: uid++ });
+  S.ui.sheet = null; S.ui.cDay = null;
+  toast(`Shift added. You'll be prompted at ${fmtTime(c.rs)} and ${fmtTime(c.rf)}.`);
+}
+function nextEvent() {
+  const times = [];
+  S.shifts.forEach(s => {
+    if (s.status === 'rostered' && s.rs > S.now) times.push(s.rs);
+    if (s.status === 'onShift' && s.rf > S.now) times.push(s.rf);
+  });
+  S.now = times.length ? Math.min(...times) + MIN : S.now + 24 * HOUR;
+}
+const actions = {
+  tab: d => { S.ui.tab = d.tab; },
+  advance: d => { S.now += Number(d.min) * MIN; },
+  nextEvent,
+  reset: () => { S = initialState(); scrollToToday = true; },
+  openSheet: d => { S.ui.sheet = newSheet(d.date); },
+  closeSheet: () => { S.ui.sheet = null; },
+  sheetEmp: d => { S.ui.sheet.emp = d.emp; S.ui.sheet.breach = null; },
+  saveShift: () => saveShift(false),
+  saveAnyway: () => saveShift(true),
+  clearBreach: () => { S.ui.sheet.breach = null; },
+  clockIn: d => apply(clockIn(Number(d.id), d.mode)),
+  clockOut: d => apply(clockOut(Number(d.id), d.mode)),
+  notWorked: d => apply(markNotWorked(Number(d.id))),
+  snooze: () => toast(`We'll remind you again at ${fmtTime(S.now + 30 * MIN)}.`),
+  detail: d => { S.ui.detail = Number(d.id); },
+  closeDetail: () => { S.ui.detail = null; },
+  alertOk: () => { S.ui.alert = null; },
+  dismissBanner: () => { S.ui.banner = null; },
+  hoursShift: d => { S.ui.hoursStart = addDays(S.ui.hoursStart ?? addDays(mondayOf(S.now), -7), Number(d.by)); },
+  bToggle: d => { S.ui.bFortnight = Number(d.i) === 0 ? 1 : 0; },
+  bSettings: () => { S.ui.bSettings = true; },
+  closeSettings: () => { S.ui.bSettings = false; },
+  cFortnight: d => { S.ui.cIndex = Number(d.i); },
+  cDay: d => { S.ui.cDay = Number(d.day); },
+  closeDay: () => { S.ui.cDay = null; },
+  stub: d => toast(`${d.what || 'That'} isn't in this prototype.`),
+  prevVariant: () => setVariant(VARIANTS[(VARIANTS.findIndex(v => v.key === variant) + VARIANTS.length - 1) % VARIANTS.length].key),
+  nextVariant: () => setVariant(VARIANTS[(VARIANTS.findIndex(v => v.key === variant) + 1) % VARIANTS.length].key),
+};
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]'); if (!el) return;
+  const handler = actions[el.dataset.act]; if (!handler) return;
+  handler(el.dataset); render();
+});
+document.addEventListener('input', e => {
+  const field = e.target.dataset.field; if (!field || !S.ui.sheet) return;
+  S.ui.sheet[field] = e.target.value; S.ui.sheet.breach = null;
+  const preview = document.getElementById('sheet-preview'); if (preview) preview.innerHTML = sheetPreview();
+});
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input, textarea, [contenteditable]')) return;
+  if (e.key === 'ArrowLeft') { actions.prevVariant(); render(); }
+  if (e.key === 'ArrowRight') { actions.nextVariant(); render(); }
+});
+render();
+</script>
+</body>
+</html>
