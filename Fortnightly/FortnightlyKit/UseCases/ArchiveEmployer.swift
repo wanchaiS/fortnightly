@@ -54,7 +54,27 @@ public struct ArchiveEmployer: Sendable {
         self.now = now
     }
 
+    /// Refused while the student is on shift there or has upcoming shifts there: nothing is cancelled silently.
+    /// No shift is touched, so hours already worked keep counting toward the limit.
     public func execute(employerID: Employer.ID) throws(ArchiveEmployerError) {
-        // TDD red: not implemented yet.
+        guard var employer = try read({ try employers.employer(withID: employerID) }) else { throw .employerNotFound }
+        guard employer.isArchived == false else { return }
+        if let openShift = try read({ try shifts.openShift() }), openShift.employerID == employerID {
+            throw .stillOnShift
+        }
+        let upcoming = try read { try shifts.upcomingShifts(after: now()) }.filter { $0.employerID == employerID }
+        guard upcoming.isEmpty else { throw .hasUpcomingShifts(count: upcoming.count) }
+
+        employer.isArchived = true
+        try read { try employers.save(employer) }
+        display.shiftsDidChange()
+    }
+
+    private func read<Value>(_ operation: () throws -> Value) throws(ArchiveEmployerError) -> Value {
+        do {
+            return try operation()
+        } catch {
+            throw .recordsUnavailable
+        }
     }
 }
