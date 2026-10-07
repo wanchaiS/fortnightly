@@ -87,7 +87,10 @@ struct FortnightBoardView: View {
             sheetContent(sheet)
         }
         .problemAlert($model.problem)
-        .onAppear(perform: model.refresh)
+        .onAppear {
+            model.refresh()
+            model.refreshReminders()
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 model.refresh()

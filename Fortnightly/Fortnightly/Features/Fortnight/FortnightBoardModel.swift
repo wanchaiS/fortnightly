@@ -1,6 +1,7 @@
 import FortnightlyKit
 import Foundation
 import Observation
+import UserNotifications
 
 @Observable
 final class FortnightBoardModel {
@@ -58,6 +59,11 @@ final class FortnightBoardModel {
             try services.refreshShiftReminders.execute()
         } catch {
             problem = ProblemMessage(error)
+        }
+        // A student who chose "Not now" in onboarding is asked again once a shift is rostered,
+        // the moment prompts start to matter. iOS shows the question only once.
+        if currentShift != .nothingRostered {
+            Task { _ = try? await UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) }
         }
     }
 }
