@@ -134,9 +134,10 @@ public struct LogPastShift: Sendable {
             guard let missed = try read({ try shifts.shift(withID: id) }) else { throw .shiftNotFound }
             guard missed.status == .rostered, missed.rosteredFinish <= currentTime else { throw .notMissed }
             shift = missed
-        case .workedShift:
-            // TDD red: not implemented yet.
-            throw .recordsUnavailable
+        case let .workedShift(id):
+            guard let worked = try read({ try shifts.shift(withID: id) }) else { throw .shiftNotFound }
+            guard worked.status == .worked else { throw .nothingToCorrect }
+            shift = worked
         }
         shift.clockedInAt = request.start
         shift.clockedOutAt = request.finish
