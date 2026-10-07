@@ -7,8 +7,8 @@ struct ReviewFortnightHoursTests {
     private let shifts = InMemoryShiftRepository()
     private let courseBreaks = InMemoryCourseBreakRepository()
 
-    private func reviewHours(on date: Date) throws -> FortnightHoursReview {
-        try ReviewFortnightHours(shifts: shifts, courseBreaks: courseBreaks, calendar: Sydney.calendar)
+    private func reviewHours(on date: Date, now: Date = october(26)) throws -> FortnightHoursReview {
+        try ReviewFortnightHours(shifts: shifts, courseBreaks: courseBreaks, calendar: Sydney.calendar, now: { now })
             .execute(on: date)
     }
 
@@ -56,5 +56,17 @@ struct ReviewFortnightHoursTests {
 
         #expect(fortnight.hoursTowardLimit == 30)
         #expect(fortnight.status != .overLimit)
+    }
+
+    @Test("An open shift's hours split at \"now\" into worked and still rostered")
+    func openShiftSplitsAtNow() throws {
+        shifts.recordStoryboardShifts()
+        shifts.recordOnShift(rosteredFrom: october(19, at: 17), to: october(19, at: 22, 30), clockedInAt: october(19, at: 17))
+
+        let fortnight = try reviewHours(on: october(19), now: october(19, at: 19)).fortnightStartedLastWeek
+
+        #expect(fortnight.hoursWorked == 31.75) // 29.75 finished + 2 so far tonight
+        #expect(fortnight.hoursRostered == 14.5) // 5 missed Sunday + 6 Thursday + 3.5 still to come tonight
+        #expect(fortnight.hoursTowardLimit == 46.25)
     }
 }

@@ -57,4 +57,16 @@ extension InMemoryShiftRepository {
         try! save(shift)
         return shift
     }
+
+    /// The data in the prototype mocks, without tonight's Café Roma shift (Mon 19 Oct, 5–10:30pm).
+    /// That's 40.75 hrs in the fortnight from Mon 12 Oct and 6 in the one from Mon 19 Oct.
+    func recordStoryboardShifts() {
+        recordWorkedShift(from: october(12, at: 7), to: october(12, at: 13), at: .cafeRoma)
+        recordWorkedShift(from: october(13, at: 17), to: october(13, at: 22, 30), at: .thaiExpress)
+        recordWorkedShift(from: october(14, at: 7), to: october(14, at: 13), at: .cafeRoma)
+        recordWorkedShift(from: october(17, at: 9), to: october(17, at: 15, 15), at: .cafeRoma)
+        recordWorkedShift(from: october(17, at: 17), to: october(17, at: 23), at: .thaiExpress) // two jobs on Saturday
+        recordRosteredShift(from: october(18, at: 17), to: october(18, at: 22), at: .thaiExpress) // finished, never clocked in
+        recordRosteredShift(from: october(22, at: 17), to: october(22, at: 23), at: .thaiExpress)
+    }
 }

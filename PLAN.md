@@ -44,6 +44,7 @@ The two problems feed each other. Students who suspect they've gone over their h
 | Source | What it evidences |
 |---|---|
 | Department of Home Affairs, [Work restrictions for student visa holders](https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/student-500/temporary-relaxation-of-working-hours-for-student-visa-holders) | 48 hrs per fortnight from 1 July 2023 while the course is in session. "A fortnight is a period of 14 days starting on a Monday." Their worked example: a breach in "the fortnight comprising the 14 days of weeks 2 and 3 (60 hours worked)". No restriction when the course is not in session. Research masters and doctoral students are exempt. *The page returned HTTP 401 to automated fetch; open it in a browser and quote it directly.* |
+| Migration Regulations 1994, [Schedule 8, condition 8105(3)](https://classic.austlii.edu.au/au/legis/cth/consol_reg/mr1994227/sch8.html) | The legal definition: "fortnight means the period of 14 days commencing on a Monday". Any Monday starts one, so fortnights overlap. |
 | Farbenblum & Berg (2020), *International Students and Wage Theft in Australia*; [UNSW news summary](https://www.unsw.edu.au/news/2020/07/wage-theft-rife-for-international-students-in-australia) | Survey of 5,000 students: more than 3 in 4 earn below the minimum casual wage. Almost two-thirds didn't seek help, "often because of visa concerns". "There's nothing to stop the labour regulator sharing information with immigration authorities if a student has worked more hours than her visa allows." |
 | Migrant Justice Institute (2026), *Off the Books*; [UNSW newsroom, 7 May 2026](https://www.unsw.edu.au/newsroom/news/2026/05/survey-hidden-system-migrant-worker-exploitation) | 9,963 responses. 65% of migrant employees paid below their legal entitlements. International students short-changed about $3.18 billion a year. The more underpaid, the more likely they receive fraudulent or no payslips. Workers fear "immigration consequences". |
 | Fair Work Ombudsman, [Record My Hours: how the app works](https://www.fairwork.gov.au/tools-and-resources/record-my-hours-app/how-the-app-works) | The existing tool: records hours automatically by location (needs "Always" location access) or manually. FWO itself notes iPhone automatic recording can fail when the app has been in the background for a long time, and that it isn't suitable where there's no coverage. Its help page does not mention visa work limits. *Install it and confirm before writing the comparison.* |
@@ -562,7 +563,7 @@ Must-have screens to clear the 5-screen minimum: Today, Roster, Roster a Shift, 
 |---|---|---|---|
 | `nothingRostered` | No upcoming shifts | "No shifts rostered" + fortnight hours | — |
 | `nextShift` | Next shift in the future | "Next: Café Roma · Sat 5:00pm" + "38 / 48 hrs" | — |
-| `clockInDue` | Rostered start passed, not clocked in | "Café Roma started 5:00pm · Not clocked in" | **Clock in** |
+| `clockInDue` | Rostered start passed, not clocked in | "Café Roma started 5:00pm · Not clocked in" | **Started 5:00pm** and **Just now** (decided 2026-10-07: never assume the tap time) |
 | `onShift` | Clocked in | "On shift · Café Roma" + `Text(clockedInAt, style: .timer)` | **Clock out** |
 | `clockOutDue` | Rostered finish passed, still on shift | "Rostered finish 10:30pm · Still clocked in" | **Clock out** |
 
@@ -638,6 +639,17 @@ Dates are October 2026 (Sydney is already on daylight time from 4 Oct): Mon 5, M
 |---|---|---|---|---|
 | 11 | Clocking out records the hours even when they take the fortnight over the limit, and flags the breach | 45 hrs worked in the fortnight; on shift since 5:00pm; now 10:30pm | Clock out "finished just now" | Shift saved as worked, 5.5 hrs; outcome shows the fortnight **over the limit** (50.5 hrs) |
 | 12 | Clocking out of a shift left open for 19 hours asks for the real finish time | Clocked in Sat 17 Oct 5:00pm; now Sun 18 Oct 12:00pm | Clock out "finished just now" | Rejected as an unusually long 19-hr shift; shift still on shift |
+
+### Group 5: What the board needs (added 2026-10-07 from the prototype; chosen from `prototype/test-storyboard.html`)
+
+Shared data, matching the mocks. Worked: Mon 12 Café Roma 7am–1pm, Tue 13 Thai Express 5–10:30pm, Wed 14 Café Roma 7am–1pm, Sat 17 Café Roma 9am–3:15pm **and** Thai Express 5–11pm. Rostered: Sun 18 Thai Express 5–10pm (missed), Mon 19 Café Roma 5–10:30pm, Thu 22 Thai Express 5–11pm. That makes 46.25 hrs in the fortnight from Mon 12 Oct and 11.5 from Mon 19 Oct.
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 13 | An open shift's hours split at "now" into worked and still rostered | Clocked in at Café Roma Mon 19 at 5:00pm (rostered to 10:30pm); now 7:00pm | Review fortnight hours | Fortnight from Mon 12: **31.75 worked, 14.5 rostered**, still 46.25 in total |
+| 14 | Previewing a shift shows its effect on both fortnights and saves nothing | Now Mon 19, 5:05pm | Preview Thai Express Sat 24 Oct 10am–2pm | From Mon 12: 46.25 → **50.25** (over); from Mon 19: 11.5 → 15.5; the roster is unchanged |
+| 15 | A shift that finished without a clock-in is listed as missed; one still running isn't | Now Mon 19, 5:05pm | Review missed shifts | Only Thai Express Sun 18 (not Café Roma tonight, not Thu 22) |
+| 16 | Marking a missed shift as not worked removes its hours | Now Mon 19, 5:05pm | Mark Thai Express Sun 18 as not worked | Fortnight from Mon 12 drops to **41.25**; no missed shifts left |
 
 ---
 
