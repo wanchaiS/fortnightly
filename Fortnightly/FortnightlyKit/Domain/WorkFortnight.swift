@@ -26,6 +26,18 @@ public struct WorkFortnight: Equatable, Sendable {
         let dayInLastWeek = calendar.date(byAdding: .day, value: -7, to: startingThisWeek.startsOn)!
         return (starting(inWeekOf: dayInLastWeek, calendar: calendar), startingThisWeek)
     }
+
+    /// Every work fortnight that shares time with `interval`, earliest first.
+    static func overlapping(_ interval: DateInterval, calendar: Calendar) -> [WorkFortnight] {
+        var fortnights: [WorkFortnight] = []
+        var fortnight = containing(interval.start, calendar: calendar).startedLastWeek
+        while fortnight.startsOn < interval.end {
+            fortnights.append(fortnight)
+            let nextMonday = calendar.date(byAdding: .day, value: 7, to: fortnight.startsOn)!
+            fortnight = starting(inWeekOf: nextMonday, calendar: calendar)
+        }
+        return fortnights
+    }
 }
 
 extension Calendar {
