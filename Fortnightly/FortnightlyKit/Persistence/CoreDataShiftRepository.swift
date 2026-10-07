@@ -26,6 +26,28 @@ public struct CoreDataShiftRepository: ShiftRepository, @unchecked Sendable {
         }
     }
 
+    public func shiftsCountingTowardWorkLimit(overlapping interval: DateInterval) throws -> [Shift] {
+        try context.performAndWait {
+            let start = interval.start as NSDate
+            let end = interval.end as NSDate
+            let request = ShiftEntity.fetchRequest()
+            request.predicate = NSCompoundPredicate(orPredicateWithSubpredicates: [
+                // Clocked in: counts from clock-in to clock-out (still open while on shift).
+                NSPredicate(
+                    format: "status IN %@ AND clockedInAt < %@ AND (clockedOutAt == nil OR clockedOutAt > %@)",
+                    [ShiftStatus.onShift.rawValue, ShiftStatus.worked.rawValue], end, start
+                ),
+                // Not yet clocked in: counts as rostered.
+                NSPredicate(
+                    format: "status == %@ AND rosteredStart < %@ AND rosteredFinish > %@",
+                    ShiftStatus.rostered.rawValue, end, start
+                ),
+            ])
+            request.sortDescriptors = [NSSortDescriptor(key: "rosteredStart", ascending: true)]
+            return try context.fetch(request).map { try $0.shift() }
+        }
+    }
+
     public func save(_ shift: Shift) throws {
         try context.performAndWait {
             guard let employer = try EmployerEntity.find(shift.employerID, in: context) else {

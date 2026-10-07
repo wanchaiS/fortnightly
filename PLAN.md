@@ -593,29 +593,51 @@ The circular widget is a `Gauge` of hours / 48, coloured by status (within / app
 
 ---
 
-## 13. Unit tests (Swift Testing, mock repositories)
+## 13. Unit tests (TDD, Swift Testing, mock repositories)
 
-All tests use `InMemoryShiftRepository` (and the other in-memory mocks), `SpyReminderScheduler`, a fixed `CurrentTimeProvider`, and a `Calendar` set to `Australia/Sydney` with Monday as the first weekday. No Core Data.
+Agreed 2026-10-07. **12 tests, each guarding a mistake that could plausibly be made**, each traceable to a rule in §4. Written red-first, one group at a time: failing tests committed as `test(...)`, then the code that passes them as `feat(...)`.
 
-| # | Test (domain-language name) | Kind |
-|---|---|---|
-| 1 | Rostering a shift that overlaps another employer's shift is rejected | Error |
-| 2 | Rostering a shift that takes a fortnight past 48 hours needs acknowledgement | Error / rule |
-| 3 | Rostering a shift that brings a fortnight to exactly 48 hours is allowed | Boundary |
-| 4 | Rostering a shift longer than 14 hours is rejected as a likely AM/PM mistake | Error |
-| 5 | Shifts during a course break don't count towards the work limit | Rule |
-| 6 | Clocking in "on time" records the rostered start, not the time of the tap | Happy path |
-| 7 | Clocking in while another shift is still open is rejected | Error |
-| 8 | Clocking out before the clock-in time is rejected | Error |
-| 9 | Clocking out of a shift left open for 19 hours asks for the real finish time | Boundary / error |
-| 10 | Hours worked in weeks 2 and 3 breach the limit even though weeks 1–2 and 3–4 are under (the Home Affairs example) | Rule |
-| 11 | A shift crossing Sunday midnight is split across both weeks | Boundary |
-| 12 | Work fortnights start on Monday even when the phone's region starts weeks on Sunday | Boundary |
-| 13 | A shift over the daylight-saving change counts the hours actually worked | Boundary |
+All tests use in-memory mock repositories (`InMemoryShiftRepository`, `InMemoryCourseBreakRepository`), a spy reminder scheduler, a fixed current time, and a Gregorian calendar in `Australia/Sydney` **left at its default Sunday week start**, so every test also proves fortnights are forced to start on Monday. No Core Data.
 
-Example name style: `@Test("Clocking in while another shift is still open is rejected")`.
+Dates are October 2026 (Sydney is already on daylight time from 4 Oct): Mon 5, Mon 12, Sat 17, Sun 18, Mon 19, Sun 25.
 
-Optional integration test (separate target, in-memory store at `/dev/null`): check that the Core Data overlap predicate agrees with the mock's overlap logic. The required tests stay on mocks.
+**Deliberately not tested:**
+- **Daylight saving:** hours are measured as real time intervals, so it's handled automatically.
+- **Exact error wording:** the test would break on every copy edit.
+- **Repository mapping, defaults, widget-reload calls:** plumbing.
+- **14-hour rostering limit, clock-in window, finish before clock-in:** low risk compared with the rules above.
+
+### Group 1: Reviewing fortnight hours (`ReviewFortnightHours`)
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 1 | Hours in weeks 2 and 3 breach the limit even when weeks 1 and 2 are within it | Worked 18 hrs in week of Mon 5 Oct, 30 in week of 12 Oct, 30 in week of 19 Oct | Review on Wed 14 Oct | Fortnight from 5 Oct: 48 hrs, not over. Fortnight from 12 Oct: 60 hrs, **over the limit** |
+| 2 | A fortnight at exactly 48 hours is within the limit, and 48.5 is over | Worked 48 hrs in the fortnight from Mon 5 Oct | Review; then add a 30-minute shift and review again | 48 hrs: not over. 48.5 hrs: over |
+| 3 | A shift crossing Sunday midnight counts in the week each hour was worked | Worked Sun 18 Oct 10pm – Mon 19 Oct 2am | Review on Mon 19 Oct | Fortnight from 12 Oct: 4 hrs. Fortnight from 19 Oct: **2 hrs** (not 0, not 4) |
+| 4 | Hours worked during a course break don't count toward the limit | Course break Mon 19 – Sun 25 Oct. Worked 30 hrs in week of 12 Oct and 30 in week of 19 Oct | Review on Mon 19 Oct | Fortnight from 12 Oct: **30 hrs**, not over (60 without the exemption) |
+
+### Group 2: Rostering a shift (`RosterShift`)
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 5 | Rostering a valid shift saves it and schedules its clock-in and clock-out reminders | Now Mon 12 Oct 9am; employer Café Roma | Roster Café Roma Sat 17 Oct 5:00–10:30pm | Shift saved as rostered with those times; reminders scheduled for it |
+| 6 | Rostering a shift that overlaps another employer's shift is rejected | Café Roma rostered Sat 17 Oct 5:00–10:30pm | Roster Thai Express Sat 10:00–11:30pm | Rejected as overlapping Café Roma; nothing saved |
+| 7 | A shift starting exactly when another finishes is not an overlap | Café Roma rostered Sat 17 Oct 12:00–5:00pm | Roster Thai Express Sat 5:00–10:00pm | Saved |
+| 8 | Rostering a shift that takes a fortnight past 48 hours needs the student's acknowledgement | 45 hrs already in the fortnight from Mon 12 Oct | Roster a 6-hr shift Sat 24 Oct, first without acknowledging, then acknowledging | First: rejected as a breach (51 of 48 hrs), nothing saved. Then: saved |
+
+### Group 3: Clocking in (`ClockIntoShift`)
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 9 | Clocking in "on time" records the rostered start, not the time of the tap | Café Roma rostered Sat 17 Oct 5:00pm; now 5:20pm | Clock in "started on time" | Clocked in at **5:00pm**; on shift |
+| 10 | Clocking in while still on another shift is rejected | Still clocked in at Café Roma since 9:02am; Thai Express rostered 5:00pm; now 5:00pm | Clock in to Thai Express | Rejected: still clocked in at Café Roma since 9:02am. Thai Express stays rostered |
+
+### Group 4: Clocking out (`ClockOutOfShift`)
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 11 | Clocking out records the hours even when they take the fortnight over the limit, and flags the breach | 45 hrs worked in the fortnight; on shift since 5:00pm; now 10:30pm | Clock out "finished just now" | Shift saved as worked, 5.5 hrs; outcome shows the fortnight **over the limit** (50.5 hrs) |
+| 12 | Clocking out of a shift left open for 19 hours asks for the real finish time | Clocked in Sat 17 Oct 5:00pm; now Sun 18 Oct 12:00pm | Clock out "finished just now" | Rejected as an unusually long 19-hr shift; shift still on shift |
 
 ---
 
