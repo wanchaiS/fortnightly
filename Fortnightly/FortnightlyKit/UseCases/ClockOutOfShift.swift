@@ -9,17 +9,6 @@ public enum ClockOutTime: Equatable, Sendable {
     case at(Date)
 }
 
-/// The recorded shift and what it did to the work fortnights it falls in.
-public struct ClockOutOutcome: Equatable, Sendable {
-    public let workedShift: Shift
-    /// Every work fortnight the shift falls in, earliest first, including the hours it added.
-    public let fortnights: [FortnightWorkSummary]
-
-    public var fortnightsOverLimit: [FortnightWorkSummary] {
-        fortnights.filter { $0.status == .overLimit }
-    }
-}
-
 public enum ClockOutOfShiftError: Error, Equatable {
     case shiftNotFound
     case notClockedIn
@@ -101,7 +90,7 @@ public struct ClockOutOfShift: Sendable {
     /// Records the shift as worked, stops its prompts, refreshes the widget, and reports what it did to the fortnights.
     /// A shift that takes a fortnight over the limit is still recorded: the record must match what happened.
     @discardableResult
-    public func execute(shiftID: Shift.ID, finishedAt time: ClockOutTime) throws(ClockOutOfShiftError) -> ClockOutOutcome {
+    public func execute(shiftID: Shift.ID, finishedAt time: ClockOutTime) throws(ClockOutOfShiftError) -> WorkedShiftOutcome {
         let currentTime = now()
         guard var shift = try read({ try shifts.shift(withID: shiftID) }) else { throw .shiftNotFound }
         guard shift.status == .onShift, let clockedInAt = shift.clockedInAt else { throw .notClockedIn }
@@ -131,7 +120,7 @@ public struct ClockOutOfShift: Sendable {
         reminders.cancelAllReminders(for: shift.id)
         display.shiftsDidChange()
 
-        return ClockOutOutcome(
+        return WorkedShiftOutcome(
             workedShift: shift,
             fortnights: fortnights.map {
                 FortnightWorkSummary(fortnight: $0, shifts: otherShifts + [shift], courseBreaks: breaks, calendar: calendar, now: currentTime)
