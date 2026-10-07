@@ -141,13 +141,9 @@ public struct RosterShift: Sendable {
         let existingShifts = try read { try shifts.shiftsCountingTowardWorkLimit(overlapping: affectedTime) }
         let breaks = try read { try courseBreaks.courseBreaks(overlapping: affectedTime) }
 
-        // Touching end-to-start is fine: finishing at 5pm and starting elsewhere at 5pm isn't an overlap.
-        if let clash = existingShifts.first(where: { existing in
-            guard let taken = existing.timeTowardWorkLimit(asOf: currentTime) else { return false }
-            return taken.start < rosteredTime.end && rosteredTime.start < taken.end
-        }), let clashTime = clash.timeTowardWorkLimit(asOf: currentTime) {
-            let clashEmployerName = try read { try employers.employer(withID: clash.employerID)?.name }
-            throw .overlaps(employerName: clashEmployerName ?? "other", existingShift: clashTime)
+        if let clash = existingShifts.firstClash(with: rosteredTime, asOf: currentTime) {
+            let clashEmployerName = try read { try employers.employer(withID: clash.shift.employerID)?.name }
+            throw .overlaps(employerName: clashEmployerName ?? "other", existingShift: clash.time)
         }
 
         let shift = Shift(employerID: employer.id, rosteredStart: request.start, rosteredFinish: request.finish, note: request.note)

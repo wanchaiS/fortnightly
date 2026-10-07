@@ -106,9 +106,57 @@ public struct LogPastShift: Sendable {
         self.now = now
     }
 
+    /// Saves the shift as worked with the given times, stops any prompts it still had, and reports
+    /// what it did to the fortnights. A breach is still recorded: the record must match what happened.
     @discardableResult
     public func execute(_ request: PastShiftRequest) throws(LogPastShiftError) -> WorkedShiftOutcome {
-        // TDD red: not implemented yet.
-        throw .recordsUnavailable
+        let currentTime = now()
+        guard request.finish > request.start else { throw .finishesBeforeStart }
+        guard request.finish <= currentTime else { throw .notFinishedYet }
+        let workedTime = DateInterval(start: request.start, end: request.finish)
+        let hours = workedTime.duration / 3600
+        guard hours <= Self.longestWorkedShiftHours else { throw .unusuallyLong(hours: hours) }
+
+        var shift: Shift
+        switch request.subject {
+        case let .newShift(employerID):
+            // Past hours can belong to a job the student has since left, so archived employers are fine.
+            guard try read({ try employers.employer(withID: employerID) }) != nil else { throw .employerUnavailable }
+            shift = Shift(employerID: employerID, rosteredStart: request.start, rosteredFinish: request.finish)
+        case let .missedShift(id):
+            guard let missed = try read({ try shifts.shift(withID: id) }) else { throw .missedShiftNotFound }
+            guard missed.status == .rostered, missed.rosteredFinish <= currentTime else { throw .notMissed }
+            shift = missed
+        }
+        shift.clockedInAt = request.start
+        shift.clockedOutAt = request.finish
+        shift.status = .worked
+
+        let fortnights = WorkFortnight.overlapping(workedTime, calendar: calendar)
+        let affectedTime = DateInterval(start: fortnights.first!.startsOn, end: fortnights.last!.interval.end)
+        let otherShifts = try read { try shifts.shiftsCountingTowardWorkLimit(overlapping: affectedTime) }.filter { $0.id != shift.id }
+        let breaks = try read { try courseBreaks.courseBreaks(overlapping: affectedTime) }
+        if let clash = otherShifts.firstClash(with: workedTime, asOf: currentTime) {
+            let clashEmployerName = try read { try employers.employer(withID: clash.shift.employerID)?.name }
+            throw .overlaps(employerName: clashEmployerName ?? "other", existingShift: clash.time)
+        }
+
+        try read { try shifts.save(shift) }
+        reminders.cancelAllReminders(for: shift.id)
+        display.shiftsDidChange()
+        return WorkedShiftOutcome(
+            workedShift: shift,
+            fortnights: fortnights.map {
+                FortnightWorkSummary(fortnight: $0, shifts: otherShifts + [shift], courseBreaks: breaks, calendar: calendar, now: currentTime)
+            }
+        )
+    }
+
+    private func read<Value>(_ operation: () throws -> Value) throws(LogPastShiftError) -> Value {
+        do {
+            return try operation()
+        } catch {
+            throw .recordsUnavailable
+        }
     }
 }
