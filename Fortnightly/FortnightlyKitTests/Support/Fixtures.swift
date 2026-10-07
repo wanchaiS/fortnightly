@@ -49,4 +49,12 @@ extension InMemoryShiftRepository {
         try! save(shift)
         return shift
     }
+
+    /// A shift the student has clocked into and not yet clocked out of.
+    @discardableResult
+    func recordOnShift(rosteredFrom start: Date, to finish: Date, clockedInAt: Date, at employer: Employer = .cafeRoma) -> Shift {
+        let shift = Shift(employerID: employer.id, rosteredStart: start, rosteredFinish: finish, clockedInAt: clockedInAt, status: .onShift)
+        try! save(shift)
+        return shift
+    }
 }

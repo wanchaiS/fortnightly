@@ -14,6 +14,15 @@ public struct CoreDataShiftRepository: ShiftRepository, @unchecked Sendable {
         }
     }
 
+    public func openShift() throws -> Shift? {
+        try context.performAndWait {
+            let request = ShiftEntity.fetchRequest()
+            request.predicate = NSPredicate(format: "status == %@", ShiftStatus.onShift.rawValue)
+            request.fetchLimit = 1
+            return try context.fetch(request).first?.shift()
+        }
+    }
+
     public func upcomingShifts(after date: Date) throws -> [Shift] {
         try context.performAndWait {
             let request = ShiftEntity.fetchRequest()

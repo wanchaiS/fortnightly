@@ -11,6 +11,10 @@ final class InMemoryShiftRepository: ShiftRepository, @unchecked Sendable {
         savedShifts.first { $0.id == id }
     }
 
+    func openShift() throws -> Shift? {
+        savedShifts.first { $0.status == .onShift }
+    }
+
     func upcomingShifts(after date: Date) throws -> [Shift] {
         savedShifts
             .filter { $0.status == .rostered && $0.rosteredFinish > date }
