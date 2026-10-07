@@ -200,6 +200,23 @@ Simple:   I asked for simplicity over cleverness: no over-engineering, readable 
           Following that: "Correct times" reuses `LogPastShift` (a third kind of request, `.workedShift`) instead of a new use case, because the rules are the same (times in the past, at most 16 hours, no overlap, keep the rostered times). Undo reuses `RosterShift` and `LogPastShift` the same way.
 Report:   Section 4 (design before code; how the design changed); AI tools (keeping AI output simple)
 
+## 2026-10-07 — Building the screens and extensions: what changed on the way
+Context:  Built the SwiftUI app, the widget and the notification view on the shared use cases, then tapped through every screen in the iPhone 17 Simulator with AXe (a tool I chose to install, so real buttons were pressed, not just screens looked at).
+Proven end to end:
+          - Widget "Just now" on the Home Screen clocked a shift in; the widget switched to "On shift" with a live timer.
+          - "Started 11:48 pm" on the expanded notification clocked in at the rostered start; the view said "Clocked in at 11:48 pm." and the Lock Screen widget updated straight away.
+          - The board's dock, roster sheet ("Add anyway" on a breach), day sheet, shift details, Jobs and onboarding all work against the real App Group store.
+Findings:
+          - **iOS 26 keeps a navigation bar's title dark on a coloured bar.** Asking for a dark bar style also turned the navy into its Dark Mode shade. The app draws its own white title and uses the navy for the real appearance.
+          - **Another process can change a shift the app has already read.** Repositories now take every value fresh from the store, so the app shows what the widget or notification just did.
+          - **"Not now" in onboarding shouldn't mean never.** Prompts are the core of the app, so a student who skipped them is asked once a shift is rostered, when they start to matter. iOS shows the question only once.
+          - **A clock-out over the limit gets no pop-up.** It's recorded; the board's hours line turns red and the dock names the fortnight. The contract says nothing alarming.
+          - **The notification shows "46.25 of 48 h this fortnight" instead of "40.75 → 46.25".** Working out "before" correctly needs course breaks and shifts crossing fortnights; not worth the code in a notification (PLAN §10 promised before → after).
+          - **Contrast:** the finish review found the hours-left orange and green below 4.5:1 for 15 pt text; both were darkened.
+          - **Markers need data:** a debug launch option (`-sampleRoster`) and a "Load sample shifts (testing only)" button in Jobs fill two jobs and a fortnight of shifts around today; neither exists in a release build.
+          - **App icon:** the AI drew the donut on navy with a script (`tools/make_app_icon.py`). A proposal; I haven't approved it yet.
+Report:   Section 4: architecture under pressure (iOS 26 bar, cross-process data, warn don't block); extension design (both extensions proven end to end); AI tools (how output was checked)
+
 ---
 
 ## AI use log
@@ -216,10 +233,16 @@ Report:   Section 4 (design before code; how the design changed); AI tools (keep
 | 2026-10-07 | Pick the core tests (TDD) | A longer list of candidate tests with the plausible bug each catches | **I chose 12** and declined the rest as low-risk | Mutation check on the Monday rule; the AI's claim about it was wrong and corrected |
 | 2026-10-07 | Show what the screens could look like | Throwaway HTML prototype with 3 layouts, checked in a browser | **I chose C**, and two widget clock-in buttons | Walked through a shift in the prototype; it surfaced 4 missing use-case outputs |
 | 2026-10-07 | Use the impeccable design skill | Product interview → `PRODUCT.md` | I confirmed the record and the name | Checked the product record against PLAN.md and my own answers |
+| 2026-10-07 | Settle the last design points | HTML mock: employer colours 3–6, onboarding picture, empty board | I chose the six colours, the three-week picture and the drawn empty board | Judged in the browser |
+| 2026-10-07 | Tests for the screens' use cases | 18 candidates, each naming the bug it catches | **I chose 11** (tests 21–31) | Each group failed red first, then passed; all 31 pass |
+| 2026-10-07 | Build the app, widget and notification view | SwiftUI screens, platform adapters, App Intents, notification actions | Mid-build **I asked for simplicity and fewer comments**; the AI dropped an extra colour rule and reused `LogPastShift` instead of a new use case | Tapped through every screen and both extensions in the Simulator with AXe; screenshots in light, dark and large text |
+| 2026-10-07 | Finish the design | Inline finish review, `DESIGN.md`, `.impeccable/design.json`, app icon | I named the system "The Honest Fortnight"; icon still to approve | The review found 2 problems (contrast, a missing "?"); both fixed and rechecked on new screenshots |
 
 **Lessons so far:**
 - The AI's first extension suggestion (widget) had a weak justification. Questioning it led to a better design.
 - Factual claims from AI research need checking against primary sources before they go in the PDF.
+- Left alone, the AI added rules and abstractions for rare cases. Asking for simplicity mid-build gave smaller code that is easier for me to explain.
+- Screens can look right and still not work; pressing the real buttons (AXe) is what proved the extensions write to the shared store.
 
 ---
 
@@ -231,3 +254,4 @@ Report:   Section 4 (design before code; how the design changed); AI tools (keep
 - [x] Spike: does the App Group work in the Simulator? Yes, no Team needed
 - [x] Spike: can the widget extension cancel the app's pending reminders? Yes
 - [x] After the screen design: recovery messages now name the real screens (the Fortnight screen, Jobs, a day's "Log a past shift")
+- [ ] Approve or change the app icon (drawn by the AI from the donut; regenerate with `python3 tools/make_app_icon.py`)
