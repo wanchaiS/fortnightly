@@ -142,6 +142,13 @@ public struct RosterShift: Sendable {
         return shift
     }
 
+    /// The shift's effect on every work fortnight it falls in, earliest first, without saving anything.
+    /// Checks the same rules as `execute`; a breach shows in the effects instead of being thrown.
+    public func preview(_ request: ShiftRosterRequest) throws(RosterShiftError) -> [FortnightEffect] {
+        // TDD red: not implemented yet.
+        []
+    }
+
     private func read<Value>(_ operation: () throws -> Value) throws(RosterShiftError) -> Value {
         do {
             return try operation()
