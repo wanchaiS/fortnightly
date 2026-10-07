@@ -196,8 +196,9 @@ Chose:    My decisions:
           - **Empty board:** as drawn: empty ring with the 48 tick, "48 h left", a one-line hint, the 14 empty days, and a white "Roster a shift" button in the dock (white, not yellow: it isn't urgent).
           - **Undo "Not working":** a not-working shift's details offer "Put back on my roster" (if it hasn't finished) or "I worked it, enter my times" (if it has). An error message already promised this.
           - **Tests 21–31** (PLAN §13, groups 7–10), chosen from 18 candidates. Declined as low-risk: re-adding an archived job's name, editing a break's dates, a correction over 48 hours, undo, a shift past midnight, daylight-saving days, the dock's clock-out-first order.
-Refined:  The AI pointed out a gap in "first colour no current job uses": an archived job's hours still show in the fortnights around the day it was archived, so a new job could share its colour on the same donut. A new job now prefers a colour no job has used, then an archived job's colour, never a current job's. Test 22 checks only the rule I chose.
-Report:   Section 4 (design before code; how the design changed); AI tools (a gap found in my own rule)
+Simple:   I asked for simplicity over cleverness: no over-engineering, readable code, and comments only where a business rule or an outside factor (iOS limits, Core Data) isn't obvious from the code. The AI had proposed an extra colour rule for a rare case (a new job sharing a colour with a just-archived job in the same fortnight); I kept my simple rule instead.
+          Following that: "Correct times" reuses `LogPastShift` (a third kind of request, `.workedShift`) instead of a new use case, because the rules are the same (times in the past, at most 16 hours, no overlap, keep the rostered times). Undo reuses `RosterShift` and `LogPastShift` the same way.
+Report:   Section 4 (design before code; how the design changed); AI tools (keeping AI output simple)
 
 ---
 
