@@ -39,8 +39,9 @@ extension EmployerColour {
 extension WorkLimitStatus {
     public var color: Color {
         switch self {
-        case .withinLimit: Color(light: 0x2B8A3E, dark: 0x51CF66)
-        case .approachingLimit: Color(light: 0xD9480F, dark: 0xFF922B)
+        // Light variants are dark enough for 15 pt text on the grey ground (at least 4.5:1).
+        case .withinLimit: Color(light: 0x237A35, dark: 0x51CF66)
+        case .approachingLimit: Color(light: 0xB8400E, dark: 0xFF922B)
         case .overLimit: Color(light: 0xC92A2A, dark: 0xFF6B6B)
         }
     }

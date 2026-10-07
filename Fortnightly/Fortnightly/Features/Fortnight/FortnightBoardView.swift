@@ -257,7 +257,7 @@ struct FortnightBoardView: View {
                             segments: day.shifts.map { DayBarSegment(listing: $0, now: model.now) },
                             hours: day.hours,
                             isToday: Calendar.current.isDateInToday(day.date),
-                            needsAnswer: day.shifts.contains(where: isMissed)
+                            needsAnswer: day.hasMissedShift(asOf: model.now)
                         )
                         .contentShape(.rect)
                     }
