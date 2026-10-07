@@ -10,5 +10,7 @@ public protocol ShiftRepository: Sendable {
     func rosteredShifts() throws -> [Shift]
     /// Rostered, on-shift and worked shifts whose time falls at least partly inside `interval`.
     func shiftsCountingTowardWorkLimit(overlapping interval: DateInterval) throws -> [Shift]
+    /// Every shift, including those not worked, rostered to start inside `interval`, earliest first.
+    func shifts(rosteredToStartIn interval: DateInterval) throws -> [Shift]
     func save(_ shift: Shift) throws
 }

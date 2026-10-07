@@ -44,6 +44,18 @@ public struct CoreDataShiftRepository: ShiftRepository, @unchecked Sendable {
         }
     }
 
+    public func shifts(rosteredToStartIn interval: DateInterval) throws -> [Shift] {
+        try context.performAndWait {
+            let request = ShiftEntity.fetchRequest()
+            request.predicate = NSPredicate(
+                format: "rosteredStart >= %@ AND rosteredStart < %@",
+                interval.start as NSDate, interval.end as NSDate
+            )
+            request.sortDescriptors = [NSSortDescriptor(key: "rosteredStart", ascending: true)]
+            return try context.fetch(request).map { try $0.shift() }
+        }
+    }
+
     public func shiftsCountingTowardWorkLimit(overlapping interval: DateInterval) throws -> [Shift] {
         try context.performAndWait {
             let start = interval.start as NSDate

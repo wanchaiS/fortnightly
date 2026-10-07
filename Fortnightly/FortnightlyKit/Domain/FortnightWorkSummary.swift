@@ -6,6 +6,13 @@ public enum WorkLimitStatus: Equatable, Sendable {
     case overLimit
 }
 
+/// One employer's share of a work fortnight: a slice of the donut.
+public struct EmployerHours: Equatable, Sendable {
+    public let employerID: Employer.ID
+    public let hoursWorked: Double
+    public let hoursRostered: Double
+}
+
 /// How many hours of one work fortnight count toward the student visa work limit.
 public struct FortnightWorkSummary: Equatable, Sendable {
     public let fortnight: WorkFortnight
@@ -16,6 +23,8 @@ public struct FortnightWorkSummary: Equatable, Sendable {
     /// Hours still to come: rostered shifts, plus the rest of an open shift.
     public let hoursRostered: Double
     public let status: WorkLimitStatus
+    /// Each employer with hours in this fortnight, in order of their first shift.
+    public let hoursByEmployer: [EmployerHours]
 
     init(fortnight: WorkFortnight, shifts: [Shift], courseBreaks: [CourseBreak], calendar: Calendar, now: Date) {
         let breakDays = courseBreaks.map { $0.interval(in: calendar) }
@@ -49,6 +58,7 @@ public struct FortnightWorkSummary: Equatable, Sendable {
         hoursRostered = rostered / 3600
         hoursTowardLimit = hoursWorked + hoursRostered
         status = WorkLimitPolicy.status(forHours: hoursTowardLimit)
+        hoursByEmployer = [] // TDD red: not implemented yet.
     }
 }
 
