@@ -71,9 +71,9 @@ extension RosterShiftError: LocalizedError {
         case .tooLong:
             "Check AM and PM on the start and finish. Shifts longer than \(RosterShift.longestRosteredShiftHours.hoursDescription) hours can't be rostered."
         case .alreadyFinished:
-            "Add hours you've already worked with Log a past shift in Hours."
+            "To add hours you've already worked, tap the day on the Fortnight screen and choose Log a past shift."
         case .employerUnavailable:
-            "Choose another employer, or add them again in Employers."
+            "Choose another employer, or add them again in Jobs."
         case .shiftNotFound:
             "Check your shifts on the Fortnight screen."
         case .alreadyClockedIn:

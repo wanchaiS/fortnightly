@@ -42,9 +42,9 @@ extension ClockOutOfShiftError: LocalizedError {
     public var recoverySuggestion: String? {
         switch self {
         case .shiftNotFound:
-            "Check your shifts in Hours."
+            "Check your shifts on the Fortnight screen."
         case .notClockedIn:
-            "If you worked it, add it with Log a past shift."
+            "If you worked it, tap its day on the Fortnight screen and choose Log a past shift."
         case let .finishBeforeClockIn(clockedInAt):
             "Pick a time after \(clockedInAt.formatted(date: .omitted, time: .shortened))."
         case .rosteredFinishNotReached:

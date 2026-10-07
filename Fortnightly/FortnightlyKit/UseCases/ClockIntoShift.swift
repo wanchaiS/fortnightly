@@ -48,7 +48,7 @@ extension ClockIntoShiftError: LocalizedError {
     public var recoverySuggestion: String? {
         switch self {
         case .shiftNotFound:
-            "Check your upcoming shifts in Roster."
+            "Check your upcoming shifts on the Fortnight screen."
         case .alreadyClockedIn:
             "Nothing to do: your hours are being tracked."
         case .alreadyFinished:
@@ -64,7 +64,7 @@ extension ClockIntoShiftError: LocalizedError {
         case .timeInFuture:
             "Choose \"Started just now\"."
         case .recordsUnavailable:
-            "Try again. If it keeps failing, note your start time and add it later with Log a past shift."
+            "Try again. If it keeps failing, note your start time and add it later: tap the day on the Fortnight screen, then Log a past shift."
         }
     }
 }
