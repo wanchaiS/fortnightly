@@ -17,15 +17,16 @@ func october(_ day: Int, at hour: Int = 0, _ minute: Int = 0) -> Date {
     Sydney.calendar.date(from: DateComponents(year: 2026, month: 10, day: day, hour: hour, minute: minute))!
 }
 
-enum CafeRoma {
-    static let id = UUID()
+extension Employer {
+    static let cafeRoma = Employer(name: "Café Roma", payCycleStartsOn: october(5))
+    static let thaiExpress = Employer(name: "Thai Express", payCycleStartsOn: october(5))
 }
 
 extension InMemoryShiftRepository {
     /// A shift clocked in and out exactly as rostered.
-    func recordWorkedShift(from start: Date, to finish: Date, employerID: Employer.ID = CafeRoma.id) {
+    func recordWorkedShift(from start: Date, to finish: Date, at employer: Employer = .cafeRoma) {
         try! save(Shift(
-            employerID: employerID,
+            employerID: employer.id,
             rosteredStart: start,
             rosteredFinish: finish,
             clockedInAt: start,
@@ -39,5 +40,13 @@ extension InMemoryShiftRepository {
         for day in firstDay ..< firstDay + days {
             recordWorkedShift(from: october(day, at: 10), to: october(day, at: 16))
         }
+    }
+
+    /// An upcoming shift that hasn't been clocked into.
+    @discardableResult
+    func recordRosteredShift(from start: Date, to finish: Date, at employer: Employer = .cafeRoma) -> Shift {
+        let shift = Shift(employerID: employer.id, rosteredStart: start, rosteredFinish: finish)
+        try! save(shift)
+        return shift
     }
 }
