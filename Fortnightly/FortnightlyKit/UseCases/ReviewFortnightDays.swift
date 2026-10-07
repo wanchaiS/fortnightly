@@ -49,8 +49,33 @@ public struct ReviewFortnightDays: Sendable {
         self.now = now
     }
 
+    /// A shift is listed on the day it was rostered to start, even when it runs past midnight.
     public func execute(for fortnight: WorkFortnight) throws(ReviewFortnightDaysError) -> [WorkDay] {
-        // TDD red: not implemented yet.
-        []
+        let currentTime = now()
+        let rostered: [Shift]
+        let employersByID: [Employer.ID: Employer]
+        let breakDays: [DateInterval]
+        do {
+            rostered = try shifts.shifts(rosteredToStartIn: fortnight.interval)
+            employersByID = Dictionary(uniqueKeysWithValues: try employers.employers(includingArchived: true).map { ($0.id, $0) })
+            breakDays = try courseBreaks.courseBreaks(overlapping: fortnight.interval).map { $0.interval(in: calendar) }
+        } catch {
+            throw .recordsUnavailable
+        }
+
+        return (0 ..< 14).map { offset in
+            let day = calendar.date(byAdding: .day, value: offset, to: fortnight.startsOn)!
+            let nextDay = calendar.date(byAdding: .day, value: 1, to: day)!
+            let shiftsThatDay = rostered
+                .filter { $0.rosteredStart >= day && $0.rosteredStart < nextDay }
+                .sorted { $0.rosteredStart < $1.rosteredStart }
+            let seconds = shiftsThatDay.compactMap { $0.timeTowardWorkLimit(asOf: currentTime)?.duration }.reduce(0, +)
+            return WorkDay(
+                date: day,
+                shifts: shiftsThatDay.map { ShiftListing(shift: $0, employer: employersByID[$0.employerID]) },
+                hours: seconds / 3600,
+                isInCourseBreak: breakDays.contains { $0.start <= day && day < $0.end }
+            )
+        }
     }
 }
