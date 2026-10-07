@@ -214,7 +214,7 @@ Findings:
           - **The notification shows "46.25 of 48 h this fortnight" instead of "40.75 → 46.25".** Working out "before" correctly needs course breaks and shifts crossing fortnights; not worth the code in a notification (PLAN §10 promised before → after).
           - **Contrast:** the finish review found the hours-left orange and green below 4.5:1 for 15 pt text; both were darkened.
           - **Markers need data:** a debug launch option (`-sampleRoster`) and a "Load sample shifts (testing only)" button in Jobs fill two jobs and a fortnight of shifts around today; neither exists in a release build.
-          - **App icon:** the AI drew the donut on navy with a script (`tools/make_app_icon.py`). A proposal; I haven't approved it yet.
+          - **App icon:** the AI drew the donut on navy with a script (`tools/make_app_icon.py`); I approved it.
 Report:   Section 4: architecture under pressure (iOS 26 bar, cross-process data, warn don't block); extension design (both extensions proven end to end); AI tools (how output was checked)
 
 ---
@@ -236,7 +236,7 @@ Report:   Section 4: architecture under pressure (iOS 26 bar, cross-process data
 | 2026-10-07 | Settle the last design points | HTML mock: employer colours 3–6, onboarding picture, empty board | I chose the six colours, the three-week picture and the drawn empty board | Judged in the browser |
 | 2026-10-07 | Tests for the screens' use cases | 18 candidates, each naming the bug it catches | **I chose 11** (tests 21–31) | Each group failed red first, then passed; all 31 pass |
 | 2026-10-07 | Build the app, widget and notification view | SwiftUI screens, platform adapters, App Intents, notification actions | Mid-build **I asked for simplicity and fewer comments**; the AI dropped an extra colour rule and reused `LogPastShift` instead of a new use case | Tapped through every screen and both extensions in the Simulator with AXe; screenshots in light, dark and large text |
-| 2026-10-07 | Finish the design | Inline finish review, `DESIGN.md`, `.impeccable/design.json`, app icon | I named the system "The Honest Fortnight"; icon still to approve | The review found 2 problems (contrast, a missing "?"); both fixed and rechecked on new screenshots |
+| 2026-10-07 | Finish the design | Inline finish review, `DESIGN.md`, `.impeccable/design.json`, app icon | I named the system "The Honest Fortnight" and approved the icon | The review found 2 problems (contrast, a missing "?"); both fixed and rechecked on new screenshots |
 
 **Lessons so far:**
 - The AI's first extension suggestion (widget) had a weak justification. Questioning it led to a better design.
@@ -254,4 +254,5 @@ Report:   Section 4: architecture under pressure (iOS 26 bar, cross-process data
 - [x] Spike: does the App Group work in the Simulator? Yes, no Team needed
 - [x] Spike: can the widget extension cancel the app's pending reminders? Yes
 - [x] After the screen design: recovery messages now name the real screens (the Fortnight screen, Jobs, a day's "Log a past shift")
-- [ ] Approve or change the app icon (drawn by the AI from the donut; regenerate with `python3 tools/make_app_icon.py`)
+- [x] App icon approved (drawn from the donut; regenerate with `python3 tools/make_app_icon.py`)
+- [x] README written, including how markers load sample data (`-sampleRoster`, listed in the shared scheme)

@@ -29,6 +29,7 @@ An iPhone app for international students on a subclass 500 visa working casual h
 
 | File | What it is |
 |---|---|
+| `README.md` | For markers: overview, domain, architecture, extensions, database, App Group, setup, sample data, tests. |
 | `PRODUCT.md` | Product record (users, purpose, positioning, constraints, principles). |
 | `DESIGN.md` + `.impeccable/design.json` | The visual system as built ("The Honest Fortnight"): tokens, named rules, components. New screens follow it. |
 | `PLAN.md` | Full plan. §4 rules, §8 use cases, §13 all 31 tests with Given/When/Then, §14 project setup. Parts of §9–12 still describe the old tab layout; §10's "before → after" in the notification was simplified (see DECISIONS). |
@@ -55,11 +56,12 @@ An iPhone app for international students on a subclass 500 visa working casual h
 
 ## Next steps
 
-1. Show the user the result (screenshots in `.impeccable/review/`) and get the app icon approved or changed.
-2. README (the brief's required sections: overview, domain, architecture, extensions and why, Core Data and why, App Group id, setup; tell markers about `-sampleRoster`, "Load sample shifts", and swipe left → View for the notification in DeviceHub).
-3. PDF: Sections 1–4 and the draw.io architecture diagram. DECISIONS.md has the material; the two extensions are proven end to end (see the 2026-10-07 build entry).
-4. User's open items: interviews, Home Affairs quote, Record My Hours check, commit email, private GitHub repo with tutor access.
-5. Optional polish noticed in review (not material): animate the donut when switching fortnights; the native segmented control on navy uses its dark style rather than the mock's white selected segment.
+Done: app icon approved; `README.md` written (all the brief's sections, sample data, how to try both extensions). `-sampleRoster` is listed, switched off, in the shared scheme.
+
+1. PDF: Sections 1–4 and the draw.io architecture diagram. DECISIONS.md has the material; the two extensions are proven end to end (see the 2026-10-07 build entry). Interviews and the Home Affairs quote strengthen Section 1, so they come first.
+2. User's open items: interviews, Home Affairs quote (the README links the page but doesn't quote it), Record My Hours check, commit email, private GitHub repo with tutor access.
+3. Push, then zip the Xcode project and submit with the PDF and the repo link.
+4. Optional polish noticed in review (not material): animate the donut when switching fortnights; the native segmented control on navy uses its dark style rather than the mock's white selected segment.
 
 ## Environment gotchas
 
