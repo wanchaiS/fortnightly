@@ -16,3 +16,12 @@ public struct CourseBreak: Identifiable, Equatable, Sendable {
         self.endsOn = endsOn
     }
 }
+
+extension CourseBreak {
+    /// From midnight on the first day to midnight after the last day, in `calendar`'s time zone.
+    func interval(in calendar: Calendar) -> DateInterval {
+        let firstDay = calendar.startOfDay(for: startsOn)
+        let dayAfterLast = calendar.date(byAdding: .day, value: 1, to: calendar.startOfDay(for: endsOn))!
+        return DateInterval(start: firstDay, end: Swift.max(firstDay, dayAfterLast))
+    }
+}

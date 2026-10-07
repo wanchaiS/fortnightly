@@ -597,7 +597,7 @@ The circular widget is a `Gauge` of hours / 48, coloured by status (within / app
 
 Agreed 2026-10-07. **12 tests, each guarding a mistake that could plausibly be made**, each traceable to a rule in §4. Written red-first, one group at a time: failing tests committed as `test(...)`, then the code that passes them as `feat(...)`.
 
-All tests use in-memory mock repositories (`InMemoryShiftRepository`, `InMemoryCourseBreakRepository`), a spy reminder scheduler, a fixed current time, and a Gregorian calendar in `Australia/Sydney` **left at its default Sunday week start**, so every test also proves fortnights are forced to start on Monday. No Core Data.
+All tests use in-memory mock repositories (`InMemoryShiftRepository`, `InMemoryCourseBreakRepository`), a spy reminder scheduler, a fixed current time, and a Gregorian calendar in `Australia/Sydney` **set to start weeks on Sunday**, like a US-region phone. No Core Data. Test 3 (Sunday midnight) therefore also proves fortnights are forced to start on Monday: a mutation check removing that rule failed it, while the weekday-only scenarios still passed.
 
 Dates are October 2026 (Sydney is already on daylight time from 4 Oct): Mon 5, Mon 12, Sat 17, Sun 18, Mon 19, Sun 25.
 

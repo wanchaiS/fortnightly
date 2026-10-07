@@ -3,7 +3,7 @@ import Foundation
 
 enum Sydney {
     /// Sydney time, with weeks starting on Sunday like a US-region phone.
-    /// Every test therefore also proves the app forces work fortnights to start on Monday.
+    /// The Sunday-midnight test therefore also proves the app forces work fortnights to start on Monday.
     static let calendar: Calendar = {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Australia/Sydney")!
