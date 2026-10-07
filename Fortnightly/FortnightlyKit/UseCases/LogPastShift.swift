@@ -1,12 +1,14 @@
 import Foundation
 
-/// Hours worked that weren't clocked: a new past shift, or the real times of a missed one.
+/// The real times of a finished shift: a new past shift, a missed one, or a correction to a worked one.
 public struct PastShiftRequest: Sendable {
     public enum Subject: Equatable, Sendable {
         /// A shift that was never on the roster ("Log a past shift").
         case newShift(employerID: Employer.ID)
         /// A rostered shift that finished without a clock-in ("Yes, enter my times").
         case missedShift(Shift.ID)
+        /// A worked shift whose clocked times were wrong ("Correct times").
+        case workedShift(Shift.ID)
     }
 
     public var subject: Subject
@@ -25,8 +27,9 @@ public enum LogPastShiftError: Error, Equatable {
     case notFinishedYet
     case unusuallyLong(hours: Double)
     case employerUnavailable
-    case missedShiftNotFound
+    case shiftNotFound
     case notMissed
+    case nothingToCorrect
     case overlaps(employerName: String, existingShift: DateInterval)
     case recordsUnavailable
 }
@@ -42,10 +45,12 @@ extension LogPastShiftError: LocalizedError {
             "That would record a \(hours.hoursDescription)-hour shift."
         case .employerUnavailable:
             "This employer is no longer in your list."
-        case .missedShiftNotFound:
+        case .shiftNotFound:
             "This shift is no longer on your roster."
         case .notMissed:
             "This shift already has its hours recorded."
+        case .nothingToCorrect:
+            "This shift has no worked times to correct yet."
         case let .overlaps(employerName, existingShift):
             "This overlaps your \(employerName) shift (\(existingShift.shiftTimesDescription))."
         case .recordsUnavailable:
@@ -63,10 +68,12 @@ extension LogPastShiftError: LocalizedError {
             "Check the start and finish times. Shifts longer than \(LogPastShift.longestWorkedShiftHours.hoursDescription) hours can't be logged."
         case .employerUnavailable:
             "Choose another employer, or add them again in Jobs."
-        case .missedShiftNotFound:
+        case .shiftNotFound:
             "Check your shifts on the Fortnight screen."
         case .notMissed:
             "To change its times, open the shift and choose Correct times."
+        case .nothingToCorrect:
+            "If you worked it, open the shift and enter your times."
         case .overlaps:
             "You can't have worked two shifts at once. Check the times of both shifts."
         case .recordsUnavailable:
@@ -75,7 +82,7 @@ extension LogPastShiftError: LocalizedError {
     }
 }
 
-/// Records hours that were worked without clocking in and out, so the record matches what happened.
+/// Records the real times of a finished shift, so the record matches what happened.
 public struct LogPastShift: Sendable {
     /// Longer than this almost always means a typo in the times.
     public static let longestWorkedShiftHours: Double = ClockOutOfShift.longestWorkedShiftHours
@@ -124,9 +131,12 @@ public struct LogPastShift: Sendable {
             guard try read({ try employers.employer(withID: employerID) }) != nil else { throw .employerUnavailable }
             shift = Shift(employerID: employerID, rosteredStart: request.start, rosteredFinish: request.finish)
         case let .missedShift(id):
-            guard let missed = try read({ try shifts.shift(withID: id) }) else { throw .missedShiftNotFound }
+            guard let missed = try read({ try shifts.shift(withID: id) }) else { throw .shiftNotFound }
             guard missed.status == .rostered, missed.rosteredFinish <= currentTime else { throw .notMissed }
             shift = missed
+        case .workedShift:
+            // TDD red: not implemented yet.
+            throw .recordsUnavailable
         }
         shift.clockedInAt = request.start
         shift.clockedOutAt = request.finish
