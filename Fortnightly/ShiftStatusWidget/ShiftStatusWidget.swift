@@ -1,7 +1,6 @@
 import FortnightlyKit
 import Foundation
 import SwiftUI
-import UserNotifications
 import WidgetKit
 
 struct ShiftStatusEntry: TimelineEntry {
@@ -30,7 +29,6 @@ struct ShiftStatusProvider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<ShiftStatusEntry>) -> Void) {
-        runSpikeReminderProbe()
         completion(Timeline(entries: [currentEntry()], policy: .after(.now.addingTimeInterval(15 * 60))))
     }
 
@@ -52,18 +50,6 @@ struct ShiftStatusProvider: TimelineProvider {
             )
         } catch {
             return ShiftStatusEntry(date: .now, nextShift: nil, problem: "Open Fortnightly to see your shifts")
-        }
-    }
-
-    /// Milestone 1 spike: can this extension see and cancel the app's pending reminders?
-    private func runSpikeReminderProbe() {
-        let center = UNUserNotificationCenter.current()
-        center.getPendingNotificationRequests { requests in
-            let sawProbe = requests.contains { $0.identifier == SpikeProbe.reminderIdentifier }
-            center.removePendingNotificationRequests(withIdentifiers: [SpikeProbe.reminderIdentifier])
-            let time = Date.now.formatted(date: .omitted, time: .standard)
-            let summary = "Widget at \(time): saw \(requests.count) pending reminder(s); probe \(sawProbe ? "found, removal requested" : "not found")"
-            AppGroup.sharedDefaults?.set(summary, forKey: SpikeProbe.resultKey)
         }
     }
 }
