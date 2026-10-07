@@ -11,7 +11,7 @@ extension DateInterval {
 
 extension WorkFortnight {
     /// "Mon 12 Oct – Sun 25 Oct"
-    var datesDescription: String {
+    public var datesDescription: String {
         let lastDay = interval.end.addingTimeInterval(-1)
         let style = Date.FormatStyle.dateTime.weekday(.abbreviated).day().month(.abbreviated)
         return "\(startsOn.formatted(style)) – \(lastDay.formatted(style))"

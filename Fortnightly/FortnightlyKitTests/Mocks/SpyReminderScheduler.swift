@@ -23,6 +23,8 @@ final class SpyReminderScheduler: ShiftReminderScheduling, @unchecked Sendable {
     func replaceAllReminders(with reminders: [ShiftReminder]) {
         reminderWindow = reminders
     }
+
+    func snoozeClockOutReminder(for shift: Shift, employerName: String, until date: Date) {}
 }
 
 /// Widget reloads aren't asserted: they're platform plumbing.

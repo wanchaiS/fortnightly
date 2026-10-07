@@ -49,3 +49,12 @@ public final class ShiftStore: @unchecked Sendable {
         return context
     }
 }
+
+extension NSManagedObjectContext {
+    /// The widget and notification extension write from other processes, so values already
+    /// loaded into this context may be out of date: every read takes them from the store again.
+    func fetchFresh<Entity>(_ request: NSFetchRequest<Entity>) throws -> [Entity] {
+        request.shouldRefreshRefetchedObjects = true
+        return try fetch(request)
+    }
+}

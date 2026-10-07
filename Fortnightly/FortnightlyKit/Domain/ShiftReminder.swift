@@ -15,7 +15,11 @@ public struct ShiftReminder: Equatable, Sendable {
     public let employerName: String
 
     /// One identifier per prompt, so a prompt can be cancelled as soon as it no longer applies.
-    public var identifier: String { "shift.\(shiftID.uuidString).\(moment.rawValue)" }
+    public var identifier: String { Self.identifier(shiftID: shiftID, moment: moment) }
+
+    static func identifier(shiftID: Shift.ID, moment: Moment) -> String {
+        "shift.\(shiftID.uuidString).\(moment.rawValue)"
+    }
 }
 
 extension Shift {

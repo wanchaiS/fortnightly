@@ -1,3 +1,5 @@
+import Foundation
+
 /// Schedules the clock-in and clock-out prompts for shifts (implemented with local notifications).
 public protocol ShiftReminderScheduling: Sendable {
     func scheduleReminders(for shift: Shift, employerName: String)
@@ -7,4 +9,6 @@ public protocol ShiftReminderScheduling: Sendable {
     func cancelAllReminders(for shiftID: Shift.ID)
     /// Replaces every pending prompt with `reminders`.
     func replaceAllReminders(with reminders: [ShiftReminder])
+    /// "Still working": ask again about clocking out at `date`.
+    func snoozeClockOutReminder(for shift: Shift, employerName: String, until date: Date)
 }
