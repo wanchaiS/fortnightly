@@ -102,11 +102,36 @@ public struct RosterShift: Sendable {
     /// Saves the shift as rostered, then schedules its prompts and refreshes the widget.
     @discardableResult
     public func execute(_ request: ShiftRosterRequest) throws(RosterShiftError) -> Shift {
+        let assessment = try assess(request, at: now())
+        if !request.acknowledgingWorkLimitBreach,
+           let breach = assessment.effects.first(where: { $0.after.status == .overLimit }) {
+            throw .wouldBreachWorkLimit(fortnight: breach.fortnight, projectedHours: breach.after.hoursTowardLimit)
+        }
+        try read { try shifts.save(assessment.shift) }
+        reminders.scheduleReminders(for: assessment.shift, employerName: assessment.employer.name)
+        display.shiftsDidChange()
+        return assessment.shift
+    }
+
+    /// The shift's effect on every work fortnight it falls in, earliest first, without saving anything.
+    /// Checks the same rules as `execute`; a breach shows in the effects instead of being thrown.
+    public func preview(_ request: ShiftRosterRequest) throws(RosterShiftError) -> [FortnightEffect] {
+        try assess(request, at: now()).effects
+    }
+
+    private struct Assessment {
+        let employer: Employer
+        let shift: Shift
+        let effects: [FortnightEffect]
+    }
+
+    /// Every rule except the work limit, plus the shift's effect on each fortnight it falls in.
+    private func assess(_ request: ShiftRosterRequest, at currentTime: Date) throws(RosterShiftError) -> Assessment {
         guard request.finish > request.start else { throw .finishesBeforeStart }
         let rosteredTime = DateInterval(start: request.start, end: request.finish)
         let hours = rosteredTime.duration / 3600
         guard hours <= Self.longestRosteredShiftHours else { throw .tooLong(hours: hours) }
-        guard request.finish > now() else { throw .alreadyFinished }
+        guard request.finish > currentTime else { throw .alreadyFinished }
         guard let employer = try read({ try employers.employer(withID: request.employerID) }), !employer.isArchived else {
             throw .employerUnavailable
         }
@@ -118,27 +143,19 @@ public struct RosterShift: Sendable {
 
         // Touching end-to-start is fine: finishing at 5pm and starting elsewhere at 5pm isn't an overlap.
         if let clash = existingShifts.first(where: { existing in
-            guard let taken = existing.timeTowardWorkLimit else { return false }
+            guard let taken = existing.timeTowardWorkLimit(asOf: currentTime) else { return false }
             return taken.start < rosteredTime.end && rosteredTime.start < taken.end
-        }), let clashTime = clash.timeTowardWorkLimit {
+        }), let clashTime = clash.timeTowardWorkLimit(asOf: currentTime) {
             let clashEmployerName = try read { try employers.employer(withID: clash.employerID)?.name }
             throw .overlaps(employerName: clashEmployerName ?? "other", existingShift: clashTime)
         }
 
         let shift = Shift(employerID: employer.id, rosteredStart: request.start, rosteredFinish: request.finish, note: request.note)
-        if !request.acknowledgingWorkLimitBreach {
-            let breach = fortnights
-                .map { FortnightWorkSummary(fortnight: $0, shifts: existingShifts + [shift], courseBreaks: breaks, calendar: calendar) }
-                .first { $0.status == .overLimit }
-            if let breach {
-                throw .wouldBreachWorkLimit(fortnight: breach.fortnight, projectedHours: breach.hoursTowardLimit)
-            }
+        func summary(_ fortnight: WorkFortnight, _ counted: [Shift]) -> FortnightWorkSummary {
+            FortnightWorkSummary(fortnight: fortnight, shifts: counted, courseBreaks: breaks, calendar: calendar, now: currentTime)
         }
-
-        try read { try shifts.save(shift) }
-        reminders.scheduleReminders(for: shift, employerName: employer.name)
-        display.shiftsDidChange()
-        return shift
+        let effects = fortnights.map { FortnightEffect(before: summary($0, existingShifts), after: summary($0, existingShifts + [shift])) }
+        return Assessment(employer: employer, shift: shift, effects: effects)
     }
 
     private func read<Value>(_ operation: () throws -> Value) throws(RosterShiftError) -> Value {

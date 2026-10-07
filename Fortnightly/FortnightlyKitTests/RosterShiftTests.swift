@@ -8,6 +8,18 @@ struct RosterShiftTests {
     private let employers = InMemoryEmployerRepository(.cafeRoma, .thaiExpress)
     private let reminders = SpyReminderScheduler()
 
+    private func rostering(now: Date) -> RosterShift {
+        RosterShift(
+            shifts: shifts,
+            employers: employers,
+            courseBreaks: InMemoryCourseBreakRepository(),
+            reminders: reminders,
+            display: IgnoredDisplayRefresh(),
+            calendar: Sydney.calendar,
+            now: { now }
+        )
+    }
+
     @discardableResult
     private func rosterShift(
         at employer: Employer,
@@ -16,20 +28,32 @@ struct RosterShiftTests {
         now: Date = october(12, at: 9),
         acknowledgingWorkLimitBreach: Bool = false
     ) throws(RosterShiftError) -> Shift {
-        try RosterShift(
-            shifts: shifts,
-            employers: employers,
-            courseBreaks: InMemoryCourseBreakRepository(),
-            reminders: reminders,
-            display: IgnoredDisplayRefresh(),
-            calendar: Sydney.calendar,
-            now: { now }
-        ).execute(ShiftRosterRequest(
+        try rostering(now: now).execute(ShiftRosterRequest(
             employerID: employer.id,
             start: start,
             finish: finish,
             acknowledgingWorkLimitBreach: acknowledgingWorkLimitBreach
         ))
+    }
+
+    @Test("Previewing a shift shows its effect on both fortnights and saves nothing")
+    func previewCoversBothFortnights() throws {
+        shifts.recordStoryboardShifts()
+        shifts.recordRosteredShift(from: october(19, at: 17), to: october(19, at: 22, 30), at: .cafeRoma)
+        let rosterBeforePreview = shifts.savedShifts
+
+        let effects = try rostering(now: october(19, at: 17, 5)).preview(ShiftRosterRequest(
+            employerID: Employer.thaiExpress.id,
+            start: october(24, at: 10),
+            finish: october(24, at: 14)
+        ))
+
+        #expect(effects.map(\.fortnight.startsOn) == [october(12), october(19)])
+        #expect(effects.map(\.before.hoursTowardLimit) == [46.25, 11.5])
+        #expect(effects.map(\.after.hoursTowardLimit) == [50.25, 15.5])
+        #expect(effects.first?.after.status == .overLimit)
+        #expect(shifts.savedShifts == rosterBeforePreview)
+        #expect(reminders.scheduledShiftIDs.isEmpty)
     }
 
     @Test("Rostering a valid shift saves it and schedules its clock-in and clock-out reminders")

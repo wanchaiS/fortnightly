@@ -46,7 +46,7 @@ public struct Shift: Identifiable, Equatable, Sendable {
 extension Shift {
     /// The time this shift counts toward the work limit: actual times once clocked in,
     /// rostered times until then, nothing if it wasn't worked.
-    var timeTowardWorkLimit: DateInterval? {
+    func timeTowardWorkLimit(asOf now: Date) -> DateInterval? {
         let start: Date
         let finish: Date
         switch status {
@@ -56,10 +56,10 @@ extension Shift {
             start = rosteredStart
             finish = rosteredFinish
         case .onShift:
-            // Still working: assume the rostered finish until they clock out.
+            // Still working: at least until the rostered finish, and until now if they've stayed later.
             guard let clockedInAt else { return nil }
             start = clockedInAt
-            finish = Swift.max(rosteredFinish, clockedInAt)
+            finish = Swift.max(rosteredFinish, now, clockedInAt)
         case .worked:
             guard let clockedInAt, let clockedOutAt else { return nil }
             start = clockedInAt

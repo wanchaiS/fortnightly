@@ -640,6 +640,17 @@ Dates are October 2026 (Sydney is already on daylight time from 4 Oct): Mon 5, M
 | 11 | Clocking out records the hours even when they take the fortnight over the limit, and flags the breach | 45 hrs worked in the fortnight; on shift since 5:00pm; now 10:30pm | Clock out "finished just now" | Shift saved as worked, 5.5 hrs; outcome shows the fortnight **over the limit** (50.5 hrs) |
 | 12 | Clocking out of a shift left open for 19 hours asks for the real finish time | Clocked in Sat 17 Oct 5:00pm; now Sun 18 Oct 12:00pm | Clock out "finished just now" | Rejected as an unusually long 19-hr shift; shift still on shift |
 
+### Group 5: What the board needs (added 2026-10-07 from the prototype; chosen from `prototype/test-storyboard.html`)
+
+Shared data, matching the mocks. Worked: Mon 12 Café Roma 7am–1pm, Tue 13 Thai Express 5–10:30pm, Wed 14 Café Roma 7am–1pm, Sat 17 Café Roma 9am–3:15pm **and** Thai Express 5–11pm. Rostered: Sun 18 Thai Express 5–10pm (missed), Mon 19 Café Roma 5–10:30pm, Thu 22 Thai Express 5–11pm. That makes 46.25 hrs in the fortnight from Mon 12 Oct and 11.5 from Mon 19 Oct.
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 13 | An open shift's hours split at "now" into worked and still rostered | Clocked in at Café Roma Mon 19 at 5:00pm (rostered to 10:30pm); now 7:00pm | Review fortnight hours | Fortnight from Mon 12: **31.75 worked, 14.5 rostered**, still 46.25 in total |
+| 14 | Previewing a shift shows its effect on both fortnights and saves nothing | Now Mon 19, 5:05pm | Preview Thai Express Sat 24 Oct 10am–2pm | From Mon 12: 46.25 → **50.25** (over); from Mon 19: 11.5 → 15.5; the roster is unchanged |
+| 15 | A shift that finished without a clock-in is listed as missed; one still running isn't | Now Mon 19, 5:05pm | Review missed shifts | Only Thai Express Sun 18 (not Café Roma tonight, not Thu 22) |
+| 16 | Marking a missed shift as not worked removes its hours | Now Mon 19, 5:05pm | Mark Thai Express Sun 18 as not worked | Fortnight from Mon 12 drops to **41.25**; no missed shifts left |
+
 ---
 
 ## 14. Project setup (done, `chore/project-setup`)

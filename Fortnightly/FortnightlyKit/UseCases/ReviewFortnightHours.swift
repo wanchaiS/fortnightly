@@ -31,12 +31,19 @@ public struct ReviewFortnightHours: Sendable {
     private let shifts: any ShiftRepository
     private let courseBreaks: any CourseBreakRepository
     private let calendar: Calendar
+    private let now: @Sendable () -> Date
 
     /// `calendar` supplies the time zone; work fortnights always start on Monday whatever its first weekday.
-    public init(shifts: any ShiftRepository, courseBreaks: any CourseBreakRepository, calendar: Calendar = .current) {
+    public init(
+        shifts: any ShiftRepository,
+        courseBreaks: any CourseBreakRepository,
+        calendar: Calendar = .current,
+        now: @escaping @Sendable () -> Date = Date.init
+    ) {
         self.shifts = shifts
         self.courseBreaks = courseBreaks
         self.calendar = calendar
+        self.now = now
     }
 
     /// Both work fortnights containing `date`, with the hours that count toward the 48-hour limit.
@@ -51,8 +58,9 @@ public struct ReviewFortnightHours: Sendable {
         } catch {
             throw .recordsUnavailable
         }
+        let currentTime = now()
         func summary(of fortnight: WorkFortnight) -> FortnightWorkSummary {
-            FortnightWorkSummary(fortnight: fortnight, shifts: countedShifts, courseBreaks: breaks, calendar: calendar)
+            FortnightWorkSummary(fortnight: fortnight, shifts: countedShifts, courseBreaks: breaks, calendar: calendar, now: currentTime)
         }
         return FortnightHoursReview(
             fortnightStartedLastWeek: summary(of: fortnights.startedLastWeek),
