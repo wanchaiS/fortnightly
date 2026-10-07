@@ -1,0 +1,275 @@
+<!doctype html>
+<!-- PROTOTYPE — throwaway. Open design points before the SwiftUI build (2026-10-07). Never merge into main. -->
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · Open design points</title><style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #cdd2db; color: #111; font: 15px/1.38 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+.note { background: #101418; color: #e7e9ec; padding: 10px 20px; font-size: 13px; }
+.note b { color: #fff; }
+.row { display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-start; justify-content: center; padding: 26px 20px 50px; }
+figure { margin: 0; width: 316px; }
+figcaption { font-size: 13.5px; color: #2b2f36; margin-top: 10px; }
+figcaption b { display: block; font-size: 15px; color: #111; }
+.phone { zoom: .78; width: 390px; height: 844px; border-radius: 54px; background: #0a0a0b; padding: 11px; box-shadow: 0 24px 50px -14px rgba(15, 20, 30, .5); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; }
+.num { font-variant-numeric: tabular-nums; }
+button { font: inherit; border: 0; background: none; color: inherit; }
+
+.w { --ink: #16204a; --shell: #16204a; --ground: #eef0f6; --card: #fff; --rule: #e1e4ed; --text: #16204a; --muted: #5b6275; --act: #ffc21a; --ok: #2b8a3e; --near: #d9480f; --over: #c92a2a; --roma: #6f45e8; --thai: #0f8fa8; --tint: #16204a; --fill: #e3e6ef; --sheet: #f2f3f8; background: var(--ground); color: var(--text); }
+.w.dark { --ink: #e8ebf5; --shell: #0b1030; --ground: #0d1120; --card: #161b2e; --rule: #232a42; --text: #e8ebf5; --muted: #9aa2b8; --ok: #51cf66; --near: #ff922b; --over: #ff6b6b; --roma: #9775fa; --thai: #3bc9db; --tint: #a5b4fc; --fill: #252d47; --sheet: #121729; }
+
+.status { height: 50px; flex: none; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 7px; font-weight: 600; font-size: 15px; }
+.shell { background: var(--shell); color: #fff; flex: none; padding-bottom: 14px; }
+.titlebar { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 16px 10px; }
+.titlebar h1 { margin: 0; font-size: 34px; letter-spacing: -.6px; line-height: 1.05; }
+.titlebar .tools { display: flex; gap: 18px; align-items: center; padding-bottom: 6px; font-weight: 600; font-size: 16px; }
+.seg { display: flex; border-radius: 9px; padding: 2px; margin: 0 16px; background: rgba(255,255,255,.14); }
+.seg button { flex: 1; border-radius: 7px; padding: 7px 4px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.88); }
+.seg button.on { background: #fff; color: #16204a; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.seg.light { background: var(--fill); margin: 0; }
+.seg.light button { color: var(--text); }
+.seg.light button.on { background: var(--card); color: var(--text); }
+.scroll { flex: 1; overflow: hidden; position: relative; }
+.scroll::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 28px; background: linear-gradient(to bottom, transparent, var(--ground)); pointer-events: none; }
+
+.donut { display: flex; flex-direction: column; align-items: center; padding: 16px 16px 4px; }
+.donut svg { display: block; }
+.statusline { font-size: 15px; font-weight: 600; margin-top: 8px; }
+.key { display: flex; gap: 16px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+.key i { display: inline-block; width: 10px; height: 10px; border-radius: 5px; margin-right: 6px; vertical-align: 0; }
+.key b { color: var(--text); font-weight: 600; }
+.answer { display: flex; align-items: center; gap: 10px; margin: 10px 16px 0; background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: 14px; }
+.q { flex: none; width: 20px; height: 20px; border-radius: 10px; background: var(--near); color: #fff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.answer span:nth-child(2) { flex: 1; }
+.days { margin: 12px 16px 0; background: var(--card); border-radius: 14px; overflow: hidden; }
+.wkhead { font-size: 12px; font-weight: 600; color: var(--muted); padding: 10px 14px 4px; display: flex; justify-content: space-between; }
+.drow { display: grid; grid-template-columns: 64px 1fr 44px; align-items: center; gap: 8px; padding: 0 14px; height: 44px; border-top: 1px solid var(--rule); }
+.drow .dl { font-size: 14px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.drow .dl b { font-weight: 600; }
+.drow.today .dl b { background: var(--ink); color: var(--card); border-radius: 8px; padding: 1px 6px; }
+.drow.empty .dl { color: var(--muted); }
+.drow .hrs { text-align: right; font-size: 14px; font-weight: 600; }
+.drow.empty .hrs { color: var(--muted); font-weight: 400; }
+.track { position: relative; height: 16px; border-radius: 5px; background: var(--fill); display: flex; gap: 2px; overflow: hidden; }
+.seg-w { background: var(--c); height: 100%; border-radius: 4px; }
+.seg-r { height: 100%; border-radius: 4px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 55%, var(--card)) 0 3px, color-mix(in srgb, var(--c) 25%, var(--card)) 3px 6px); box-shadow: inset 0 0 0 1.5px var(--c); }
+.seg-r.due { box-shadow: inset 0 0 0 1.5px var(--c), 0 0 0 2px var(--act); }
+.seg-r.new { box-shadow: none; outline: 2px dashed var(--c); outline-offset: -2px; }
+.drow .q { width: 16px; height: 16px; font-size: 10px; }
+.dock { flex: none; background: var(--shell); color: #fff; padding: 12px 16px 26px; border-radius: 18px 18px 0 0; }
+.dock b { font-size: 17px; }
+.dock p { margin: 2px 0 10px; font-size: 13px; color: rgba(255,255,255,.75); }
+.acts { display: flex; gap: 8px; }
+.acts button { flex: 1; border-radius: 12px; padding: 12px 6px; font-weight: 700; font-size: 15px; }
+.go { background: var(--act); color: #16204a; }
+.alt { background: rgba(255,255,255,.14); color: #fff; }
+.plainbtn { background: #fff; color: #16204a; }
+.homebar { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: #fff; }
+
+/* sheet */
+.dim { position: absolute; inset: 0; background: rgba(5, 8, 20, .45); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; top: 58px; background: var(--sheet); border-radius: 14px 14px 0 0; overflow: hidden; display: flex; flex-direction: column; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--rule); margin: 6px auto 0; flex: none; }
+.sheethead { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; flex: none; }
+.sheethead b { font-size: 17px; }
+.sheethead button { color: var(--tint); font-size: 17px; }
+.sheethead button.warnbtn { color: var(--over); font-weight: 700; }
+.pad { padding: 0 16px; }
+.lbl { font-size: 13px; color: var(--muted); margin: 14px 4px 6px; }
+.list { background: var(--card); border-radius: 12px; overflow: hidden; }
+.li { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--rule); font-size: 16px; min-height: 44px; }
+.li:last-child { border-bottom: 0; }
+.li .grow { flex: 1; }
+.pill { background: var(--fill); border-radius: 7px; padding: 5px 10px; font-size: 16px; }
+.effect { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--rule); font-size: 14px; }
+.effect:last-child { border-bottom: 0; }
+.effect .s { width: 8px; height: 8px; border-radius: 4px; margin-right: 8px; display: inline-block; }
+.warn { background: color-mix(in srgb, var(--over) 10%, var(--card)); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-top: 10px; }
+.warn b { display: block; margin-bottom: 3px; }
+
+/* lock / home */
+.wall { background: linear-gradient(165deg, #3b5bdb 0%, #364fc7 30%, #1b1f5c 70%, #0b0d24 100%); color: #fff; }
+.lockdate { text-align: center; font-size: 19px; font-weight: 600; opacity: .9; margin-top: 8px; }
+.locktime { text-align: center; font-size: 92px; font-weight: 600; line-height: 1; letter-spacing: -2px; }
+.notif { margin: 0 10px 28px; border-radius: 22px; background: rgba(246, 247, 251, .97); color: #16204a; overflow: hidden; }
+.notifhead { display: flex; align-items: center; gap: 8px; padding: 12px 14px 0; font-size: 13px; color: #5b6275; font-weight: 600; }
+.notifhead span:last-child { margin-left: auto; font-weight: 400; }
+.appicon { width: 22px; height: 22px; border-radius: 6px; background: #16204a; display: flex; align-items: center; justify-content: center; }
+.notifbody { padding: 8px 14px 12px; }
+.notifbody h3 { margin: 0; font-size: 18px; }
+.notifbody p { margin: 2px 0 8px; font-size: 14px; color: #5b6275; }
+.notifacts div { padding: 13px; text-align: center; font-size: 17px; color: #0a5bd6; border-top: 1px solid #d9dde8; background: rgba(255,255,255,.6); }
+.notifacts div:last-child { color: #c92a2a; }
+.wsmall { width: 158px; height: 158px; border-radius: 24px; background: #fff; color: #16204a; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.wsmall .t { font-size: 14.5px; font-weight: 700; line-height: 1.2; }
+.wsmall .s { font-size: 12px; color: #5b6275; }
+.wsmall .wb { border-radius: 10px; padding: 7px 4px; font-size: 13.5px; font-weight: 700; text-align: center; }
+.wsmall .wb.go { background: #ffc21a; }
+.wsmall .wb.alt { background: #e3e6ef; color: #16204a; margin-top: 5px; }
+.wsmall .wb.navy { background: #16204a; color: #fff; }
+.accrow { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+.acc-rect { width: 172px; height: 72px; border-radius: 16px; background: rgba(255,255,255,.16); padding: 8px 10px; font-size: 13px; line-height: 1.25; }
+.acc-rect b { display: block; font-size: 14px; }
+.acc-circ { width: 72px; height: 72px; border-radius: 36px; background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; }
+
+.w { --c3: #c2378a; --c4: #2f66d0; --c5: #9a5b2b; --c6: #5f7a1f; }
+.w.dark { --c3: #f06bb6; --c4: #74a0ff; --c5: #d9a066; --c6: #a9c25a; }
+.panel { width: 316px; border-radius: 18px; padding: 16px; }
+.swrow { display: grid; grid-template-columns: 18px 92px 1fr 34px; gap: 8px; align-items: center; height: 36px; font-size: 13px; }
+.swrow i { width: 14px; height: 14px; border-radius: 7px; display: inline-block; }
+.swrow .track { height: 14px; }
+.legend { font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+.sig { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.sig span { font-size: 11.5px; border-radius: 6px; padding: 3px 7px; }
+.onb { padding: 20px 22px 0; flex: 1; display: flex; flex-direction: column; }
+.onb h2 { margin: 6px 0 8px; font-size: 30px; line-height: 1.12; letter-spacing: -.5px; }
+.onb p { margin: 0 0 14px; color: var(--muted); font-size: 16px; }
+.ill { background: var(--card); border-radius: 16px; padding: 14px; }
+.wk { display: grid; grid-template-columns: 54px 1fr 44px; gap: 8px; align-items: center; height: 40px; font-size: 13.5px; }
+.wk .track { height: 18px; }
+.brk { position: relative; }
+.br { position: absolute; right: -6px; border: 2px solid var(--ink); border-left: 0; border-radius: 0 8px 8px 0; width: 10px; }
+.brlbl { font-size: 13px; display: flex; justify-content: space-between; padding: 7px 2px 0; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.col h4 { margin: 0 0 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.mini { display: grid; grid-template-columns: 26px 1fr; gap: 6px; align-items: center; height: 15px; font-size: 10.5px; color: var(--muted); }
+.mini .track { height: 9px; border-radius: 3px; }
+.mini.shared .track { box-shadow: 0 0 0 1.5px var(--ink); }
+.coltotal { margin-top: 8px; font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; }
+.cta { margin-top: auto; padding: 14px 0 34px; }
+.cta button { width: 100%; border-radius: 14px; padding: 15px; font-weight: 700; font-size: 17px; background: var(--ink); color: var(--card); }
+.dots { display: flex; gap: 6px; justify-content: center; margin-top: 12px; }
+.dots i { width: 7px; height: 7px; border-radius: 4px; background: var(--rule); }
+.dots i.on { background: var(--ink); }
+.empty-note { margin: 10px 16px 0; font-size: 14px; color: var(--muted); }
+</style></head><body>
+<div class="note"><b>PROTOTYPE — the three open design points before the build.</b> 1) employer colours 3 to 6, 2) the onboarding picture (it was the timetable), 3) the board before any shift is added. Everything else follows board-v2.html.</div>
+<div class="row">
+  <figure style="width:316px"><div id="c-light"></div><figcaption><b>1a · Six employer colours (light)</b>Violet and teal as approved, then magenta, cobalt, bronze and moss. None is yellow, green, orange or red, so they never look like "act now" or a limit warning. Most students have one or two jobs; colours 3 to 6 are the rare case.</figcaption></figure>
+  <figure style="width:316px"><div id="c-dark"></div><figcaption><b>1b · Six employer colours (dark)</b>The same six, lifted for the dark ground, like violet and teal in board-v2.</figcaption></figure>
+  <figure><div class="phone"><div class="screen w" id="o-a"></div></div><figcaption><b>2A · Onboarding: three weeks, two fortnights</b>The Home Affairs example in week rows: weeks 1 and 2 make 42 h (fine), weeks 2 and 3 make 54 h (over). Two brackets share week 2. Numbers are big enough to read.</figcaption></figure>
+  <figure><div class="phone"><div class="screen w" id="o-b"></div></div><figcaption><b>2B · Onboarding: two day lists, a week apart</b>The board's own day rows, tiny: the fortnight from Mon 1 and the one from Mon 8, offset so the shared week lines up (outlined). Closer to the board, but the bars are small.</figcaption></figure>
+  <figure><div class="phone"><div class="screen w" id="e-board"></div></div><figcaption><b>3 · Board before any shift</b>Empty ring with the 48 tick, "48 h left" in green, a one-line hint, the 14 empty days, and a dock offering "Roster a shift" (white: it isn't urgent, so not yellow).</figcaption></figure>
+</div>
+<script>
+const E = { roma: { name: 'Café Roma', c: 'var(--roma)' }, thai: { name: 'Thai Express', c: 'var(--thai)' } };
+const fmt = h => String(Math.round(h * 100) / 100);
+const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+// shift: [employer, hours, kind] kind: worked | rostered | due | new
+const days12 = [
+  { d: 12, s: [['roma', 6, 'worked']] }, { d: 13, s: [['thai', 5.5, 'worked']] }, { d: 14, s: [['roma', 6, 'worked']] },
+  { d: 15, s: [] }, { d: 16, s: [] }, { d: 17, s: [['roma', 6.25, 'worked'], ['thai', 6, 'worked']] }, { d: 18, s: [['thai', 5, 'rostered']], missed: true }];
+const days19 = (x = {}) => [
+  { d: 19, s: x[19] || [['roma', 5.5, 'due']], today: true }, { d: 20, s: [] }, { d: 21, s: [] }, { d: 22, s: [['thai', 6, 'rostered']] },
+  { d: 23, s: [] }, { d: 24, s: x[24] || [] }, { d: 25, s: [] }];
+const days26 = [26, 27, 28, 29, 30, 31, 1].map(d => ({ d, s: [] }));
+
+const signal = col => `<svg width="62" height="12" viewBox="0 0 62 12"><g fill="${col}"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><rect x="34" y="0.5" width="24" height="11" rx="3" fill="none" stroke="${col}"/><rect x="36" y="2.5" width="18" height="7" rx="1.5"/><rect x="59" y="4" width="2" height="4" rx="1"/></g></svg>`;
+const status = (col = '#fff', time = '5:05') => `<div class="status" style="color:${col}"><span class="num">${time}</span>${signal(col)}</div>`;
+const plus = col => `<svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="${col}" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+const chev = `<svg width="8" height="13" viewBox="0 0 8 13" style="opacity:.5;flex:none"><path d="M1.5 1.5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const fIcon = `<svg width="13" height="13" viewBox="0 0 13 13"><rect x="1" y="2" width="11" height="10" rx="2" fill="none" stroke="#ffc21a" stroke-width="1.6"/><path d="M1 5h11M4 1v2.4M9 1v2.4" stroke="#ffc21a" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+
+// Donut: one arc per employer and kind, worked first then rostered, gaps between, tick at 48.
+function donut(parts, size = 200, stroke = 22, centre = true) {
+  const total = parts.reduce((a, p) => a + p.h, 0), cap = Math.max(48, total);
+  const r = size / 2 - stroke / 2 - 6, C = 2 * Math.PI * r, c = size / 2, gap = 2;
+  let at = 0, arcs = '';
+  for (const p of parts) {
+    const len = p.h / cap * C;
+    const op = p.kind === 'worked' ? 1 : .42;
+    arcs += `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${E[p.e].c}" stroke-opacity="${op}" stroke-width="${stroke}" stroke-dasharray="${Math.max(len - gap, 0)} ${C}" stroke-dashoffset="${-at}" transform="rotate(-90 ${c} ${c})"/>`;
+    at += len;
+  }
+  const a = 48 / cap * 2 * Math.PI - Math.PI / 2;
+  const tick = `<line x1="${c + Math.cos(a) * (r - stroke / 2 - 4)}" y1="${c + Math.sin(a) * (r - stroke / 2 - 4)}" x2="${c + Math.cos(a) * (r + stroke / 2 + 4)}" y2="${c + Math.sin(a) * (r + stroke / 2 + 4)}" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>`;
+  const text = centre ? `<text x="${c}" y="${c + 4}" text-anchor="middle" font-size="${size / 5.2}" font-weight="700" fill="var(--text)" class="num">${fmt(total)}</text><text x="${c}" y="${c + size / 7.5}" text-anchor="middle" font-size="${size / 13}" fill="var(--muted)">of 48 hours</text>` : '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--fill)" stroke-width="${stroke}"/>${arcs}${tick}${text}</svg>`;
+}
+function partsFor(days) {
+  const sum = { roma: { worked: 0, rostered: 0 }, thai: { worked: 0, rostered: 0 } };
+  days.forEach(d => d.s.forEach(([e, h, k]) => { sum[e][k === 'worked' ? 'worked' : 'rostered'] += h; }));
+  return [['roma', 'worked'], ['thai', 'worked'], ['roma', 'rostered'], ['thai', 'rostered']]
+    .map(([e, kind]) => ({ e, kind, h: sum[e][kind] })).filter(p => p.h > 0);
+}
+function key(days) {
+  const t = { roma: 0, thai: 0 }; days.forEach(d => d.s.forEach(([e, h]) => { t[e] += h; }));
+  return `<div class="key">${Object.entries(t).map(([e, h]) => `<span><i style="background:${E[e].c}"></i>${E[e].name} <b class="num">${fmt(h)} h</b></span>`).join('')}</div>`;
+}
+function dayRow(day, dowIndex) {
+  const hrs = day.s.reduce((a, s) => a + s[1], 0), scale = Math.max(12, hrs);
+  const segs = day.s.map(([e, h, k]) => `<div class="${k === 'worked' ? 'seg-w' : `seg-r ${k}`}" style="--c:${E[e].c};width:calc(${h / scale * 100}% - 2px)"></div>`).join('');
+  return `<div class="drow ${day.today ? 'today' : ''} ${hrs ? '' : 'empty'}"><div class="dl"><b>${DOW[dowIndex]}</b><span class="num">${day.d}</span>${day.missed ? '<span class="q">?</span>' : ''}</div><div class="track">${segs}</div><div class="hrs num">${hrs ? fmt(hrs) : '–'}</div></div>`;
+}
+const week = (title, days) => `<div class="wkhead"><span>${title}</span><span class="num">${fmt(days.reduce((a, d) => a + d.s.reduce((x, s) => x + s[1], 0), 0))} h</span></div>${days.map((d, i) => dayRow(d, i)).join('')}`;
+function shell(seg = 0, time = '5:05', compact = '') {
+  return `<div class="shell">${status('#fff', time)}<div class="titlebar"><h1>Fortnight</h1><div class="tools"><span>Jobs</span>${plus('#fff')}</div></div>
+    <div class="seg"><button class="${seg === 0 ? 'on' : ''}">From Mon 12 Oct</button><button class="${seg === 1 ? 'on' : ''}">From Mon 19 Oct</button></div>${compact}</div>`;
+}
+const answer = `<div class="answer"><span class="q">?</span><span><b>Thai Express, Sun 18</b> finished without a clock-in. Did you work it?</span>${chev}</div>`;
+const dockIn = `<div class="dock"><b>Café Roma started at 5:00pm</b><p>You haven't clocked in. Rostered until 10:30pm.</p><div class="acts"><button class="go">Started 5:00pm</button><button class="alt">Just now</button></div></div>`;
+const fortnightA = [...days12, ...days19()];
+function board(days, line, colour, extra = '') {
+  return `<div class="donut">${donut(partsFor(days))}<div class="statusline" style="color:${colour}">${line}</div>${key(days)}</div>${extra}`;
+}
+
+
+const E6 = { a: { name: 'Café Roma', c: 'var(--roma)' }, b: { name: 'Thai Express', c: 'var(--thai)' }, c: { name: 'Uni Library', c: 'var(--c3)' },
+  d: { name: 'Gelato Bar', c: 'var(--c4)' }, e: { name: 'Sushi Train', c: 'var(--c5)' }, f: { name: 'Bakery', c: 'var(--c6)' } };
+Object.assign(E, E6);
+const colourNames = { a: 'Violet', b: 'Teal', c: 'Magenta', d: 'Cobalt', e: 'Bronze', f: 'Moss' };
+function seg(e, h, k, scale = 12) { return `<div class="${k === 'worked' ? 'seg-w' : 'seg-r'}" style="--c:${E[e].c};width:calc(${h / scale * 100}% - 2px)"></div>`; }
+
+// Colours panel
+function coloursPanel(dark) {
+  const rows = Object.keys(E6).map((k, i) => `<div class="swrow"><i style="background:${E[k].c}"></i><span><b>${colourNames[k]}</b></span><div class="track">${seg(k, 4, 'worked')}${seg(k, 3, 'rostered')}</div><span class="num" style="text-align:right">${i + 1}${['st','nd','rd','th','th','th'][i]}</span></div>`).join('');
+  const parts = Object.keys(E6).flatMap(k => [{ e: k, kind: 'worked', h: 5 }, { e: k, kind: 'rostered', h: 2 }]);
+  const worked = Object.keys(E6).map(k => ({ e: k, kind: 'worked', h: 5 })), rost = Object.keys(E6).map(k => ({ e: k, kind: 'rostered', h: 2 }));
+  return `<div class="panel w ${dark ? 'dark' : ''}" style="background:var(--ground)">
+    <div style="display:flex;justify-content:center">${donut([...worked, ...rost].map(p => ({ ...p })), 170, 20)}</div>
+    <div class="legend">Given in order of adding. Solid = worked, light = rostered.</div>${rows}
+    <div class="legend">Reserved colours, never used for an employer:</div>
+    <div class="sig"><span style="background:var(--act);color:#16204a">Act now</span><span style="color:var(--ok);background:var(--card)">Hours left</span><span style="color:var(--near);background:var(--card)">Near 48</span><span style="color:var(--over);background:var(--card)">Over 48</span><span style="background:var(--shell);color:#fff">Shell</span></div></div>`;
+}
+document.getElementById('c-light').innerHTML = coloursPanel(false);
+document.getElementById('c-dark').innerHTML = coloursPanel(true);
+
+// Onboarding 1 · variant A: three week rows, two brackets
+const weeks = [
+  { t: 'Week 1', s: [['a', 6, 'worked'], ['b', 6, 'worked'], ['a', 6, 'worked']], h: 18 },
+  { t: 'Week 2', s: [['a', 6, 'worked'], ['b', 6, 'worked'], ['a', 6, 'worked'], ['b', 6, 'worked']], h: 24 },
+  { t: 'Week 3', s: [['b', 6, 'worked'], ['a', 6, 'worked'], ['b', 6, 'worked'], ['a', 6, 'worked'], ['b', 6, 'worked']], h: 30 }];
+const wkRow = w => `<div class="wk"><b>${w.t}</b><div class="track">${w.s.map(([e, h, k]) => seg(e, h, k, 36)).join('')}</div><span class="num" style="text-align:right;font-weight:600">${w.h} h</span></div>`;
+const onbA = `<div class="onb"><h2>48 hours in any fortnight</h2><p>Your student visa limits work to 48 hours in any 14 days that start on a Monday. Every week belongs to two of them, and both count.</p>
+  <div class="ill"><div style="position:relative;padding-right:18px">${weeks.map(wkRow).join('')}
+    <div class="br" style="top:4px;height:72px;right:4px"></div><div class="br" style="top:46px;height:72px;right:-4px;border-color:var(--over)"></div></div>
+    <div class="brlbl"><span>Weeks 1 and 2</span><b class="num">42 h</b></div>
+    <div class="brlbl"><span>Weeks 2 and 3</span><b class="num" style="color:var(--over)">54 h, over</b></div></div>
+  <p style="margin-top:14px;font-size:14.5px">Fortnightly adds up your hours across all your jobs and warns you before a shift would take either fortnight over.</p>
+  <div class="cta"><button>Continue</button><div class="dots"><i class="on"></i><i></i><i></i></div></div></div>`;
+document.getElementById('o-a').innerHTML = status('#16204a', '9:41') + onbA;
+
+// Onboarding 1 · variant B: two fortnight lists of day rows, offset by a week
+const dayH = [6, 0, 6, 0, 6, 0, 0, 6, 0, 6, 6, 0, 6, 0, 6, 6, 0, 6, 6, 6, 0];
+const dayE = ['a', 0, 'b', 0, 'a', 0, 0, 'a', 0, 'b', 'a', 0, 'b', 0, 'b', 'a', 0, 'b', 'a', 'b', 0];
+const DOW1 = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+function miniCol(from, title, total, over) {
+  let rows = '';
+  for (let i = from; i < from + 14; i++) {
+    const shared = i >= 7 && i < 14;
+    rows += `<div class="mini ${shared ? 'shared' : ''}"><span>${DOW1[i % 7]} ${i + 1}</span><div class="track">${dayH[i] ? seg(dayE[i], dayH[i], 'worked') : ''}</div></div>`;
+  }
+  return `<div class="col"><h4>${title}</h4>${rows}<div class="coltotal"><span>Total</span><span class="num" style="color:${over ? 'var(--over)' : 'var(--text)'}">${total}</span></div></div>`;
+}
+const onbB = `<div class="onb"><h2>48 hours in any fortnight</h2><p>Your student visa limits work to 48 hours in any 14 days that start on a Monday. Every week belongs to two of them.</p>
+  <div class="ill"><div class="cols"><div>${miniCol(0, 'From Mon 1', '42 h', false)}</div><div style="padding-top:105px">${miniCol(7, 'From Mon 8', '54 h, over', true)}</div></div></div>
+  <div class="cta"><button>Continue</button><div class="dots"><i class="on"></i><i></i><i></i></div></div></div>`;
+document.getElementById('o-b').innerHTML = status('#16204a', '9:41') + onbB;
+
+// Empty board
+const empty14 = [...[12, 13, 14, 15, 16, 17, 18].map(d => ({ d, s: [] })), ...[19, 20, 21, 22, 23, 24, 25].map(d => ({ d, s: [], today: d === 19 }))];
+document.getElementById('e-board').innerHTML = shell() + `<div class="scroll"><div class="donut">${donut([])}<div class="statusline" style="color:var(--ok)">48 h left</div></div>
+  <div class="empty-note">No shifts in this fortnight yet. Add each shift when your manager sends the roster, and Fortnightly will remind you to clock in.</div>
+  <div class="days">${week('Mon 12 – Sun 18 Oct', empty14.slice(0, 7))}${week('Mon 19 – Sun 25 Oct', empty14.slice(7))}</div></div>
+  <div class="dock"><b>Nothing rostered</b><p>Your next shift will appear here.</p><div class="acts"><button class="plainbtn">Roster a shift</button></div></div><div class="homebar"></div>`;
+</script></body></html>
