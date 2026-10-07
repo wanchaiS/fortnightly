@@ -4,11 +4,11 @@ An iPhone app that keeps international students within the student visa work lim
 
 The student enters each shift as their manager rosters it. Fortnightly shows what that shift does to the 48-hour limit before it's saved, prompts at the rostered start and finish to clock in and out, and keeps nagging from the widget until the shift is recorded. Everything stays on the phone.
 
-UTS Assessment 3: Platform-Integrated iOS Application.
+UTS Assessment 3: Platform-Integrated iOS Application. The Required Document (problem statement, design justification, architecture diagram, reflective report) is [`report/Fortnightly-Report.pdf`](report/Fortnightly-Report.pdf).
 
 ## Domain context
 
-International students on a Student visa (subclass 500) may work at most **48 hours in any work fortnight** while their course is in session (visa condition 8105). The law defines a fortnight as "the period of 14 days commencing on a Monday" ([Migration Regulations 1994, Sch 8, condition 8105(3)](https://classic.austlii.edu.au/au/legis/cth/consol_reg/mr1994227/sch8.html)). Every Monday starts one, so fortnights overlap and every week belongs to two of them: a student can be within the limit in weeks 1 and 2 and over it in weeks 2 and 3 ([Department of Home Affairs](https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/student-500/temporary-relaxation-of-working-hours-for-student-visa-holders)).
+International students on a Student visa (subclass 500) can work up to **48 hours a fortnight** while their course is in session ([Department of Home Affairs](https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/student-500); visa condition 8105). The law defines a fortnight as "the period of 14 days commencing on a Monday" ([Migration Regulations 1994, Sch 8, condition 8105(3)](https://classic.austlii.edu.au/au/legis/cth/consol_reg/mr1994227/sch8.html)). Every Monday starts one, so fortnights overlap and every week belongs to two of them. Home Affairs' own example: 15, 30, 30 and 10 hours in four weeks is within the limit for weeks 1 and 2 (45 hours) and weeks 3 and 4 (40 hours), but may breach it in weeks 2 and 3 (60 hours) ([archived page, 2024](https://web.archive.org/web/20240730204044/https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/student-500/temporary-relaxation-of-working-hours-for-student-visa-holders)).
 
 **Primary stakeholder:** an international student studying full-time in Sydney, working two to four casual hospitality shifts a week for one or two employers, with rosters arriving by text message or a rostering app.
 

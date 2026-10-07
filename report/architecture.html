@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fortnightly architecture</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; font: 13px/1.35 -apple-system, "Helvetica Neue", Arial, sans-serif; color: #16204a; }
+  #d { position: relative; width: 1600px; height: 1240px; }
+  .box { position: absolute; border-radius: 10px; padding: 8px 10px; }
+  .lane { background: #fff8e1; border: 1.5px solid #f0c24a; }
+  .proc { background: #f3f5fb; border: 1.5px solid #9aa2b8; }
+  .kit { background: #eef0f6; border: 2px solid #16204a; }
+  .ios { background: #f6f6f6; border: 1.5px dashed #6b7280; }
+  .store { background: #e9f6f8; border: 2px solid #0f8fa8; }
+  .card { background: #fff; border: 1px solid #c8cddc; }
+  .navy { background: #16204a; color: #fff; border: 0; }
+  .act { background: #fff; border: 1.5px solid #f0c24a; }
+  h1 { position: absolute; left: 40px; top: 6px; margin: 0; font-size: 22px; }
+  .sub { position: absolute; left: 40px; top: 34px; font-size: 13px; color: #5b6275; }
+  .t { font-weight: 700; font-size: 14px; margin-bottom: 3px; }
+  .s { font-size: 12px; color: #5b6275; }
+  .mono { font-family: Menlo, monospace; font-size: 11.5px; }
+  .n { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 10px; background: #ffc21a; color: #16204a; font-weight: 800; font-size: 12px; border: 1.5px solid #16204a; margin-right: 4px; vertical-align: -4px; }
+  .badge { position: absolute; }
+  .boundary { position: absolute; left: 30px; right: 30px; top: 170px; border-top: 2.5px dashed #c92a2a; }
+  .blabel { position: absolute; left: 40px; top: 174px; color: #c92a2a; font-weight: 700; font-size: 12px; background: #fff; padding: 0 4px; }
+  svg { position: absolute; inset: 0; pointer-events: none; }
+  .lbl { font-size: 11.5px; fill: #16204a; font-weight: 600; }
+  ul { margin: 2px 0 0 16px; padding: 0; }
+  li { margin: 1px 0; }
+  .cols2 { columns: 2; column-gap: 14px; }
+</style>
+</head>
+<body>
+<div id="d">
+  <h1>Fortnightly: architecture and the primary use case</h1>
+  <div class="sub">Views → ViewModels → Use Cases → Repositories → Core Data, in three processes sharing one App Group store. Yellow numbers follow the primary use case: clocking in from the shift prompt.</div>
+
+  <!-- Human lane -->
+  <div class="box lane" style="left:30px;top:58px;width:1540px;height:104px">
+    <div class="t">The student (human side)</div>
+  </div>
+  <div class="box act" style="left:46px;top:84px;width:380px;height:70px">
+    <b>Rosters each shift</b> when the manager sends it; sees its effect on both fortnights; clocks in or out from the dock; answers "Did you work it?"
+  </div>
+  <div class="box act" style="left:456px;top:84px;width:380px;height:70px">
+    <span class="n">3</span><b>Taps "Started 5:00 pm"</b> on the expanded prompt (or "Started just now", "Not working this shift"); sees "Clocked in at 5:00 pm".
+  </div>
+  <div class="box act" style="left:866px;top:84px;width:380px;height:70px">
+    <b>Glances at the widget</b> on the Home or Lock Screen; taps "Started 5:00 pm", "Just now" or "Clock out" without opening the app.
+  </div>
+  <div class="box act" style="left:1296px;top:84px;width:266px;height:70px">
+    <b>Allows notifications</b> once; never needs to open anything for the prompts to arrive.
+  </div>
+  <div class="boundary"></div>
+  <div class="blabel" style="left:252px">Human–system boundary: the student above, the system below</div>
+
+  <!-- Processes -->
+  <div class="box proc" style="left:40px;top:200px;width:390px;height:280px">
+    <div class="t">Fortnightly app <span class="s">(process 1)</span></div>
+    <div class="box card" style="left:10px;top:30px;width:368px;height:72px">
+      <div class="t">Views (SwiftUI)</div>
+      Fortnight board · dock · Roster a shift · Day · Shift details · Log / correct times · Jobs · Onboarding
+    </div>
+    <div class="box card" style="left:10px;top:122px;width:368px;height:72px">
+      <div class="t">ViewModels (@Observable)</div>
+      FortnightBoardModel · RosterShiftModel · ShiftActions · ShiftTimesModel · JobsModel
+    </div>
+    <div class="box card" style="left:10px;top:208px;width:368px;height:62px">
+      <div class="t">AppDelegate</div>
+      Prompt buttons tapped on a banner → ShiftPromptResponder
+    </div>
+  </div>
+  <div class="box proc" style="left:450px;top:200px;width:390px;height:280px">
+    <div class="t">ShiftPromptNotification <span class="s">(Notification Content Extension, process 2)</span></div>
+    <div class="box card" style="left:10px;top:30px;width:368px;height:90px">
+      <div class="t">View: ShiftPromptView</div>
+      Small donut, hours this fortnight, the shift's day row; buttons with real times ("Started 5:00 pm"). Categories SHIFT_START, SHIFT_FINISH.
+    </div>
+    <div class="box card" style="left:10px;top:140px;width:368px;height:72px">
+      <div class="t">ShiftPromptModel + ShiftPromptResponder</div>
+      Loads the shift; turns each button into a use case call
+    </div>
+    <div class="s" style="position:absolute;left:12px;top:222px;width:366px"><span class="n">2</span>On arrival it reads the shift and the fortnight from the shared store (ReviewShift, ReviewFortnightHours).</div>
+  </div>
+  <div class="box proc" style="left:860px;top:200px;width:390px;height:280px">
+    <div class="t">ShiftStatusWidget <span class="s">(WidgetKit extension, process 3)</span></div>
+    <div class="box card" style="left:10px;top:30px;width:368px;height:72px">
+      <div class="t">Views</div>
+      Small: donut + state + buttons · Lock Screen: rectangular (words) and circular (gauge)
+    </div>
+    <div class="box card" style="left:10px;top:122px;width:368px;height:72px">
+      <div class="t">Timeline provider + App Intents</div>
+      Reads ReviewCurrentShift and ReviewFortnightHours · ClockInIntent, ClockOutIntent write through the use cases
+    </div>
+    <div class="s" style="position:absolute;left:12px;top:206px;width:366px"><span class="n">7</span>After a reload the timeline reads the store again and shows "On shift" with a live timer.</div>
+  </div>
+
+  <!-- FortnightlyKit -->
+  <div class="box kit" style="left:40px;top:510px;width:1210px;height:378px">
+    <div class="t">FortnightlyKit: shared framework linked by the app and both extensions; all business logic lives here</div>
+    <div class="box card" style="left:12px;top:32px;width:600px;height:178px">
+      <div class="t">Use cases <span class="s">(structs with business rules and a typed error enum each)</span></div>
+      <div class="cols2">
+        <b>RosterShift</b>: no overlap, ≤ 14 h, breach needs "Add anyway"<br>
+        <b>ClockIntoShift</b> <span class="n" style="width:16px;height:16px;font-size:10px">4</span>: rostered only, no other open shift, ≤ 60 min early<br>
+        <b>ClockOutOfShift</b>: breach recorded and reported, &gt; 16 h queried<br>
+        <b>LogPastShift</b>: past, missed and corrected times<br>
+        MarkShiftNotWorked · AddEmployer · ArchiveEmployer · RecordCourseBreak · RefreshShiftReminders<br>
+        Reads: ReviewFortnightHours · ReviewFortnightDays · ReviewCurrentShift · ReviewMissedShifts · ReviewShift · ReviewJobs
+      </div>
+    </div>
+    <div class="box card" style="left:628px;top:32px;width:270px;height:178px">
+      <div class="t">Domain models</div>
+      Employer (6 colours) · Shift (rostered, onShift, worked, notWorked) · CourseBreak · WorkFortnight (14 days from a Monday) · WorkLimitPolicy (48 h, near from 40) · FortnightWorkSummary · ShiftReminder
+    </div>
+    <div class="box card" style="left:914px;top:32px;width:282px;height:178px">
+      <div class="t">Ports (protocols)</div>
+      ShiftRepository · EmployerRepository · CourseBreakRepository · ShiftReminderScheduling · ShiftDisplayRefreshing
+      <div class="s" style="margin-top:6px">Unit tests swap these for in-memory mocks; no Core Data in tests (31 tests).</div>
+    </div>
+    <div class="box card" style="left:12px;top:238px;width:600px;height:128px">
+      <div class="t">Repositories (Core Data implementations)</div>
+      CoreDataShiftRepository · CoreDataEmployerRepository · CoreDataCourseBreakRepository
+      <div class="mono" style="margin-top:4px">status == "onShift" · status == "rostered" AND rosteredFinish &gt; now<br>work-limit query: clocked times or rostered times overlap the fortnight, not "notWorked"</div>
+    </div>
+    <div class="box card" style="left:628px;top:238px;width:568px;height:128px">
+      <div class="t">Platform adapters</div>
+      <b>NotificationReminderScheduler</b>: prompts per shift <span class="mono">shift.&lt;id&gt;.clockInDue / clockInOverdue / clockOutDue / clockOutOverdue</span><br>
+      <b>WidgetDisplayRefresher</b>: reloadTimelines("ShiftStatusWidget") after every change<br>
+      <b>FortnightlyServices</b>: wires the use cases to the store in each process
+    </div>
+  </div>
+
+  <!-- Store -->
+  <div class="box store" style="left:40px;top:916px;width:1210px;height:150px">
+    <div class="t">App Group shared container: group.com.peter.fortnightly</div>
+    <div style="width:560px">Fortnightly.sqlite (Core Data, persistent history on). Read and written by all three processes; every read takes values fresh from the store, and the app refreshes when another process writes. Private, on the phone only, works offline.</div>
+    <div class="box card" style="left:640px;top:36px;width:170px;height:96px"><div class="t">EmployerEntity</div><span class="s">id, name, colour, payCycle, payCycleAnchor, isArchived</span></div>
+    <div class="box card" style="left:860px;top:36px;width:190px;height:96px"><div class="t">ShiftEntity</div><span class="s">id, rosteredStart, rosteredFinish, clockedInAt, clockedOutAt, status, note</span></div>
+    <div class="box card" style="left:1062px;top:36px;width:136px;height:96px"><div class="t">CourseBreakEntity</div><span class="s">id, name, startsOn, endsOn</span></div>
+  </div>
+
+  <!-- iOS -->
+  <div class="box ios" style="left:1300px;top:200px;width:270px;height:866px">
+    <div class="t">iOS system services</div>
+    <div class="box card" style="left:12px;top:32px;width:244px;height:180px">
+      <div class="t">UNUserNotificationCenter</div>
+      Local notifications at the rostered start and finish, and again 20 / 45 min later if still unanswered. No server, works without signal.
+      <div class="s" style="margin-top:4px">At most 64 pending per app → a rolling window of the open shift + next 10 shifts.</div>
+    </div>
+    <div class="box card" style="left:12px;top:350px;width:244px;height:130px">
+      <div class="t">WidgetCenter</div>
+      Reloads the widget's timeline when any process changes shifts; otherwise the widget refreshes at the next rostered start or finish.
+    </div>
+    <div class="box card" style="left:12px;top:520px;width:244px;height:120px">
+      <div class="t">Core Data remote change</div>
+      <span class="mono">NSPersistentStoreRemoteChange</span> tells the open app the widget or prompt wrote, so the board reloads <span class="n">8</span>
+    </div>
+  </div>
+
+  <!-- Flow legend -->
+  <div class="box card" style="left:30px;top:1082px;width:1540px;height:148px">
+    <div class="t">Primary use case: clock in from the shift prompt</div>
+    <div class="cols2" style="columns:2;column-gap:40px">
+      <div><span class="n">1</span>At the rostered start iOS delivers the SHIFT_START prompt that RosterShift scheduled when the shift was entered.</div>
+      <div><span class="n">2</span>The notification extension reads the shift and fortnight from the App Group store and draws the donut and day row.</div>
+      <div><span class="n">3</span>The student taps "Started 5:00 pm" (the rostered time, not the time of the tap).</div>
+      <div><span class="n">4</span>ShiftPromptResponder calls ClockIntoShift, which checks its rules; a broken rule shows its message in the prompt instead.</div>
+      <div><span class="n">5</span>ShiftRepository saves the shift as on shift through Core Data into Fortnightly.sqlite in the App Group container.</div>
+      <div><span class="n">6</span>The use case cancels the remaining clock-in prompts and asks WidgetCenter to reload the widget.</div>
+      <div><span class="n">7</span>The widget reads the store again and shows "On shift" with a live timer, on the Home and Lock Screen.</div>
+      <div><span class="n">8</span>The prompt shows "Clocked in at 5:00 pm" and closes; the open app hears the remote change and its board shows the shift on.</div>
+    </div>
+  </div>
+
+  <svg viewBox="0 0 1600 1240" width="1600" height="1240">
+    <defs>
+      <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#16204a"/></marker>
+      <marker id="y" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#c98a00"/></marker>
+    </defs>
+    <g stroke="#16204a" stroke-width="1.8" fill="none">
+      <!-- human to processes -->
+      <line x1="236" y1="154" x2="236" y2="198" marker-end="url(#a)"/>
+      <line x1="1056" y1="154" x2="1056" y2="198" marker-end="url(#a)"/>
+      <!-- views to viewmodels inside columns -->
+      <line x1="236" y1="303" x2="236" y2="321" marker-end="url(#a)"/>
+      <line x1="646" y1="321" x2="646" y2="339" marker-end="url(#a)"/>
+      <line x1="1056" y1="303" x2="1056" y2="321" marker-end="url(#a)"/>
+      <!-- columns to the Kit -->
+      <line x1="236" y1="480" x2="236" y2="508" marker-end="url(#a)"/>
+      <line x1="1056" y1="480" x2="1056" y2="508" marker-end="url(#a)"/>
+      <!-- use cases -> domain/ports; ports implemented by repositories and adapters -->
+      <line x1="652" y1="632" x2="666" y2="632" marker-end="url(#a)"/>
+      <line x1="940" y1="632" x2="952" y2="632" marker-end="url(#a)"/>
+      <line x1="1095" y1="720" x2="1095" y2="746" marker-end="url(#a)"/>
+      <path d="M970 720 L970 734 L400 734 L400 746" marker-end="url(#a)"/>
+      <!-- repositories to store -->
+      <line x1="300" y1="876" x2="300" y2="915" marker-end="url(#a)" stroke-width="2.4"/>
+      <!-- adapters to UNUserNotificationCenter -->
+      <path d="M1236 770 L1276 770 L1276 300 L1310 300" marker-end="url(#a)"/>
+      <!-- store to remote change -->
+      <path d="M1250 1000 L1290 1000 L1290 780 L1310 780" marker-end="url(#a)"/>
+    </g>
+    <g stroke="#0f8fa8" stroke-width="2" fill="none"><line x1="851" y1="1000" x2="899" y2="1000"/></g>
+    <g font-size="12" font-weight="700" fill="#0f8fa8"><text x="854" y="994">1</text><text x="884" y="994">N</text><text x="852" y="1016" font-size="10">shifts</text></g>
+    <!-- primary flow (yellow) -->
+    <g stroke="#c98a00" stroke-width="3" fill="none">
+      <path d="M1310 250 L1292 250 L1292 186 L780 186 L780 197" marker-end="url(#y)"/>
+      <line x1="646" y1="154" x2="646" y2="197" marker-end="url(#y)"/>
+      <line x1="646" y1="480" x2="646" y2="508" marker-end="url(#y)"/>
+      <line x1="560" y1="876" x2="560" y2="915" marker-end="url(#y)"/>
+      <path d="M1236 810 L1262 810 L1262 620 L1310 620" marker-end="url(#y)"/>
+      <path d="M1310 580 L1288 580 L1288 440 L1253 440" marker-end="url(#y)"/>
+    </g>
+    <g>
+      <text class="lbl" x="244" y="499">calls use cases</text>
+      <text class="lbl" x="654" y="499">calls ClockIntoShift</text>
+      <text class="lbl" x="1064" y="499">reads; intents write</text>
+      <text class="lbl" x="308" y="902">read / write</text>
+      <text class="lbl" x="568" y="902">save shift (on shift)</text>
+      <text class="lbl" x="1103" y="741">implemented by</text>
+      <text class="lbl" x="900" y="181">prompt at the rostered start</text>
+    </g>
+    <g font-weight="800" font-size="12" text-anchor="middle">
+      <circle cx="1120" cy="186" r="11" fill="#ffc21a" stroke="#16204a" stroke-width="1.5"/><text x="1120" y="190" fill="#16204a">1</text>
+      <circle cx="560" cy="896" r="11" fill="#ffc21a" stroke="#16204a" stroke-width="1.5"/><text x="560" y="900" fill="#16204a">5</text>
+      <circle cx="1262" cy="700" r="11" fill="#ffc21a" stroke="#16204a" stroke-width="1.5"/><text x="1262" y="704" fill="#16204a">6</text>
+      <circle cx="1288" cy="500" r="11" fill="#ffc21a" stroke="#16204a" stroke-width="1.5"/><text x="1288" y="504" fill="#16204a">7</text>
+    </g>
+  </svg>
+</div>
+</body>
+</html>
