@@ -18,8 +18,8 @@ func october(_ day: Int, at hour: Int = 0, _ minute: Int = 0) -> Date {
 }
 
 extension Employer {
-    static let cafeRoma = Employer(name: "Café Roma", payCycleStartsOn: october(5))
-    static let thaiExpress = Employer(name: "Thai Express", payCycleStartsOn: october(5))
+    static let cafeRoma = Employer(name: "Café Roma", colour: .violet, payCycleStartsOn: october(5))
+    static let thaiExpress = Employer(name: "Thai Express", colour: .teal, payCycleStartsOn: october(5))
 }
 
 extension InMemoryShiftRepository {

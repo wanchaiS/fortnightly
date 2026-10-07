@@ -34,6 +34,7 @@ public struct CoreDataEmployerRepository: EmployerRepository, @unchecked Sendabl
                 return created
             }()
             entity.name = employer.name
+            entity.colour = employer.colour.rawValue
             entity.payCycle = employer.payCycle.rawValue
             entity.payCycleAnchor = employer.payCycleStartsOn
             entity.isArchived = employer.isArchived
@@ -52,8 +53,9 @@ extension EmployerEntity {
 
     func employer() throws -> Employer {
         guard let id, let name, let payCycleAnchor,
+              let colour = colour.flatMap(EmployerColour.init(rawValue:)),
               let payCycle = payCycle.flatMap(PayCycle.init(rawValue:))
         else { throw ShiftStoreError.unreadableRecord(entity: "EmployerEntity") }
-        return Employer(id: id, name: name, payCycle: payCycle, payCycleStartsOn: payCycleAnchor, isArchived: isArchived)
+        return Employer(id: id, name: name, colour: colour, payCycle: payCycle, payCycleStartsOn: payCycleAnchor, isArchived: isArchived)
     }
 }
