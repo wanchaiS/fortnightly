@@ -181,6 +181,13 @@ Also:     The dock shows one thing: clock in/out first, then a missed shift, the
 Found while drawing: four use cases the screens need that don't exist yet (log a past shift or enter a missed shift's times; change or correct times; add and archive employers; course breaks and the research-degree setting).
 Report:   Section 4: how the design changed and why (the strongest "my understanding changed" example); AI tools (I overrode the AI-rolled direction)
 
+## 2026-10-07 — Scope: no research-degree setting; archiving needs no upcoming shifts
+Dropped:  The setting that turns the limit off for research masters and PhD students. The app exists for students who have the limit; anyone without it has no reason to use it. Removed from PRODUCT.md and PLAN (R12) and from the Jobs screen.
+Kept:     Course breaks (the limit doesn't apply during them); the rule is already built and tested.
+Rule:     Archiving an employer is refused while they still have upcoming rostered shifts; the student marks those "not working" first. Nothing is cancelled silently ("ask, don't guess"). Worked hours always keep counting.
+Tests:    I chose 4 more (PLAN §13, group 6): a missed shift's real times; a past shift can't overlap; editing a shift doesn't clash with itself; archiving keeps hours counting.
+Report:   Section 4 (scope decisions)
+
 ---
 
 ## AI use log

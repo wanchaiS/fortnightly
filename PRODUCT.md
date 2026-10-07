@@ -35,7 +35,7 @@ Driven by the roster, not by location. The student enters shifts as they're give
 ## Capabilities and Constraints
 
 - Data stays on the phone (Core Data in an App Group shared with the extensions). No account, no server, works offline.
-- Fixed product rules: 48-hour limit; Monday-start overlapping fortnights; hours worked during course breaks don't count; research masters and PhD students have no limit (a setting).
+- Fixed product rules: 48-hour limit; Monday-start overlapping fortnights; hours worked during course breaks don't count. Students without the limit (research masters and PhD) aren't users, so there's no setting to turn it off.
 - **Warn, don't block:** a shift that would breach the limit can still be saved after the student acknowledges it, and a worked breach is always recorded. The record must match what happened.
 - The time of a tap is not assumed to be the time work started or finished. Where the student can't be asked (notification and widget buttons), both options are offered: the widget has two clock-in buttons, "Started <rostered time>" and "Just now".
 - Shifts can't overlap; touching end to start is allowed.

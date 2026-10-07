@@ -125,7 +125,7 @@ Use these words in type names, properties, labels and errors. Avoid `Item`, `Ent
 | R9 | Only one shift can be on shift at a time | Follows from R7 |
 | R10 | Clock-in no earlier than 60 minutes before the rostered start, and not after the rostered finish | Catches clocking into the wrong shift |
 | R11 | "Approaching the limit" at 40 hrs or more (amber) | Product rule |
-| R12 | Research masters and doctoral students: the work limit is off (a setting) | Home Affairs exemption |
+| R12 | ~~Research masters and doctoral students: the work limit is off (a setting)~~ Dropped 2026-10-07: students without the limit aren't users | Home Affairs exemption |
 
 The app must say it isn't legal advice: "Fortnightly helps you track your hours. Check your visa conditions in VEVO."
 
@@ -459,7 +459,7 @@ Every **mutating** use case calls `display.shiftsDidChange()` (which reloads the
 
 ### `ReviewFortnightHours`
 - **Input:** a date (usually today)
-- **Rules:** R1–R6, R11, R12. Returns a summary for **both** work fortnights containing the date (the one starting this Monday and the one starting last Monday). Each summary has worked, on-shift and rostered hours, remaining hours, course-break exemption, and status (`withinLimit` / `approachingLimit` / `overLimit` / `noLimit`).
+- **Rules:** R1–R6, R11. Returns a summary for **both** work fortnights containing the date (the one starting this Monday and the one starting last Monday). Each summary has worked and rostered hours, the total toward the limit, and status (`withinLimit` / `approachingLimit` / `overLimit`).
 - Used by the Today screen, the Hours screen, the widget and the notification view.
 
 | Error case | errorDescription | recoverySuggestion |
@@ -511,7 +511,7 @@ The tab bar follows the student's week: plan → work → check.
 | **Hours** (tab) | Choose a work fortnight; daily bars, total vs 48, course-break shading, breakdown by employer; **Log a past shift** | ReviewFortnightHours, LogPastShift | |
 | **Pay Period Hours** | Hours worked per employer per pay period, to hold against the payslip; optional hours-paid entry | ComparePayslipHours | |
 | **Employers** (tab / settings) | Add, edit and archive employers; pay cycle | (repository read; archive rule) | Empty: "Add the places you work so your shifts add up across all of them." |
-| **Course Breaks** | Semester break dates (limit off); research-degree toggle | RecordCourseBreak | |
+| **Course Breaks** | Semester break dates (limit off) | RecordCourseBreak | |
 
 Must-have screens to clear the 5-screen minimum: Today, Roster, Roster a Shift, Hours, Employers.
 
@@ -650,6 +650,17 @@ Shared data, matching the mocks. Worked: Mon 12 Café Roma 7am–1pm, Tue 13 Tha
 | 14 | Previewing a shift shows its effect on both fortnights and saves nothing | Now Mon 19, 5:05pm | Preview Thai Express Sat 24 Oct 10am–2pm | From Mon 12: 46.25 → **50.25** (over); from Mon 19: 11.5 → 15.5; the roster is unchanged |
 | 15 | A shift that finished without a clock-in is listed as missed; one still running isn't | Now Mon 19, 5:05pm | Review missed shifts | Only Thai Express Sun 18 (not Café Roma tonight, not Thu 22) |
 | 16 | Marking a missed shift as not worked removes its hours | Now Mon 19, 5:05pm | Mark Thai Express Sun 18 as not worked | Fortnight from Mon 12 drops to **41.25**; no missed shifts left |
+
+### Group 6: What the screens need (added 2026-10-07 from `prototype/screens.html` and `board-v2.html`)
+
+Same shared data as group 5; now Mon 19 Oct, 5:05pm.
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 17 | Entering a missed shift's real times records it as worked, and it's no longer missed | Thai Express Sun 18, rostered 5–10pm, never clocked in | Log its real times: 5:10–10:20pm | That shift is worked, clocked in 5:10pm and out 10:20pm; no missed shifts left |
+| 18 | A past shift that overlaps another shift is rejected | Café Roma worked Sat 17, 9am–3:15pm | Log Thai Express Sat 17, 2–4pm | Rejected as overlapping Café Roma (9:00am–3:15pm); nothing saved |
+| 19 | Changing a shift's times doesn't count as overlapping itself | Thai Express rostered Thu 22, 5–11pm | Change it to 6–11pm | Saved: same shift, new start, no second shift |
+| 20 | Archiving an employer keeps their worked hours counting | Thai Express worked Tue 13 (5.5 h) and Sat 17 (6 h); Café Roma worked 18 h; no upcoming Thai Express shifts | Archive Thai Express | Thai Express no longer listed as an employer; fortnight from Mon 12 still 29.5 h |
 
 ---
 
