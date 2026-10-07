@@ -70,6 +70,10 @@ public struct FortnightlyServices: Sendable {
         ReviewJobs(employers: employers, courseBreaks: courseBreaks)
     }
 
+    public var reviewShift: ReviewShift {
+        ReviewShift(shifts: shifts, employers: employers)
+    }
+
     // MARK: Shifts
 
     public var rosterShift: RosterShift {

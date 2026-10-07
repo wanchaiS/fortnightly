@@ -71,12 +71,12 @@ struct ShiftStatusWidgetView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 8) {
                 FortnightDonut(slices: entry.slices, lineWidth: 8)
-                    .frame(width: 48, height: 48)
+                    .frame(width: 44, height: 44)
                 VStack(alignment: .leading, spacing: 0) {
                     if case let .clockInDue(listing) = entry.currentShift {
                         // Who to clock in for matters more than the total here.
-                        Text(listing.employerName).font(.subheadline.weight(.bold)).lineLimit(2)
-                        Text("Not clocked in").font(.caption).foregroundStyle(Palette.muted)
+                        Text(listing.employerName).font(.footnote.weight(.bold)).lineLimit(2).minimumScaleFactor(0.8)
+                        Text("Not clocked in").font(.caption2).foregroundStyle(Palette.muted).lineLimit(1).minimumScaleFactor(0.8)
                     } else {
                         Text(hours.hoursDescription).font(.headline).monospacedDigit()
                         Text("of \(WorkLimitPolicy.hoursPerFortnight.hoursDescription) h").font(.caption).foregroundStyle(Palette.muted)
