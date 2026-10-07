@@ -163,6 +163,14 @@ Context:  I installed the impeccable design skill to guide the visual design. It
 Source:   The legal definition of a fortnight is Migration Regulations 1994, Sch 8, condition 8105(3): "the period of 14 days commencing on a Monday". It's a better primary source than the Home Affairs page.
 Report:   Section 1 (evidence); AI tools (how the design skill was used)
 
+## 2026-10-07 — Visual direction: semester timetable
+Context:  The design skill rolled one direction from my own list of seven (candidate 5, the uni semester timetable) and weighed six catalog challengers against it; all six lost on recognisability and clarity but each donated one discipline. I compared three directions as mocks of the same home screen (branch `prototype/ui-variants`, `prototype/directions.html`).
+Options:  Semester timetable / roster sheet with highlighter / standard iOS.
+Chose:    **Semester timetable.** Navy shell, employers as timetable subject colours, solid blocks for worked and outlined for rostered, yellow reserved for "act now", and the fortnight frame sliding one week at a time over three weeks.
+Why:      The other two break down when a student works **two jobs in one day**, which is the common case: the roster sheet squeezes two highlights into one table row, and the standard list hides which day is heavy. The timetable stacks one block per shift inside the day; a mock with Café Roma 9am–3:15pm and Thai Express 5–11pm on the same Saturday stayed readable. The roster sheet's highlighter colours also looked odd. The one-week slide makes overlapping fortnights visible.
+Recorded: direction contract in `.impeccable/surfaces/atures-fortnight-fortnightboardview-swift-7ebb1a81.md`.
+Report:   Section 2 (design before code); Section 4 (how I evaluated design options)
+
 ---
 
 ## AI use log
