@@ -7,7 +7,7 @@ struct ClockOutOfShiftTests {
     private let shifts = InMemoryShiftRepository()
 
     @discardableResult
-    private func clockOut(of shift: Shift, finishedAt time: ClockOutTime, now: Date) throws(ClockOutOfShiftError) -> ClockOutOutcome {
+    private func clockOut(of shift: Shift, finishedAt time: ClockOutTime, now: Date) throws(ClockOutOfShiftError) -> WorkedShiftOutcome {
         try ClockOutOfShift(
             shifts: shifts,
             courseBreaks: InMemoryCourseBreakRepository(),

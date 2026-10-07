@@ -36,6 +36,24 @@ struct RosterShiftTests {
         ))
     }
 
+    @Test("Changing a shift's times doesn't count as overlapping itself")
+    func changingTimesDoesNotClashWithItself() throws {
+        shifts.recordStoryboardShifts()
+        let thursday = try #require(shifts.savedShifts.first { $0.rosteredStart == october(22, at: 17) })
+        let shiftCountBefore = shifts.savedShifts.count
+
+        let changed = try rostering(now: october(19, at: 17, 5)).execute(ShiftRosterRequest(
+            employerID: Employer.thaiExpress.id,
+            start: october(22, at: 18),
+            finish: october(22, at: 23),
+            editing: thursday.id
+        ))
+
+        #expect(changed.id == thursday.id)
+        #expect(try shifts.shift(withID: thursday.id)?.rosteredStart == october(22, at: 18))
+        #expect(shifts.savedShifts.count == shiftCountBefore)
+    }
+
     @Test("Previewing a shift shows its effect on both fortnights and saves nothing")
     func previewCoversBothFortnights() throws {
         shifts.recordStoryboardShifts()

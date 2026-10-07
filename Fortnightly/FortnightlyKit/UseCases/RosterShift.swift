@@ -1,6 +1,6 @@
 import Foundation
 
-/// What the student enters when adding a shift their manager has given them.
+/// What the student enters when adding a shift their manager has given them, or changing one already rostered.
 public struct ShiftRosterRequest: Sendable {
     public var employerID: Employer.ID
     public var start: Date
@@ -8,13 +8,23 @@ public struct ShiftRosterRequest: Sendable {
     public var note: String?
     /// The student has been warned this shift takes a fortnight over the work limit and wants it recorded anyway.
     public var acknowledgingWorkLimitBreach: Bool
+    /// The rostered shift whose times are being changed; `nil` adds a new shift.
+    public var editing: Shift.ID?
 
-    public init(employerID: Employer.ID, start: Date, finish: Date, note: String? = nil, acknowledgingWorkLimitBreach: Bool = false) {
+    public init(
+        employerID: Employer.ID,
+        start: Date,
+        finish: Date,
+        note: String? = nil,
+        acknowledgingWorkLimitBreach: Bool = false,
+        editing: Shift.ID? = nil
+    ) {
         self.employerID = employerID
         self.start = start
         self.finish = finish
         self.note = note
         self.acknowledgingWorkLimitBreach = acknowledgingWorkLimitBreach
+        self.editing = editing
     }
 }
 
@@ -23,6 +33,8 @@ public enum RosterShiftError: Error, Equatable {
     case tooLong(hours: Double)
     case alreadyFinished
     case employerUnavailable
+    case shiftNotFound
+    case alreadyClockedIn(since: Date)
     case overlaps(employerName: String, existingShift: DateInterval)
     case wouldBreachWorkLimit(fortnight: WorkFortnight, projectedHours: Double)
     case recordsUnavailable
@@ -39,6 +51,10 @@ extension RosterShiftError: LocalizedError {
             "This shift has already finished."
         case .employerUnavailable:
             "This employer is no longer in your list."
+        case .shiftNotFound:
+            "This shift is no longer on your roster."
+        case let .alreadyClockedIn(since):
+            "You've already clocked in to this shift (at \(since.formatted(date: .omitted, time: .shortened))), so its rostered times can't change."
         case let .overlaps(employerName, existingShift):
             "This overlaps your \(employerName) shift (\(existingShift.shiftTimesDescription))."
         case let .wouldBreachWorkLimit(fortnight, projectedHours):
@@ -55,9 +71,13 @@ extension RosterShiftError: LocalizedError {
         case .tooLong:
             "Check AM and PM on the start and finish. Shifts longer than \(RosterShift.longestRosteredShiftHours.hoursDescription) hours can't be rostered."
         case .alreadyFinished:
-            "Add hours you've already worked with Log a past shift in Hours."
+            "To add hours you've already worked, tap the day on the Fortnight screen and choose Log a past shift."
         case .employerUnavailable:
-            "Choose another employer, or add them again in Employers."
+            "Choose another employer, or add them again in Jobs."
+        case .shiftNotFound:
+            "Check your shifts on the Fortnight screen."
+        case .alreadyClockedIn:
+            "Correct the actual times from the shift's details after you clock out."
         case .overlaps:
             "You can't be at two shifts at once. Change these times or edit the other shift."
         case .wouldBreachWorkLimit:
@@ -108,6 +128,9 @@ public struct RosterShift: Sendable {
             throw .wouldBreachWorkLimit(fortnight: breach.fortnight, projectedHours: breach.after.hoursTowardLimit)
         }
         try read { try shifts.save(assessment.shift) }
+        if request.editing != nil {
+            reminders.cancelAllReminders(for: assessment.shift.id)
+        }
         reminders.scheduleReminders(for: assessment.shift, employerName: assessment.employer.name)
         display.shiftsDidChange()
         return assessment.shift
@@ -135,26 +158,34 @@ public struct RosterShift: Sendable {
         guard let employer = try read({ try employers.employer(withID: request.employerID) }), !employer.isArchived else {
             throw .employerUnavailable
         }
+        // Changing times: only before clocking in, and the shift's old times never clash with its new ones.
+        if let editedID = request.editing {
+            guard let edited = try read({ try shifts.shift(withID: editedID) }), edited.status != .notWorked else { throw .shiftNotFound }
+            if let clockedInAt = edited.clockedInAt { throw .alreadyClockedIn(since: clockedInAt) }
+        }
 
         let fortnights = WorkFortnight.overlapping(rosteredTime, calendar: calendar)
         let affectedTime = DateInterval(start: fortnights.first!.startsOn, end: fortnights.last!.interval.end)
         let existingShifts = try read { try shifts.shiftsCountingTowardWorkLimit(overlapping: affectedTime) }
+        let otherShifts = existingShifts.filter { $0.id != request.editing }
         let breaks = try read { try courseBreaks.courseBreaks(overlapping: affectedTime) }
 
-        // Touching end-to-start is fine: finishing at 5pm and starting elsewhere at 5pm isn't an overlap.
-        if let clash = existingShifts.first(where: { existing in
-            guard let taken = existing.timeTowardWorkLimit(asOf: currentTime) else { return false }
-            return taken.start < rosteredTime.end && rosteredTime.start < taken.end
-        }), let clashTime = clash.timeTowardWorkLimit(asOf: currentTime) {
-            let clashEmployerName = try read { try employers.employer(withID: clash.employerID)?.name }
-            throw .overlaps(employerName: clashEmployerName ?? "other", existingShift: clashTime)
+        if let clash = otherShifts.firstClash(with: rosteredTime, asOf: currentTime) {
+            let clashEmployerName = try read { try employers.employer(withID: clash.shift.employerID)?.name }
+            throw .overlaps(employerName: clashEmployerName ?? "other", existingShift: clash.time)
         }
 
-        let shift = Shift(employerID: employer.id, rosteredStart: request.start, rosteredFinish: request.finish, note: request.note)
+        let shift = Shift(
+            id: request.editing ?? UUID(),
+            employerID: employer.id,
+            rosteredStart: request.start,
+            rosteredFinish: request.finish,
+            note: request.note
+        )
         func summary(_ fortnight: WorkFortnight, _ counted: [Shift]) -> FortnightWorkSummary {
             FortnightWorkSummary(fortnight: fortnight, shifts: counted, courseBreaks: breaks, calendar: calendar, now: currentTime)
         }
-        let effects = fortnights.map { FortnightEffect(before: summary($0, existingShifts), after: summary($0, existingShifts + [shift])) }
+        let effects = fortnights.map { FortnightEffect(before: summary($0, existingShifts), after: summary($0, otherShifts + [shift])) }
         return Assessment(employer: employer, shift: shift, effects: effects)
     }
 
