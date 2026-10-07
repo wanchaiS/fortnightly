@@ -128,7 +128,7 @@ public struct RosterShift: Sendable {
         let shift = Shift(employerID: employer.id, rosteredStart: request.start, rosteredFinish: request.finish, note: request.note)
         if !request.acknowledgingWorkLimitBreach {
             let breach = fortnights
-                .map { FortnightWorkSummary(fortnight: $0, shifts: existingShifts + [shift], courseBreaks: breaks, calendar: calendar) }
+                .map { FortnightWorkSummary(fortnight: $0, shifts: existingShifts + [shift], courseBreaks: breaks, calendar: calendar, now: now()) }
                 .first { $0.status == .overLimit }
             if let breach {
                 throw .wouldBreachWorkLimit(fortnight: breach.fortnight, projectedHours: breach.hoursTowardLimit)

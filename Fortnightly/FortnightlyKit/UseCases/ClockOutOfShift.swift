@@ -134,7 +134,7 @@ public struct ClockOutOfShift: Sendable {
         return ClockOutOutcome(
             workedShift: shift,
             fortnights: fortnights.map {
-                FortnightWorkSummary(fortnight: $0, shifts: otherShifts + [shift], courseBreaks: breaks, calendar: calendar)
+                FortnightWorkSummary(fortnight: $0, shifts: otherShifts + [shift], courseBreaks: breaks, calendar: calendar, now: currentTime)
             }
         )
     }
