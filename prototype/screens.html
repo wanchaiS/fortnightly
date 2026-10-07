@@ -1,0 +1,415 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway screen designs in the semester timetable direction, not the app.
+  Every remaining screen and state, drawn with the same data as the earlier mocks
+  (Mon 19 Oct 2026; Café Roma started at 5:00pm and isn't clocked in yet).
+  Native iOS structure and controls; the world shows through palette, type, density and the timetable.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · Fortnightly screens</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #cdd2db; color: #111; font: 15px/1.38 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+.note { background: #101418; color: #e7e9ec; padding: 10px 20px; font-size: 13px; position: sticky; top: 0; z-index: 10; }
+.note b { color: #fff; }
+.note a { color: #9cc3ff; margin-right: 12px; }
+section.group { max-width: 1400px; margin: 30px auto 0; padding: 0 24px; }
+section.group > h2 { margin: 0 0 4px; font-size: 24px; letter-spacing: -.3px; }
+section.group > p { margin: 0 0 18px; max-width: 80ch; color: #2d3340; }
+.row { display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-start; }
+figure { margin: 0; width: 316px; }
+figcaption { font-size: 13.5px; color: #2b2f36; margin-top: 10px; }
+figcaption b { display: block; font-size: 15px; color: #111; }
+figcaption ul { margin: 4px 0 0; padding-left: 18px; }
+.phone { zoom: .78; width: 390px; height: 844px; border-radius: 54px; background: #0a0a0b; padding: 11px; box-shadow: 0 24px 50px -14px rgba(15, 20, 30, .5); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; }
+.num { font-variant-numeric: tabular-nums; }
+button { font: inherit; border: 0; cursor: default; background: none; color: inherit; }
+
+/* palette: light */
+.w { --ink: #16204a; --shell: #16204a; --ground: #eef0f6; --card: #fff; --rule: #d9dde8; --text: #16204a; --muted: #5b6275; --act: #ffc21a; --act-ink: #16204a; --ok: #2b8a3e; --near: #d9480f; --over: #c92a2a; --roma: #6f45e8; --thai: #0f8fa8; --tint: #16204a; --fill: #e3e6ef; --sheet: #f2f3f8; background: var(--ground); color: var(--text); }
+/* palette: dark */
+.w.dark { --ink: #e8ebf5; --shell: #0b1030; --ground: #0d1120; --card: #161b2e; --rule: #283049; --text: #e8ebf5; --muted: #9aa2b8; --ok: #51cf66; --near: #ff922b; --over: #ff6b6b; --roma: #9775fa; --thai: #3bc9db; --tint: #a5b4fc; --fill: #222a42; --sheet: #121729; }
+
+.status { height: 50px; flex: none; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 7px; font-weight: 600; font-size: 15px; }
+.status svg { display: block; }
+.shell { background: var(--shell); color: #fff; flex: none; padding-bottom: 14px; }
+.titlebar { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 16px 10px; }
+.titlebar h1 { margin: 0; font-size: 34px; letter-spacing: -.6px; line-height: 1.05; }
+.titlebar .tools { display: flex; gap: 18px; align-items: center; padding-bottom: 6px; font-weight: 600; font-size: 16px; }
+.seg { display: flex; border-radius: 9px; padding: 2px; margin: 0 16px; background: rgba(255,255,255,.14); }
+.seg button { flex: 1; border-radius: 7px; padding: 7px 4px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.88); }
+.seg button.on { background: #fff; color: #16204a; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.seg.light { background: var(--fill); margin: 0; }
+.seg.light button { color: var(--text); }
+.seg.light button.on { background: var(--card); color: var(--text); }
+.scroll { flex: 1; overflow: hidden; }
+.gauge { display: flex; align-items: center; gap: 16px; padding: 16px 18px 6px; }
+.gauge .read b { display: block; font-size: 30px; letter-spacing: -.5px; line-height: 1.05; }
+.gauge .read span { font-size: 13px; color: var(--muted); }
+.gauge .read .state { display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 600; }
+.span { padding: 0 18px 8px; font-size: 13px; color: var(--muted); }
+.answer { display: flex; align-items: center; gap: 10px; margin: 0 12px 8px; background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: 14px; }
+.answer .q { flex: none; width: 20px; height: 20px; border-radius: 10px; background: var(--near); color: #fff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.answer span { flex: 1; }
+.board { position: relative; margin: 2px 12px 0; background: var(--card); border-radius: 14px; padding: 8px 6px 4px 0; }
+.heads, .week { display: grid; grid-template-columns: 46px repeat(7, 1fr); column-gap: 3px; }
+.heads span { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted); padding-bottom: 4px; }
+.heads span.today { color: var(--text); }
+.week { height: 96px; }
+.week.out { opacity: .32; }
+.wk { font-size: 10.5px; color: var(--muted); line-height: 1.2; padding: 6px 0 0 8px; }
+.wk b { display: block; color: var(--text); font-size: 11px; }
+.day { position: relative; border-top: 1px solid var(--rule); padding: 4px 2px 3px; display: flex; flex-direction: column; }
+.day .d { font-size: 11px; color: var(--muted); }
+.day.today .d { color: var(--card); background: var(--ink); border-radius: 9px; width: 18px; height: 18px; line-height: 18px; text-align: center; font-weight: 700; }
+.day.brk { background: repeating-linear-gradient(135deg, var(--fill) 0 4px, transparent 4px 8px); }
+.blocks { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; }
+.blk { border-radius: 4px; min-height: 6px; }
+.blk.worked { background: var(--c); }
+.blk.rostered { border: 2px solid var(--c); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 22%, var(--card)) 0 3px, var(--card) 3px 6px); }
+.blk.due { box-shadow: 0 0 0 2px var(--act); }
+.blk.new { border-style: dashed; }
+.blk.notWorked { border: 2px solid var(--muted); background: linear-gradient(to top right, transparent calc(50% - 1px), var(--muted) 50%, transparent calc(50% + 1px)); opacity: .6; }
+.h { font-size: 11px; font-weight: 600; text-align: center; padding-top: 2px; }
+.flag { position: absolute; top: 3px; right: 2px; width: 14px; height: 14px; border-radius: 7px; background: var(--near); color: #fff; font-size: 10px; font-weight: 800; line-height: 14px; text-align: center; }
+.frame { position: absolute; left: 46px; right: 3px; height: 192px; border: 2px solid var(--ink); border-radius: 10px; pointer-events: none; }
+.legend { display: flex; gap: 14px; padding: 10px 18px 0; font-size: 12px; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.dock { flex: none; background: var(--shell); color: #fff; padding: 12px 16px 26px; border-radius: 18px 18px 0 0; }
+.dock b { font-size: 17px; }
+.dock p { margin: 2px 0 10px; font-size: 13px; color: rgba(255,255,255,.75); }
+.acts { display: flex; gap: 8px; }
+.acts button { flex: 1; border-radius: 12px; padding: 12px 6px; font-weight: 700; font-size: 15px; }
+.go { background: var(--act); color: var(--act-ink); }
+.alt { background: rgba(255,255,255,.14); color: #fff; }
+.plainbtn { background: #fff; color: #16204a; }
+.homebar { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: #fff; }
+.homebar.dark { background: var(--text); }
+
+/* sheets & lists */
+.dim { position: absolute; inset: 0; background: rgba(5, 8, 20, .45); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; top: 58px; background: var(--sheet); border-radius: 14px 14px 0 0; overflow: hidden; display: flex; flex-direction: column; }
+.sheet.half { top: 340px; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--rule); margin: 6px auto 0; flex: none; }
+.sheethead { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; flex: none; }
+.sheethead b { font-size: 17px; }
+.sheethead button { color: var(--tint); font-size: 17px; }
+.sheethead button.strong { font-weight: 700; }
+.sheethead button.warnbtn { color: var(--over); font-weight: 700; }
+.pad { padding: 0 16px; flex: 1; overflow: hidden; }
+.lbl { font-size: 13px; color: var(--muted); margin: 14px 4px 6px; }
+.list { background: var(--card); border-radius: 12px; overflow: hidden; }
+.li { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--rule); font-size: 16px; min-height: 44px; }
+.li:last-child { border-bottom: 0; }
+.li .grow { flex: 1; }
+.li .val { color: var(--muted); }
+.li .sub { display: block; font-size: 13px; color: var(--muted); }
+.li.tint { color: var(--tint); }
+.li.destructive { color: var(--over); }
+.pill { background: var(--fill); border-radius: 7px; padding: 5px 10px; font-size: 16px; color: var(--text); }
+.dotc { width: 12px; height: 12px; border-radius: 6px; flex: none; }
+.chev { flex: none; opacity: .5; }
+.foot { font-size: 13px; color: var(--muted); margin: 6px 4px 0; }
+.effect { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--rule); font-size: 14px; }
+.effect:last-child { border-bottom: 0; }
+.effect .s { width: 8px; height: 8px; border-radius: 4px; margin-right: 8px; display: inline-block; }
+.warn { background: color-mix(in srgb, var(--over) 10%, var(--card)); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-top: 10px; }
+.warn b { display: block; margin-bottom: 3px; }
+.strip { background: var(--card); border-radius: 12px; padding: 6px 6px 4px 0; }
+.strip .week { height: 84px; }
+.toggle { width: 51px; height: 31px; border-radius: 16px; background: var(--fill); position: relative; flex: none; }
+.toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 14px; background: #fff; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+.toggle.on { background: var(--ok); }
+.toggle.on::after { left: 22px; }
+.bigbtn { display: block; width: 100%; border-radius: 14px; padding: 15px; font-weight: 700; font-size: 17px; text-align: center; }
+.bigbtn.navy { background: var(--ink); color: var(--card); }
+.bigbtn.soft { background: var(--fill); color: var(--text); margin-top: 10px; }
+
+/* lock & home screens */
+.wall { background: linear-gradient(165deg, #3b5bdb 0%, #364fc7 30%, #1b1f5c 70%, #0b0d24 100%); color: #fff; }
+.lockdate { text-align: center; font-size: 19px; font-weight: 600; opacity: .9; margin-top: 8px; }
+.locktime { text-align: center; font-size: 92px; font-weight: 600; line-height: 1; letter-spacing: -2px; }
+.accessories { display: flex; gap: 10px; justify-content: center; margin: 14px 0 0; }
+.acc-rect { width: 172px; height: 72px; border-radius: 16px; background: rgba(255,255,255,.16); padding: 8px 10px; font-size: 13px; line-height: 1.25; backdrop-filter: blur(12px); }
+.acc-rect b { display: block; font-size: 14px; }
+.acc-circ { width: 72px; height: 72px; border-radius: 36px; background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; }
+.notif { margin: 0 10px; border-radius: 22px; background: rgba(246, 247, 251, .97); color: #16204a; overflow: hidden; }
+.notifhead { display: flex; align-items: center; gap: 8px; padding: 12px 14px 0; font-size: 13px; color: #5b6275; font-weight: 600; }
+.notifhead span:last-child { margin-left: auto; font-weight: 400; }
+.appicon { width: 22px; height: 22px; border-radius: 6px; background: #16204a; display: flex; align-items: center; justify-content: center; }
+.notifbody { padding: 8px 14px 12px; }
+.notifbody h3 { margin: 0; font-size: 18px; }
+.notifbody p { margin: 2px 0 10px; font-size: 14px; color: #5b6275; }
+.notifacts { border-top: 1px solid #d9dde8; }
+.notifacts div { padding: 13px; text-align: center; font-size: 17px; color: #0a5bd6; border-bottom: 1px solid #d9dde8; background: rgba(255,255,255,.6); }
+.notifacts div:last-child { border-bottom: 0; color: #c92a2a; }
+.homegrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px 0; padding: 16px 22px; }
+.appi { display: flex; flex-direction: column; align-items: center; gap: 5px; font-size: 11px; }
+.appi i { width: 62px; height: 62px; border-radius: 15px; background: rgba(255,255,255,.22); }
+.wsmall { width: 158px; height: 158px; border-radius: 24px; background: #fff; color: #16204a; padding: 13px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.wsmall .t { font-size: 15px; font-weight: 700; line-height: 1.2; }
+.wsmall .s { font-size: 12.5px; color: #5b6275; }
+.wsmall .wb { border-radius: 10px; padding: 7px 4px; font-size: 13.5px; font-weight: 700; text-align: center; }
+.wsmall .wb.go { background: #ffc21a; color: #16204a; }
+.wsmall .wb.alt { background: #e3e6ef; color: #16204a; margin-top: 5px; }
+.wsmall .wb.navy { background: #16204a; color: #fff; }
+</style>
+</head>
+<body>
+<div class="note"><b>PROTOTYPE — remaining screens in the semester timetable direction.</b> Same data throughout: Mon 19 Oct, 5:05pm; Café Roma started at 5:00 and isn't clocked in. Jump to:
+  <a href="#board">Board states</a><a href="#sheets">Roster &amp; day</a><a href="#details">Shift details</a><a href="#jobs">Jobs &amp; onboarding</a><a href="#ext">Widget &amp; notification</a><a href="#access">Dark &amp; large text</a></div>
+
+<section class="group" id="board">
+  <h2>The fortnight board in its states</h2>
+  <p>The home screen you chose, plus the states it has to handle. The dock always shows the one thing to do now: clock in or out first, then a missed shift, then the next shift.</p>
+  <div class="row">
+    <figure><div class="phone"><div class="screen w" id="s-board"></div></div><figcaption><b>1 · Board: clock-in due</b>The design you approved, plus a "needs an answer" row for Sunday's missed Thai Express shift. The orange "?" on Sunday stays until it's answered.</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-over"></div></div><figcaption><b>2 · Board: over the limit</b>Later that night (11:02pm): Sunday answered "worked", tonight clocked out, then "Add anyway" on Sat 24. Only the hours line and the 48 tick turn red; the rest stays calm. The dock moves on to the next shift.</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-empty"></div></div><figcaption><b>3 · Board: nothing rostered yet</b>First week after onboarding. The empty timetable still shows the two-week frame, and the dock offers the first action: roster a shift.</figcaption></figure>
+  </div>
+</section>
+
+<section class="group" id="sheets">
+  <h2>Adding shifts and looking at a day</h2>
+  <p>Sheets over the board, with native pickers and Cancel / Add. The timetable look carries into the preview.</p>
+  <div class="row">
+    <figure><div class="phone"><div class="screen w" id="s-roster"></div></div><figcaption><b>4 · Roster a shift: safe</b>Thai Express, Thu 29 Oct, 5–11pm. The preview draws the new block (dashed) on its week and lists both fortnights it falls in, before → after.</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-roster-over"></div></div><figcaption><b>5 · Roster a shift: would breach</b>Sat 24 Oct, 10am–2pm. The warning says what and what to do; "Add" becomes "Add anyway", so saving it is the acknowledgement (warn, don't block).</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-day"></div></div><figcaption><b>6 · A day (tap Sat 17)</b>Two jobs in one day, listed with actual times. The day's total and the way to add another shift on that day. Past days offer "Log a past shift" instead.</figcaption></figure>
+  </div>
+</section>
+
+<section class="group" id="details">
+  <h2>Shift details</h2>
+  <p>Tap any shift. What it offers depends on its state; each action is one of the use cases.</p>
+  <div class="row">
+    <figure><div class="phone"><div class="screen w" id="s-missed"></div></div><figcaption><b>7 · A missed shift</b>Thai Express, Sun 18: finished without a clock-in. Says plainly that its 5 hours still count until answered, and asks.</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-upcoming"></div></div><figcaption><b>8 · An upcoming shift</b>Thu 22. Change the times, or mark it as not working (swapped or cancelled) so it stops counting and its prompts stop.</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-worked"></div></div><figcaption><b>9 · A worked shift</b>Sat 17 at Café Roma. Rostered and actual side by side, so it can be checked against a payslip; times can be corrected.</figcaption></figure>
+  </div>
+</section>
+
+<section class="group" id="jobs">
+  <h2>Jobs, course breaks and the first run</h2>
+  <p>Settings-shaped content uses native grouped lists. Onboarding explains the overlapping fortnight once, with the timetable itself.</p>
+  <div class="row">
+    <figure><div class="phone"><div class="screen w" id="s-jobs"></div></div><figcaption><b>10 · Jobs</b>Employers (colour, pay cycle), course breaks, the research-degree setting, and the "not legal advice / check VEVO" note.</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-onb1"></div></div><figcaption><b>11 · Onboarding 1 of 3</b>The rule in one sentence, shown on the timetable: the frame slides a week at a time, so every week is in two fortnights.</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-onb2"></div></div><figcaption><b>12 · Onboarding 2 of 3</b>Why notifications matter, with the prompt the student will get, before iOS asks for permission. Step 3 adds the first employer (a form like Jobs).</figcaption></figure>
+  </div>
+</section>
+
+<section class="group" id="ext">
+  <h2>Widget and notification (the extensions)</h2>
+  <p>Outside the app. Lock Screen widgets are drawn by iOS in one colour, so state there is carried by words and the gauge, not by colour. Notification buttons are drawn by iOS; the custom view above them is ours.</p>
+  <div class="row">
+    <figure><div class="phone"><div class="screen wall" id="s-lock"></div></div><figcaption><b>13 · Lock Screen</b>Rectangle and circle widgets, and the expanded prompt: tonight's block on its week, the effect on both fortnights, and the three actions.</figcaption></figure>
+    <figure><div class="phone"><div class="screen wall" id="s-home"></div></div><figcaption><b>14 · Home Screen widget</b>The small widget in its main states. When a clock-in is due it has the two buttons you chose: "Started 5:00pm" and "Just now".</figcaption></figure>
+  </div>
+</section>
+
+<section class="group" id="access">
+  <h2>Dark Mode and large text</h2>
+  <p>Both are required on iOS. Dark Mode keeps the navy shell and lifts the employer colours. At the largest text sizes, the seven columns can't hold, so the timetable becomes a list per day.</p>
+  <div class="row">
+    <figure><div class="phone"><div class="screen w dark" id="s-dark"></div></div><figcaption><b>15 · Board in Dark Mode</b>The same moment with the phone in Dark Mode, as it would be on the bus home after a late close.</figcaption></figure>
+    <figure><div class="phone"><div class="screen w" id="s-large"></div></div><figcaption><b>16 · Board at a large text size</b>Same information; the week becomes a list of days with their shifts.</figcaption></figure>
+  </div>
+</section>
+<div style="height:60px"></div>
+
+<script>
+// ---------- shared data ----------
+const E = { roma: { name: 'Café Roma', c: 'var(--roma)' }, thai: { name: 'Thai Express', c: 'var(--thai)' } };
+const weekOf12 = [
+  { d: 12, s: [['roma', 6, 'worked']] }, { d: 13, s: [['thai', 5.5, 'worked']] }, { d: 14, s: [['roma', 6, 'worked']] },
+  { d: 15, s: [] }, { d: 16, s: [] }, { d: 17, s: [['roma', 6.25, 'worked'], ['thai', 6, 'worked']] },
+  { d: 18, s: [['thai', 5, 'rostered']], missed: true }];
+const weekOf19 = (extra = {}) => [
+  { d: 19, s: [['roma', 5.5, 'rostered due']], today: true }, { d: 20, s: [] }, { d: 21, s: [] },
+  { d: 22, s: [['thai', 6, 'rostered']] }, { d: 23, s: [] }, { d: 24, s: extra[24] || [] }, { d: 25, s: [] }];
+const weekOf26 = (extra = {}) => [26, 27, 28, 29, 30, 31, 1].map(d => ({ d, s: extra[d] || [] }));
+const emptyWeek = (start, today) => [...Array(7)].map((_, i) => ({ d: start + i > 31 ? start + i - 31 : start + i, s: [], today: start + i === today }));
+const fmt = h => String(Math.round(h * 100) / 100);
+
+// ---------- shared pieces ----------
+const signal = col => `<svg width="62" height="12" viewBox="0 0 62 12"><g fill="${col}"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><rect x="34" y="0.5" width="24" height="11" rx="3" fill="none" stroke="${col}"/><rect x="36" y="2.5" width="18" height="7" rx="1.5"/><rect x="59" y="4" width="2" height="4" rx="1"/></g></svg>`;
+const status = (col = '#fff', time = '5:05') => `<div class="status" style="color:${col}"><span class="num">${time}</span>${signal(col)}</div>`;
+const plus = col => `<svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="${col}" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+const chev = `<svg class="chev" width="8" height="13" viewBox="0 0 8 13"><path d="M1.5 1.5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const fIcon = `<svg width="13" height="13" viewBox="0 0 13 13"><rect x="1" y="2" width="11" height="10" rx="2" fill="none" stroke="#ffc21a" stroke-width="1.6"/><path d="M1 5h11M4 1v2.4M9 1v2.4" stroke="#ffc21a" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+
+function ring(f, size = 96, stroke = 10, ink = 'var(--ink)', tickColour = 'var(--ink)') {
+  const r = size / 2 - stroke / 2 - 4, C = 2 * Math.PI * r, cap = Math.max(48, f.total);
+  const w = f.worked / cap * C, ro = f.rostered / cap * C, c = size / 2;
+  const a = 48 / cap * 2 * Math.PI - Math.PI / 2;
+  const x1 = c + Math.cos(a) * (r - stroke), y1 = c + Math.sin(a) * (r - stroke), x2 = c + Math.cos(a) * (r + stroke), y2 = c + Math.sin(a) * (r + stroke);
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--fill)" stroke-width="${stroke}"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${ink}" stroke-width="${stroke}" stroke-dasharray="${w} ${C}" transform="rotate(-90 ${c} ${c})"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${ink}" stroke-opacity=".35" stroke-width="${stroke}" stroke-dasharray="0 ${w} ${ro} ${C}" transform="rotate(-90 ${c} ${c})"/>
+    <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${tickColour}" stroke-width="2.5"/>
+    <text x="${c}" y="${c + 5}" text-anchor="middle" font-size="${size / 6.4}" font-weight="700" fill="var(--text)">${Math.round(f.total / 48 * 100)}%</text></svg>`;
+}
+function weekRow(label, date, days, cls = '') {
+  return `<div class="week ${cls}"><div class="wk">${label}<b>${date}</b></div>${days.map(day => {
+    const hrs = day.s.reduce((a, s) => a + s[1], 0);
+    return `<div class="day ${day.today ? 'today' : ''} ${day.brk ? 'brk' : ''}"><span class="d num">${day.d}</span>${day.missed ? '<span class="flag">?</span>' : ''}<div class="blocks">${day.s.map(([e, h, k]) => `<div class="blk ${k}" style="--c:${E[e].c};height:${Math.round(h / 12 * 52)}px"></div>`).join('')}</div><div class="h num">${hrs ? fmt(hrs) : ''}</div></div>`;
+  }).join('')}</div>`;
+}
+const heads = `<div class="heads"><span></span><span class="today">M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>`;
+function board(weeks, frameTop = 26) {
+  return `<div class="board">${heads}${weeks.join('')}<div class="frame" style="top:${frameTop}px"></div></div>`;
+}
+const legend = `<div class="legend"><span><i style="background:var(--roma)"></i>Café Roma</span><span><i style="background:var(--thai)"></i>Thai Express</span><span><i style="border:2px solid var(--muted)"></i>Rostered</span></div>`;
+function shell(title = 'Fortnight', seg = ['From Mon 12 Oct', 'From Mon 19 Oct']) {
+  return `<div class="shell">${status()}<div class="titlebar"><h1>${title}</h1><div class="tools"><span>Jobs</span>${plus('#fff')}</div></div>
+    <div class="seg"><button class="on">${seg[0]}</button><button>${seg[1]}</button></div></div>`;
+}
+function gauge(f, line, colour) {
+  return `<div class="gauge">${ring(f, 96, 10, 'var(--ink)', colour === 'var(--over)' ? 'var(--over)' : 'var(--ink)')}<div class="read"><b class="num">${fmt(f.total)} h</b><span>of 48 · <span class="num">${fmt(f.worked)} worked, ${fmt(f.rostered)} rostered</span></span><br><span class="state" style="color:${colour}">${line}</span></div></div>`;
+}
+const answerRow = `<div class="answer"><span class="q">?</span><span><b>Thai Express, Sun 18</b> finished without a clock-in. Did you work it?</span>${chev}</div>`;
+const dockClockIn = `<div class="dock"><b>Café Roma started at 5:00pm</b><p>You haven't clocked in. Rostered until 10:30pm.</p><div class="acts"><button class="go">Started 5:00pm</button><button class="alt">Just now</button></div></div>`;
+const A = { total: 46.25, worked: 29.75, rostered: 16.5 };
+
+// 1 · board, clock-in due
+document.getElementById('s-board').innerHTML = shell() + `<div class="scroll">${gauge(A, '1.75 h left before the limit', 'var(--near)')}<div class="span num">Mon 12 – Sun 25 Oct</div>${answerRow}${board([weekRow('Wk of', '12 Oct', weekOf12), weekRow('Wk of', '19 Oct', weekOf19()), weekRow('Wk of', '26 Oct', weekOf26(), 'out')])}</div>${dockClockIn}<div class="homebar"></div>`;
+
+// 2 · board, over the limit (after Add anyway on Sat 24)
+// Mon 19 at 11:02pm: Sunday answered "worked", tonight clocked out, then "Add anyway" on Sat 24 10am–2pm.
+const over = { total: 50.25, worked: 40.25, rostered: 10 };
+document.getElementById('s-over').innerHTML = shell().replace(status(), status('#fff', '11:02')) + `<div class="scroll">${gauge(over, '2.25 h over the limit', 'var(--over)')}<div class="span num">Mon 12 – Sun 25 Oct</div>${board([weekRow('Wk of', '12 Oct', weekOf12.map(d => d.d === 18 ? { ...d, s: [['thai', 5, 'worked']], missed: false } : d)), weekRow('Wk of', '19 Oct', weekOf19({ 24: [['thai', 4, 'rostered']] }).map(d => d.d === 19 ? { ...d, s: [['roma', 5.5, 'worked']] } : d)), weekRow('Wk of', '26 Oct', weekOf26(), 'out')])}${legend}</div>
+  <div class="dock"><b>Next: Thai Express on Thu at 5:00pm</b><p>Mon 12 – Sun 25 Oct is over the limit. Ask to swap or shorten a shift before Sun 25.</p><div class="acts"><button class="plainbtn">See the fortnight</button></div></div><div class="homebar"></div>`;
+
+// 3 · board, empty
+document.getElementById('s-empty').innerHTML = shell('Fortnight', ['From Mon 12 Oct', 'From Mon 19 Oct']) + `<div class="scroll">${gauge({ total: 0, worked: 0, rostered: 0 }, '48 h available', 'var(--ok)')}<div class="span num">Mon 12 – Sun 25 Oct</div>${board([weekRow('Wk of', '12 Oct', emptyWeek(12)), weekRow('Wk of', '19 Oct', emptyWeek(19, 19)), weekRow('Wk of', '26 Oct', emptyWeek(26), 'out')])}<p style="margin:14px 18px;font-size:14px;color:var(--muted)">No shifts yet. Add each shift as soon as your manager sends the roster, and Fortnightly will remind you to clock in.</p></div>
+  <div class="dock"><b>Nothing rostered</b><p>Your next shift will appear here.</p><div class="acts"><button class="plainbtn">Roster a shift</button></div></div><div class="homebar"></div>`;
+
+// sheet helper over a dimmed board
+function sheetOver(innerHead, body, half = false) {
+  return shell() + `<div class="scroll">${gauge(A, '1.75 h left before the limit', 'var(--near)')}</div><div class="dim"></div>
+    <div class="sheet ${half ? 'half' : ''}"><div class="grabber"></div>${innerHead}<div class="pad">${body}</div></div>`;
+}
+const segEmployers = sel => `<div class="seg light">${['Café Roma', 'Thai Express'].map(n => `<button class="${n === sel ? 'on' : ''}">${n}</button>`).join('')}</div>`;
+function rosterForm(day, start, finish) {
+  return `<div class="lbl">Employer</div>${segEmployers('Thai Express')}
+    <div class="lbl">When</div><div class="list"><div class="li"><span class="grow">Day</span><span class="pill num">${day}</span></div><div class="li"><span class="grow">Starts</span><span class="pill num">${start}</span></div><div class="li"><span class="grow">Finishes</span><span class="pill num">${finish}</span></div></div>`;
+}
+
+// 4 · roster a shift, safe (Thu 29 Oct 5–11pm)
+document.getElementById('s-roster').innerHTML = sheetOver(
+  `<div class="sheethead"><button>Cancel</button><b>Roster a shift</b><button class="strong">Add</button></div>`,
+  rosterForm('Thu 29 Oct', '5:00 pm', '11:00 pm') + `<div class="lbl">On your timetable</div><div class="strip">${heads}${weekRow('Wk of', '26 Oct', weekOf26({ 29: [['thai', 6, 'rostered new']] }))}</div>
+   <div class="lbl">Effect on your work fortnights</div><div class="list"><div class="effect"><span><span class="s" style="background:var(--ok)"></span>Mon 19 Oct – Sun 1 Nov</span><span class="num">11.5 → <b>17.5</b> of 48</span></div><div class="effect"><span><span class="s" style="background:var(--ok)"></span>Mon 26 Oct – Sun 8 Nov</span><span class="num">0 → <b>6</b> of 48</span></div></div>`);
+
+// 5 · roster a shift, would breach (Sat 24 Oct 10am–2pm)
+document.getElementById('s-roster-over').innerHTML = sheetOver(
+  `<div class="sheethead"><button>Cancel</button><b>Roster a shift</b><button class="warnbtn">Add anyway</button></div>`,
+  rosterForm('Sat 24 Oct', '10:00 am', '2:00 pm') + `<div class="lbl">On your timetable</div><div class="strip">${heads}${weekRow('Wk of', '19 Oct', weekOf19({ 24: [['thai', 4, 'rostered new']] }))}</div>
+   <div class="lbl">Effect on your work fortnights</div><div class="list"><div class="effect"><span><span class="s" style="background:var(--over)"></span>Mon 12 – Sun 25 Oct</span><span class="num">46.25 → <b style="color:var(--over)">50.25</b> of 48</span></div><div class="effect"><span><span class="s" style="background:var(--ok)"></span>Mon 19 Oct – Sun 1 Nov</span><span class="num">11.5 → <b>15.5</b> of 48</span></div></div>
+   <div class="warn"><b>This shift would take you to 50.25 of 48 hours for Mon 12 – Sun 25 Oct.</b>Your student visa allows 48 hours a fortnight during semester. Ask your manager to shorten or swap this shift. You can still add it so your record stays accurate.</div>`);
+
+// 6 · a day (Sat 17)
+document.getElementById('s-day').innerHTML = sheetOver(
+  `<div class="sheethead"><span style="width:60px"></span><b>Saturday 17 October</b><button>Done</button></div>`,
+  `<div class="list" style="margin-top:6px">
+    <div class="li"><span class="dotc" style="background:var(--roma)"></span><span class="grow">Café Roma<span class="sub num">Worked 9:00am – 3:15pm</span></span><span class="val num">6.25 h</span>${chev}</div>
+    <div class="li"><span class="dotc" style="background:var(--thai)"></span><span class="grow">Thai Express<span class="sub num">Worked 5:00 – 11:00pm</span></span><span class="val num">6 h</span>${chev}</div></div>
+   <div class="foot num">12.25 hours on this day. It's in the fortnights from Mon 5 Oct and Mon 12 Oct.</div>
+   <div class="list" style="margin-top:16px"><div class="li tint">${plus('var(--tint)')}<span class="grow">Log a past shift on Sat 17</span></div></div>`, true);
+
+// detail sheets
+function detail(title, sub, rows, actions, note = '') {
+  return sheetOver(`<div class="sheethead"><span style="width:60px"></span><b>Shift details</b><button>Done</button></div>`,
+    `<div style="padding:4px 4px 0"><div style="font-size:24px;font-weight:700;letter-spacing:-.3px">${title}</div><div style="color:var(--muted);font-size:14px" class="num">${sub}</div></div>
+     <div class="list" style="margin-top:14px">${rows.map(([k, v]) => `<div class="li"><span class="grow">${k}</span><span class="val num">${v}</span></div>`).join('')}</div>
+     ${note ? `<div class="foot">${note}</div>` : ''}${actions}`);
+}
+// 7 · missed
+document.getElementById('s-missed').innerHTML = detail('Thai Express', 'Sun 18 Oct · finished without a clock-in',
+  [['Rostered', '5:00 – 10:00pm'], ['Clocked in', 'No'], ['Counts toward', 'Fortnights from 5 and 12 Oct']],
+  `<div style="margin-top:18px;font-size:17px;font-weight:700;padding:0 4px">Did you work this shift?</div>
+   <div style="margin-top:10px"><button class="bigbtn navy">Yes, enter my times</button><button class="bigbtn soft">No, I didn't work it</button></div>`,
+  'Until you answer, its 5 hours still count toward your fortnight.');
+// 8 · upcoming
+document.getElementById('s-upcoming').innerHTML = detail('Thai Express', 'Thu 22 Oct · rostered',
+  [['Starts', '5:00pm'], ['Finishes', '11:00pm'], ['Reminders', '5:00pm and 11:00pm']],
+  `<div class="list" style="margin-top:16px"><div class="li tint"><span class="grow">Change times</span>${chev}</div><div class="li destructive"><span class="grow">Not working this shift</span></div></div>
+   <div class="foot">Use "Not working" when a shift is swapped or cancelled. Its hours stop counting and its prompts stop.</div>`);
+// 9 · worked
+document.getElementById('s-worked').innerHTML = detail('Café Roma', 'Sat 17 Oct · worked',
+  [['Rostered', '9:00am – 3:00pm'], ['Clocked in', '9:00am'], ['Clocked out', '3:15pm'], ['Hours worked', '6.25']],
+  `<div class="list" style="margin-top:16px"><div class="li tint"><span class="grow">Correct times</span>${chev}</div></div>
+   <div class="foot">You stayed 15 minutes past the rostered finish. Check it's on your payslip.</div>`);
+
+// 10 · jobs
+document.getElementById('s-jobs').innerHTML = `<div class="shell">${status()}<div style="padding:4px 12px;color:#fff;font-size:17px;display:flex;align-items:center;gap:4px"><svg width="12" height="20" viewBox="0 0 12 20"><path d="M10 2L2 10l8 8" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Fortnight</div><div class="titlebar"><h1>Jobs</h1></div></div>
+  <div class="scroll" style="padding:0 16px"><div class="lbl">Where you work</div><div class="list">
+    <div class="li"><span class="dotc" style="background:var(--roma)"></span><span class="grow">Café Roma<span class="sub">Paid fortnightly</span></span>${chev}</div>
+    <div class="li"><span class="dotc" style="background:var(--thai)"></span><span class="grow">Thai Express<span class="sub">Paid weekly</span></span>${chev}</div>
+    <div class="li tint">${plus('var(--tint)')}<span class="grow">Add an employer</span></div></div>
+   <div class="lbl">Course breaks</div><div class="list">
+    <div class="li"><span class="grow">Summer break<span class="sub num">Mon 23 Nov – Sun 21 Feb</span></span>${chev}</div>
+    <div class="li tint">${plus('var(--tint)')}<span class="grow">Add a course break</span></div></div>
+   <div class="foot">The 48-hour limit doesn't apply while your course isn't in session.</div>
+   <div class="lbl">Your visa</div><div class="list"><div class="li"><span class="grow">Research masters or PhD<span class="sub">No limit on hours</span></span><span class="toggle"></span></div></div>
+   <div class="foot">Fortnightly helps you track your hours. It isn't legal advice: check your own visa conditions in VEVO.</div></div><div class="homebar dark"></div>`;
+
+// 11 · onboarding 1
+document.getElementById('s-onb1').innerHTML = `${status('var(--text)', '9:41')}<div class="scroll" style="padding:24px 22px 0">
+   <div style="font-size:34px;font-weight:700;letter-spacing:-.6px;line-height:1.1">48 hours in any fortnight</div>
+   <p style="font-size:17px;color:var(--muted);margin:12px 0 22px">Your student visa limits work to 48 hours in any 14 days that start on a Monday. Every week belongs to two of them, and both count.</p>
+   ${board([weekRow('Wk 1', '', [...Array(7)].map((_, i) => ({ d: i + 1, s: i % 2 ? [] : [[i % 4 ? 'thai' : 'roma', 6, 'worked']] }))), weekRow('Wk 2', '', [...Array(7)].map((_, i) => ({ d: i + 8, s: i === 2 || i === 5 ? [['roma', 6, 'worked']] : [] }))), weekRow('Wk 3', '', [...Array(7)].map((_, i) => ({ d: i + 15, s: [] })), 'out')])}
+   <p style="font-size:15px;color:var(--muted);margin:14px 2px 0">Fortnightly adds up your hours across all your jobs and warns you before a shift would take either fortnight over.</p></div>
+  <div style="padding:16px 22px 40px"><button class="bigbtn navy">Continue</button><div style="display:flex;gap:6px;justify-content:center;margin-top:14px"><i style="width:8px;height:8px;border-radius:4px;background:var(--ink)"></i><i style="width:8px;height:8px;border-radius:4px;background:var(--rule)"></i><i style="width:8px;height:8px;border-radius:4px;background:var(--rule)"></i></div></div><div class="homebar dark"></div>`;
+
+// 12 · onboarding 2
+document.getElementById('s-onb2').innerHTML = `${status('var(--text)', '9:41')}<div class="scroll" style="padding:24px 22px 0">
+   <div style="font-size:34px;font-weight:700;letter-spacing:-.6px;line-height:1.1">A prompt at every start and finish</div>
+   <p style="font-size:17px;color:var(--muted);margin:12px 0 22px">When a shift starts or ends, Fortnightly asks you to clock in or out, so your record has the times you actually worked. Nothing leaves your phone.</p>
+   <div class="notif" style="margin:0;box-shadow:0 8px 24px rgba(22,32,74,.18)"><div class="notifhead"><span class="appicon">${fIcon}</span>FORTNIGHTLY<span>now</span></div><div class="notifbody"><h3>Café Roma started at 5:00pm</h3><p style="margin-bottom:0">Clock in so this fortnight's hours stay accurate.</p></div></div></div>
+  <div style="padding:16px 22px 40px"><button class="bigbtn navy">Turn on notifications</button><button class="bigbtn soft">Not now</button><div style="display:flex;gap:6px;justify-content:center;margin-top:14px"><i style="width:8px;height:8px;border-radius:4px;background:var(--rule)"></i><i style="width:8px;height:8px;border-radius:4px;background:var(--ink)"></i><i style="width:8px;height:8px;border-radius:4px;background:var(--rule)"></i></div></div><div class="homebar dark"></div>`;
+
+// 13 · lock screen
+const monoRing = `<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="5"/><circle cx="30" cy="30" r="24" fill="none" stroke="#fff" stroke-width="5" stroke-dasharray="${46.25 / 48 * 150.8} 150.8" transform="rotate(-90 30 30)" stroke-linecap="round"/><text x="30" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">46</text></svg>`;
+document.getElementById('s-lock').innerHTML = `${status('#fff')}<div class="lockdate">Monday 19 October</div><div class="locktime num">5:05</div>
+  <div class="accessories"><div class="acc-rect"><b>Café Roma</b><span class="num">Not clocked in · 5:00pm<br>46.25 of 48 h</span></div><div class="acc-circ">${monoRing}</div></div>
+  <div style="flex:1"></div>
+  <div class="notif" style="margin-bottom:28px"><div class="notifhead"><span class="appicon">${fIcon}</span>FORTNIGHTLY<span>5 min ago</span></div>
+    <div class="notifbody"><h3>Café Roma started at 5:00pm</h3><p>Rostered until 10:30pm. Clock in so this fortnight's hours stay accurate.</p>
+      <div class="w" style="background:none;color:#16204a"><div class="strip" style="box-shadow:0 0 0 1px #d9dde8">${heads}${weekRow('Wk of', '19 Oct', weekOf19())}</div>
+      <div class="list" style="margin-top:8px;box-shadow:0 0 0 1px #d9dde8"><div class="effect"><span><span class="s" style="background:var(--near)"></span>Mon 12 – Sun 25 Oct</span><span class="num">40.75 → <b>46.25</b> of 48</span></div><div class="effect"><span><span class="s" style="background:var(--ok)"></span>Mon 19 Oct – Sun 1 Nov</span><span class="num">6 → <b>11.5</b> of 48</span></div></div></div></div>
+    <div class="notifacts"><div>Started 5:00pm</div><div>Started just now (5:05pm)</div><div>Not working this shift</div></div></div><div class="homebar"></div>`;
+
+// 14 · home screen widgets
+const appIcons = n => [...Array(n)].map(() => `<div class="appi"><i></i></div>`).join('');
+document.getElementById('s-home').innerHTML = `${status('#fff')}
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:18px 18px 0">
+    <div><div class="wsmall"><div><div class="t">Café Roma started at 5:00pm</div><div class="s">Not clocked in</div></div><div><div class="wb go">Started 5:00pm</div><div class="wb alt">Just now</div></div></div><div style="text-align:center;font-size:11px;margin-top:6px">Clock-in due</div></div>
+    <div><div class="wsmall"><div><div class="t">On shift at Café Roma</div><div class="s num">since 5:00pm · 2:14</div></div><div class="s num">46.25 of 48 h this fortnight</div><div class="wb navy">Clock out</div></div><div style="text-align:center;font-size:11px;margin-top:6px">On shift</div></div>
+    <div><div class="wsmall"><div><div class="t">Thai Express on Thu at 5:00pm</div><div class="s">Next shift</div></div><div class="s num">46.25 of 48 h this fortnight</div></div><div style="text-align:center;font-size:11px;margin-top:6px">Next shift</div></div>
+    <div><div class="wsmall"><div><div class="t">Still clocked in at Café Roma</div><div class="s">Rostered finish was 10:30pm</div></div><div class="wb go">Finished 10:30pm</div></div><div style="text-align:center;font-size:11px;margin-top:6px">Clock-out due</div></div>
+  </div>
+  <div class="homegrid">${appIcons(8)}</div><div class="homebar"></div>`;
+
+// 15 · dark mode board
+document.getElementById('s-dark').innerHTML = shell() + `<div class="scroll">${gauge(A, '1.75 h left before the limit', 'var(--near)')}<div class="span num">Mon 12 – Sun 25 Oct</div>${answerRow}${board([weekRow('Wk of', '12 Oct', weekOf12), weekRow('Wk of', '19 Oct', weekOf19()), weekRow('Wk of', '26 Oct', weekOf26(), 'out')])}</div>${dockClockIn}<div class="homebar"></div>`;
+
+// 16 · large text
+document.getElementById('s-large').innerHTML = `<div class="shell">${status()}<div class="titlebar"><h1 style="font-size:40px">Fortnight</h1><div class="tools" style="font-size:20px">${plus('#fff')}</div></div><div class="seg"><button class="on" style="font-size:17px">From 12 Oct</button><button style="font-size:17px">From 19 Oct</button></div></div>
+  <div class="scroll" style="padding:12px 16px 0;font-size:21px">
+    <div style="font-size:38px;font-weight:700;letter-spacing:-.5px" class="num">46.25 h <span style="font-size:21px;font-weight:400;color:var(--muted)">of 48</span></div>
+    <div style="color:var(--near);font-weight:600" class="num">1.75 h left before the limit</div>
+    <div class="list" style="margin-top:12px">
+      <div class="li" style="font-size:21px"><span class="grow"><b>Mon 19 · today</b><span class="sub num" style="font-size:18px">Café Roma 5:00 – 10:30pm</span></span><span class="val num">5.5</span></div>
+      <div class="li" style="font-size:21px"><span class="grow"><b>Sun 18</b><span class="sub num" style="font-size:18px">Thai Express · not clocked in</span></span><span class="val num">5</span></div>
+      <div class="li" style="font-size:21px"><span class="grow"><b>Sat 17</b><span class="sub num" style="font-size:18px">Café Roma, Thai Express</span></span><span class="val num">12.25</span></div></div></div>
+  <div class="dock"><b style="font-size:22px">Café Roma started at 5:00pm</b><div class="acts" style="flex-direction:column;margin-top:10px"><button class="go" style="font-size:20px">Started 5:00pm</button><button class="alt" style="font-size:20px">Just now</button></div></div><div class="homebar"></div>`;
+</script>
+</body>
+</html>
