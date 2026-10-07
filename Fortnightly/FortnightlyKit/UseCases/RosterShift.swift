@@ -159,8 +159,9 @@ public struct RosterShift: Sendable {
             throw .employerUnavailable
         }
         // Changing times: only before clocking in, and the shift's old times never clash with its new ones.
+        // A shift marked not working can be put back on the roster this way.
         if let editedID = request.editing {
-            guard let edited = try read({ try shifts.shift(withID: editedID) }), edited.status != .notWorked else { throw .shiftNotFound }
+            guard let edited = try read({ try shifts.shift(withID: editedID) }) else { throw .shiftNotFound }
             if let clockedInAt = edited.clockedInAt { throw .alreadyClockedIn(since: clockedInAt) }
         }
 
