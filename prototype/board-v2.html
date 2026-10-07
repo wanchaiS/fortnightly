@@ -1,0 +1,249 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway redesign of the board, not the app.
+  The user's direction (2026-10-07): no calendar grid on mobile. A donut of hours against the 48 cap,
+  coloured by employer, and below it the fortnight's 14 days as a scrollable list; each row is a
+  12-hour bar that fits two jobs, in the same colours as the donut. Same data as the earlier mocks.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · Fortnight board v2 (donut + days)</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #cdd2db; color: #111; font: 15px/1.38 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; -webkit-font-smoothing: antialiased; }
+.note { background: #101418; color: #e7e9ec; padding: 10px 20px; font-size: 13px; }
+.note b { color: #fff; }
+.row { display: flex; gap: 26px; flex-wrap: wrap; align-items: flex-start; justify-content: center; padding: 26px 20px 50px; }
+figure { margin: 0; width: 316px; }
+figcaption { font-size: 13.5px; color: #2b2f36; margin-top: 10px; }
+figcaption b { display: block; font-size: 15px; color: #111; }
+.phone { zoom: .78; width: 390px; height: 844px; border-radius: 54px; background: #0a0a0b; padding: 11px; box-shadow: 0 24px 50px -14px rgba(15, 20, 30, .5); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; }
+.num { font-variant-numeric: tabular-nums; }
+button { font: inherit; border: 0; background: none; color: inherit; }
+
+.w { --ink: #16204a; --shell: #16204a; --ground: #eef0f6; --card: #fff; --rule: #e1e4ed; --text: #16204a; --muted: #5b6275; --act: #ffc21a; --ok: #2b8a3e; --near: #d9480f; --over: #c92a2a; --roma: #6f45e8; --thai: #0f8fa8; --tint: #16204a; --fill: #e3e6ef; --sheet: #f2f3f8; background: var(--ground); color: var(--text); }
+.w.dark { --ink: #e8ebf5; --shell: #0b1030; --ground: #0d1120; --card: #161b2e; --rule: #232a42; --text: #e8ebf5; --muted: #9aa2b8; --ok: #51cf66; --near: #ff922b; --over: #ff6b6b; --roma: #9775fa; --thai: #3bc9db; --tint: #a5b4fc; --fill: #252d47; --sheet: #121729; }
+
+.status { height: 50px; flex: none; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 7px; font-weight: 600; font-size: 15px; }
+.shell { background: var(--shell); color: #fff; flex: none; padding-bottom: 14px; }
+.titlebar { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 16px 10px; }
+.titlebar h1 { margin: 0; font-size: 34px; letter-spacing: -.6px; line-height: 1.05; }
+.titlebar .tools { display: flex; gap: 18px; align-items: center; padding-bottom: 6px; font-weight: 600; font-size: 16px; }
+.seg { display: flex; border-radius: 9px; padding: 2px; margin: 0 16px; background: rgba(255,255,255,.14); }
+.seg button { flex: 1; border-radius: 7px; padding: 7px 4px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,.88); }
+.seg button.on { background: #fff; color: #16204a; box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.seg.light { background: var(--fill); margin: 0; }
+.seg.light button { color: var(--text); }
+.seg.light button.on { background: var(--card); color: var(--text); }
+.scroll { flex: 1; overflow: hidden; position: relative; }
+.scroll::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 28px; background: linear-gradient(to bottom, transparent, var(--ground)); pointer-events: none; }
+
+.donut { display: flex; flex-direction: column; align-items: center; padding: 16px 16px 4px; }
+.donut svg { display: block; }
+.statusline { font-size: 15px; font-weight: 600; margin-top: 8px; }
+.key { display: flex; gap: 16px; font-size: 13px; color: var(--muted); margin-top: 6px; }
+.key i { display: inline-block; width: 10px; height: 10px; border-radius: 5px; margin-right: 6px; vertical-align: 0; }
+.key b { color: var(--text); font-weight: 600; }
+.answer { display: flex; align-items: center; gap: 10px; margin: 10px 16px 0; background: var(--card); border-radius: 12px; padding: 10px 12px; font-size: 14px; }
+.q { flex: none; width: 20px; height: 20px; border-radius: 10px; background: var(--near); color: #fff; font-weight: 800; font-size: 12px; display: flex; align-items: center; justify-content: center; }
+.answer span:nth-child(2) { flex: 1; }
+.days { margin: 12px 16px 0; background: var(--card); border-radius: 14px; overflow: hidden; }
+.wkhead { font-size: 12px; font-weight: 600; color: var(--muted); padding: 10px 14px 4px; display: flex; justify-content: space-between; }
+.drow { display: grid; grid-template-columns: 64px 1fr 44px; align-items: center; gap: 8px; padding: 0 14px; height: 44px; border-top: 1px solid var(--rule); }
+.drow .dl { font-size: 14px; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.drow .dl b { font-weight: 600; }
+.drow.today .dl b { background: var(--ink); color: var(--card); border-radius: 8px; padding: 1px 6px; }
+.drow.empty .dl { color: var(--muted); }
+.drow .hrs { text-align: right; font-size: 14px; font-weight: 600; }
+.drow.empty .hrs { color: var(--muted); font-weight: 400; }
+.track { position: relative; height: 16px; border-radius: 5px; background: var(--fill); display: flex; gap: 2px; overflow: hidden; }
+.seg-w { background: var(--c); height: 100%; border-radius: 4px; }
+.seg-r { height: 100%; border-radius: 4px; background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 55%, var(--card)) 0 3px, color-mix(in srgb, var(--c) 25%, var(--card)) 3px 6px); box-shadow: inset 0 0 0 1.5px var(--c); }
+.seg-r.due { box-shadow: inset 0 0 0 1.5px var(--c), 0 0 0 2px var(--act); }
+.seg-r.new { box-shadow: none; outline: 2px dashed var(--c); outline-offset: -2px; }
+.drow .q { width: 16px; height: 16px; font-size: 10px; }
+.dock { flex: none; background: var(--shell); color: #fff; padding: 12px 16px 26px; border-radius: 18px 18px 0 0; }
+.dock b { font-size: 17px; }
+.dock p { margin: 2px 0 10px; font-size: 13px; color: rgba(255,255,255,.75); }
+.acts { display: flex; gap: 8px; }
+.acts button { flex: 1; border-radius: 12px; padding: 12px 6px; font-weight: 700; font-size: 15px; }
+.go { background: var(--act); color: #16204a; }
+.alt { background: rgba(255,255,255,.14); color: #fff; }
+.plainbtn { background: #fff; color: #16204a; }
+.homebar { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: #fff; }
+
+/* sheet */
+.dim { position: absolute; inset: 0; background: rgba(5, 8, 20, .45); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; top: 58px; background: var(--sheet); border-radius: 14px 14px 0 0; overflow: hidden; display: flex; flex-direction: column; }
+.grabber { width: 36px; height: 5px; border-radius: 3px; background: var(--rule); margin: 6px auto 0; flex: none; }
+.sheethead { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; flex: none; }
+.sheethead b { font-size: 17px; }
+.sheethead button { color: var(--tint); font-size: 17px; }
+.sheethead button.warnbtn { color: var(--over); font-weight: 700; }
+.pad { padding: 0 16px; }
+.lbl { font-size: 13px; color: var(--muted); margin: 14px 4px 6px; }
+.list { background: var(--card); border-radius: 12px; overflow: hidden; }
+.li { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--rule); font-size: 16px; min-height: 44px; }
+.li:last-child { border-bottom: 0; }
+.li .grow { flex: 1; }
+.pill { background: var(--fill); border-radius: 7px; padding: 5px 10px; font-size: 16px; }
+.effect { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; border-bottom: 1px solid var(--rule); font-size: 14px; }
+.effect:last-child { border-bottom: 0; }
+.effect .s { width: 8px; height: 8px; border-radius: 4px; margin-right: 8px; display: inline-block; }
+.warn { background: color-mix(in srgb, var(--over) 10%, var(--card)); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-top: 10px; }
+.warn b { display: block; margin-bottom: 3px; }
+
+/* lock / home */
+.wall { background: linear-gradient(165deg, #3b5bdb 0%, #364fc7 30%, #1b1f5c 70%, #0b0d24 100%); color: #fff; }
+.lockdate { text-align: center; font-size: 19px; font-weight: 600; opacity: .9; margin-top: 8px; }
+.locktime { text-align: center; font-size: 92px; font-weight: 600; line-height: 1; letter-spacing: -2px; }
+.notif { margin: 0 10px 28px; border-radius: 22px; background: rgba(246, 247, 251, .97); color: #16204a; overflow: hidden; }
+.notifhead { display: flex; align-items: center; gap: 8px; padding: 12px 14px 0; font-size: 13px; color: #5b6275; font-weight: 600; }
+.notifhead span:last-child { margin-left: auto; font-weight: 400; }
+.appicon { width: 22px; height: 22px; border-radius: 6px; background: #16204a; display: flex; align-items: center; justify-content: center; }
+.notifbody { padding: 8px 14px 12px; }
+.notifbody h3 { margin: 0; font-size: 18px; }
+.notifbody p { margin: 2px 0 8px; font-size: 14px; color: #5b6275; }
+.notifacts div { padding: 13px; text-align: center; font-size: 17px; color: #0a5bd6; border-top: 1px solid #d9dde8; background: rgba(255,255,255,.6); }
+.notifacts div:last-child { color: #c92a2a; }
+.wsmall { width: 158px; height: 158px; border-radius: 24px; background: #fff; color: #16204a; padding: 12px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+.wsmall .t { font-size: 14.5px; font-weight: 700; line-height: 1.2; }
+.wsmall .s { font-size: 12px; color: #5b6275; }
+.wsmall .wb { border-radius: 10px; padding: 7px 4px; font-size: 13.5px; font-weight: 700; text-align: center; }
+.wsmall .wb.go { background: #ffc21a; }
+.wsmall .wb.alt { background: #e3e6ef; color: #16204a; margin-top: 5px; }
+.wsmall .wb.navy { background: #16204a; color: #fff; }
+.accrow { display: flex; gap: 10px; justify-content: center; margin-top: 14px; }
+.acc-rect { width: 172px; height: 72px; border-radius: 16px; background: rgba(255,255,255,.16); padding: 8px 10px; font-size: 13px; line-height: 1.25; }
+.acc-rect b { display: block; font-size: 14px; }
+.acc-circ { width: 72px; height: 72px; border-radius: 36px; background: rgba(255,255,255,.16); display: flex; align-items: center; justify-content: center; }
+</style>
+</head>
+<body>
+<div class="note"><b>PROTOTYPE — board redesign (your direction).</b> No calendar grid: a donut of hours against 48, coloured by employer, then the fortnight's 14 days as a scrollable list. Each row is a 12-hour bar that fits two jobs, in the donut's colours. Solid = worked, light = rostered. Same data as before: Mon 19 Oct, 5:05pm.</div>
+<div class="row">
+  <figure><div class="phone"><div class="screen w" id="v-board"></div></div><figcaption><b>A · Board: clock-in due</b>Donut by employer (solid worked, light still rostered, tick at 48), then Mon 12 – Sun 25 as rows. Tonight's bar has the yellow "act now" ring; Sunday has its "?".</figcaption></figure>
+  <figure><div class="phone"><div class="screen w" id="v-scrolled"></div></div><figcaption><b>B · Scrolled down</b>The second week of the fortnight. The donut shrinks into the navigation bar as you scroll, so the hours stay visible.</figcaption></figure>
+  <figure><div class="phone"><div class="screen w" id="v-other"></div></div><figcaption><b>C · The other fortnight</b>"From Mon 19 Oct" in the switcher: same rows from Mon 19, so this week appears in both lists, the overlap made visible without a calendar.</figcaption></figure>
+  <figure><div class="phone"><div class="screen w" id="v-over"></div></div><figcaption><b>D · Over the limit</b>Later that night after "Add anyway" on Sat 24. The donut passes the tick and the status line turns red; nothing else is alarming.</figcaption></figure>
+  <figure><div class="phone"><div class="screen w" id="v-roster"></div></div><figcaption><b>E · Roster a shift, would breach</b>The preview reuses the day row: Saturday's bar with the new shift dashed, then before → after for both fortnights.</figcaption></figure>
+  <figure><div class="phone"><div class="screen wall" id="v-lock"></div></div><figcaption><b>F · Lock Screen</b>Lock Screen widgets are one colour (iOS draws them), so the circle is a plain donut and words carry the state. The expanded prompt shows a small donut in employer colours and tonight's day row.</figcaption></figure>
+  <figure><div class="phone"><div class="screen wall" id="v-home"></div></div><figcaption><b>H · Home Screen widget</b>The small widget pairs the donut with what to do: the two clock-in buttons you chose, a clock-out button while on shift, or the next shift.</figcaption></figure>
+  <figure><div class="phone"><div class="screen w dark" id="v-dark"></div></div><figcaption><b>G · Dark Mode</b>Same board; employer colours lifted for the dark ground.</figcaption></figure>
+</div>
+<script>
+const E = { roma: { name: 'Café Roma', c: 'var(--roma)' }, thai: { name: 'Thai Express', c: 'var(--thai)' } };
+const fmt = h => String(Math.round(h * 100) / 100);
+const DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+// shift: [employer, hours, kind] kind: worked | rostered | due | new
+const days12 = [
+  { d: 12, s: [['roma', 6, 'worked']] }, { d: 13, s: [['thai', 5.5, 'worked']] }, { d: 14, s: [['roma', 6, 'worked']] },
+  { d: 15, s: [] }, { d: 16, s: [] }, { d: 17, s: [['roma', 6.25, 'worked'], ['thai', 6, 'worked']] }, { d: 18, s: [['thai', 5, 'rostered']], missed: true }];
+const days19 = (x = {}) => [
+  { d: 19, s: x[19] || [['roma', 5.5, 'due']], today: true }, { d: 20, s: [] }, { d: 21, s: [] }, { d: 22, s: [['thai', 6, 'rostered']] },
+  { d: 23, s: [] }, { d: 24, s: x[24] || [] }, { d: 25, s: [] }];
+const days26 = [26, 27, 28, 29, 30, 31, 1].map(d => ({ d, s: [] }));
+
+const signal = col => `<svg width="62" height="12" viewBox="0 0 62 12"><g fill="${col}"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><rect x="34" y="0.5" width="24" height="11" rx="3" fill="none" stroke="${col}"/><rect x="36" y="2.5" width="18" height="7" rx="1.5"/><rect x="59" y="4" width="2" height="4" rx="1"/></g></svg>`;
+const status = (col = '#fff', time = '5:05') => `<div class="status" style="color:${col}"><span class="num">${time}</span>${signal(col)}</div>`;
+const plus = col => `<svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="${col}" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+const chev = `<svg width="8" height="13" viewBox="0 0 8 13" style="opacity:.5;flex:none"><path d="M1.5 1.5l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+const fIcon = `<svg width="13" height="13" viewBox="0 0 13 13"><rect x="1" y="2" width="11" height="10" rx="2" fill="none" stroke="#ffc21a" stroke-width="1.6"/><path d="M1 5h11M4 1v2.4M9 1v2.4" stroke="#ffc21a" stroke-width="1.6" stroke-linecap="round"/></svg>`;
+
+// Donut: one arc per employer and kind, worked first then rostered, gaps between, tick at 48.
+function donut(parts, size = 200, stroke = 22, centre = true) {
+  const total = parts.reduce((a, p) => a + p.h, 0), cap = Math.max(48, total);
+  const r = size / 2 - stroke / 2 - 6, C = 2 * Math.PI * r, c = size / 2, gap = 2;
+  let at = 0, arcs = '';
+  for (const p of parts) {
+    const len = p.h / cap * C;
+    const op = p.kind === 'worked' ? 1 : .42;
+    arcs += `<circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="${E[p.e].c}" stroke-opacity="${op}" stroke-width="${stroke}" stroke-dasharray="${Math.max(len - gap, 0)} ${C}" stroke-dashoffset="${-at}" transform="rotate(-90 ${c} ${c})"/>`;
+    at += len;
+  }
+  const a = 48 / cap * 2 * Math.PI - Math.PI / 2;
+  const tick = `<line x1="${c + Math.cos(a) * (r - stroke / 2 - 4)}" y1="${c + Math.sin(a) * (r - stroke / 2 - 4)}" x2="${c + Math.cos(a) * (r + stroke / 2 + 4)}" y2="${c + Math.sin(a) * (r + stroke / 2 + 4)}" stroke="var(--text)" stroke-width="3" stroke-linecap="round"/>`;
+  const text = centre ? `<text x="${c}" y="${c + 4}" text-anchor="middle" font-size="${size / 5.2}" font-weight="700" fill="var(--text)" class="num">${fmt(total)}</text><text x="${c}" y="${c + size / 7.5}" text-anchor="middle" font-size="${size / 13}" fill="var(--muted)">of 48 hours</text>` : '';
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}"><circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke="var(--fill)" stroke-width="${stroke}"/>${arcs}${tick}${text}</svg>`;
+}
+function partsFor(days) {
+  const sum = { roma: { worked: 0, rostered: 0 }, thai: { worked: 0, rostered: 0 } };
+  days.forEach(d => d.s.forEach(([e, h, k]) => { sum[e][k === 'worked' ? 'worked' : 'rostered'] += h; }));
+  return [['roma', 'worked'], ['thai', 'worked'], ['roma', 'rostered'], ['thai', 'rostered']]
+    .map(([e, kind]) => ({ e, kind, h: sum[e][kind] })).filter(p => p.h > 0);
+}
+function key(days) {
+  const t = { roma: 0, thai: 0 }; days.forEach(d => d.s.forEach(([e, h]) => { t[e] += h; }));
+  return `<div class="key">${Object.entries(t).map(([e, h]) => `<span><i style="background:${E[e].c}"></i>${E[e].name} <b class="num">${fmt(h)} h</b></span>`).join('')}</div>`;
+}
+function dayRow(day, dowIndex) {
+  const hrs = day.s.reduce((a, s) => a + s[1], 0), scale = Math.max(12, hrs);
+  const segs = day.s.map(([e, h, k]) => `<div class="${k === 'worked' ? 'seg-w' : `seg-r ${k}`}" style="--c:${E[e].c};width:calc(${h / scale * 100}% - 2px)"></div>`).join('');
+  return `<div class="drow ${day.today ? 'today' : ''} ${hrs ? '' : 'empty'}"><div class="dl"><b>${DOW[dowIndex]}</b><span class="num">${day.d}</span>${day.missed ? '<span class="q">?</span>' : ''}</div><div class="track">${segs}</div><div class="hrs num">${hrs ? fmt(hrs) : '–'}</div></div>`;
+}
+const week = (title, days) => `<div class="wkhead"><span>${title}</span><span class="num">${fmt(days.reduce((a, d) => a + d.s.reduce((x, s) => x + s[1], 0), 0))} h</span></div>${days.map((d, i) => dayRow(d, i)).join('')}`;
+function shell(seg = 0, time = '5:05', compact = '') {
+  return `<div class="shell">${status('#fff', time)}<div class="titlebar"><h1>Fortnight</h1><div class="tools"><span>Jobs</span>${plus('#fff')}</div></div>
+    <div class="seg"><button class="${seg === 0 ? 'on' : ''}">From Mon 12 Oct</button><button class="${seg === 1 ? 'on' : ''}">From Mon 19 Oct</button></div>${compact}</div>`;
+}
+const answer = `<div class="answer"><span class="q">?</span><span><b>Thai Express, Sun 18</b> finished without a clock-in. Did you work it?</span>${chev}</div>`;
+const dockIn = `<div class="dock"><b>Café Roma started at 5:00pm</b><p>You haven't clocked in. Rostered until 10:30pm.</p><div class="acts"><button class="go">Started 5:00pm</button><button class="alt">Just now</button></div></div>`;
+const fortnightA = [...days12, ...days19()];
+function board(days, line, colour, extra = '') {
+  return `<div class="donut">${donut(partsFor(days))}<div class="statusline" style="color:${colour}">${line}</div>${key(days)}</div>${extra}`;
+}
+
+// A · board
+document.getElementById('v-board').innerHTML = shell() + `<div class="scroll">${board(fortnightA, '1.75 h left before the limit', 'var(--near)', answer)}<div class="days">${week('Mon 12 – Sun 18 Oct', days12)}${week('Mon 19 – Sun 25 Oct', days19())}</div></div>${dockIn}<div class="homebar"></div>`;
+
+// B · scrolled: compact donut in the nav bar
+const compact = `<div style="display:flex;align-items:center;gap:10px;padding:10px 16px 0">${donut(partsFor(fortnightA), 44, 7, false)}<div><b class="num" style="font-size:17px">46.25 of 48 h</b><div class="num" style="font-size:13px;color:#ffc9a8">1.75 h left before the limit</div></div></div>`;
+document.getElementById('v-scrolled').innerHTML = `<div class="shell">${status()}<div style="text-align:center;font-weight:700;font-size:17px;padding:2px 0 8px">Fortnight</div><div class="seg"><button class="on">From Mon 12 Oct</button><button>From Mon 19 Oct</button></div>${compact}</div>
+  <div class="scroll"><div class="days" style="margin-top:8px">${days12.slice(4).map((d, i) => dayRow(d, i + 4)).join('')}${week('Mon 19 – Sun 25 Oct', days19())}</div></div>${dockIn}<div class="homebar"></div>`;
+
+// C · the other fortnight (from Mon 19)
+const fortnightB = [...days19(), ...days26];
+document.getElementById('v-other').innerHTML = shell(1) + `<div class="scroll">${board(fortnightB, '36.5 h left', 'var(--ok)')}<div class="days">${week('Mon 19 – Sun 25 Oct', days19())}${week('Mon 26 Oct – Sun 1 Nov', days26)}</div></div>${dockIn}<div class="homebar"></div>`;
+
+// D · over the limit, 11:02pm
+const d12done = days12.map(d => d.d === 18 ? { ...d, s: [['thai', 5, 'worked']], missed: false } : d);
+const d19over = days19({ 19: [['roma', 5.5, 'worked']], 24: [['thai', 4, 'rostered']] });
+document.getElementById('v-over').innerHTML = shell(0, '11:02') + `<div class="scroll">${board([...d12done, ...d19over], '2.25 h over the limit', 'var(--over)')}<div class="days">${week('Mon 12 – Sun 18 Oct', d12done)}${week('Mon 19 – Sun 25 Oct', d19over)}</div></div>
+  <div class="dock"><b>Next: Thai Express on Thu at 5:00pm</b><p>Mon 12 – Sun 25 Oct is over the limit. Ask to swap or shorten a shift before Sun 25.</p></div><div class="homebar"></div>`;
+
+// E · roster sheet, would breach (Sat 24 10am–2pm)
+document.getElementById('v-roster').innerHTML = shell() + `<div class="scroll">${board(fortnightA, '', 'var(--near)')}</div><div class="dim"></div>
+  <div class="sheet"><div class="grabber"></div><div class="sheethead"><button>Cancel</button><b>Roster a shift</b><button class="warnbtn">Add anyway</button></div><div class="pad">
+    <div class="lbl">Employer</div><div class="seg light"><button>Café Roma</button><button class="on">Thai Express</button></div>
+    <div class="lbl">When</div><div class="list"><div class="li"><span class="grow">Day</span><span class="pill num">Sat 24 Oct</span></div><div class="li"><span class="grow">Starts</span><span class="pill num">10:00 am</span></div><div class="li"><span class="grow">Finishes</span><span class="pill num">2:00 pm</span></div></div>
+    <div class="lbl">On that day</div><div class="days" style="margin:0">${dayRow({ d: 24, s: [['thai', 4, 'new']] }, 5)}</div>
+    <div class="lbl">Effect on your work fortnights</div><div class="list"><div class="effect"><span><span class="s" style="background:var(--over)"></span>Mon 12 – Sun 25 Oct</span><span class="num">46.25 → <b style="color:var(--over)">50.25</b> of 48</span></div><div class="effect"><span><span class="s" style="background:var(--ok)"></span>Mon 19 Oct – Sun 1 Nov</span><span class="num">11.5 → <b>15.5</b> of 48</span></div></div>
+    <div class="warn"><b>This shift would take you to 50.25 of 48 hours for Mon 12 – Sun 25 Oct.</b>Ask your manager to shorten or swap it. You can still add it so your record stays accurate.</div></div></div>`;
+
+// F · lock screen: one-colour accessory widgets + the expanded prompt
+const monoDonut = `<svg width="60" height="60" viewBox="0 0 60 60"><circle cx="30" cy="30" r="24" fill="none" stroke="rgba(255,255,255,.3)" stroke-width="6"/><circle cx="30" cy="30" r="24" fill="none" stroke="#fff" stroke-width="6" stroke-dasharray="${46.25 / 48 * 150.8} 150.8" transform="rotate(-90 30 30)"/><text x="30" y="35" text-anchor="middle" font-size="15" font-weight="700" fill="#fff">46</text></svg>`;
+document.getElementById('v-lock').innerHTML = `${status('#fff')}<div class="lockdate">Monday 19 October</div><div class="locktime num">5:05</div>
+  <div class="accrow"><div class="acc-rect"><b>Café Roma</b><span class="num">Not clocked in · 5:00pm<br>46.25 of 48 h</span></div><div class="acc-circ">${monoDonut}</div></div>
+  <div style="flex:1"></div>
+  <div class="notif w" style="background:rgba(246,247,251,.97)"><div class="notifhead"><span class="appicon">${fIcon}</span>FORTNIGHTLY<span>5 min ago</span></div>
+    <div class="notifbody"><div style="display:flex;gap:12px;align-items:center">${donut(partsFor(fortnightA), 64, 9, false)}<div><h3>Café Roma started at 5:00pm</h3><p style="margin:0" class="num">Rostered until 10:30pm · 40.75 → 46.25 of 48 h</p></div></div>
+      <div class="days" style="margin:10px 0 0;box-shadow:0 0 0 1px #e1e4ed">${dayRow(days19()[0], 0)}</div></div>
+    <div class="notifacts"><div>Started 5:00pm</div><div>Started just now (5:05pm)</div><div>Not working this shift</div></div></div><div class="homebar"></div>`;
+
+// H · home screen small widgets
+const smallDonut = `<div style="display:flex;gap:8px;align-items:center">${donut(partsFor(fortnightA), 50, 8, false)}<div><div class="t num" style="font-size:16px">46.25</div><div class="s">of 48 h</div></div></div>`;
+document.getElementById('v-home').innerHTML = `${status('#fff')}<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding:18px 18px 0">
+  <div><div class="wsmall w" style="background:#fff"><div style="display:flex;gap:8px;align-items:center">${donut(partsFor(fortnightA), 50, 8, false)}<div><div class="t" style="font-size:14px">Café Roma</div><div class="s">Not clocked in</div></div></div><div><div class="wb go">Started 5:00pm</div><div class="wb alt">Just now</div></div></div><div style="text-align:center;font-size:11px;margin-top:6px">Clock-in due</div></div>
+  <div><div class="wsmall w" style="background:#fff">${smallDonut}<div class="s num">On shift at Café Roma · 2:14</div><div class="wb navy">Clock out</div></div><div style="text-align:center;font-size:11px;margin-top:6px">On shift</div></div>
+  <div><div class="wsmall w" style="background:#fff">${smallDonut}<div><div class="t" style="font-size:14px">Thai Express</div><div class="s">Next shift · Thu 5:00pm</div></div></div><div style="text-align:center;font-size:11px;margin-top:6px">Next shift</div></div>
+  <div><div class="wsmall w" style="background:#fff">${smallDonut}<div class="s">Still clocked in at Café Roma</div><div class="wb go">Finished 10:30pm</div></div><div style="text-align:center;font-size:11px;margin-top:6px">Clock-out due</div></div>
+</div><div class="homebar"></div>`;
+
+// G · dark
+document.getElementById('v-dark').innerHTML = shell() + `<div class="scroll">${board(fortnightA, '1.75 h left before the limit', 'var(--near)', answer)}<div class="days">${week('Mon 12 – Sun 18 Oct', days12)}${week('Mon 19 – Sun 25 Oct', days19())}</div></div>${dockIn}<div class="homebar"></div>`;
+</script>
+</body>
+</html>
