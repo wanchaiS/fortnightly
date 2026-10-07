@@ -139,6 +139,30 @@ Findings:
 Decision: Simple guard rules I chose not to test are still enforced: finish after start, 14-hr rostering limit, already-finished shifts, archived employers, clock-in window, finish before clock-in. The tests target the rules where a mistake costs the student most (visa limit, overlaps, honest records).
 Report:   Section 4: architecture under pressure (warn vs block, honest record); AI tools (how output was checked)
 
+## 2026-10-07 — Screen structure: the fortnight board (prototype variant C)
+Context:  Before building screens, a throwaway HTML prototype (branch `prototype/ui-variants`, `prototype/fortnightly-ui.html`) showed three structurally different versions of the whole app on the same fake data: A tabs, B timeline, C fortnight board.
+Chose:    **C: the fortnight board.** A gauge for one work fortnight, a 14-day grid, and the current shift docked at the bottom.
+Why:      The home screen is built around the visa rule itself (two overlapping fortnights, either of which can be breached). The grid makes "every week belongs to two fortnights" visible.
+Prototype findings the use cases must now support:
+          1. Worked and rostered hours separately (`FortnightWorkSummary` only has a total).
+          2. A "before → after" preview of one shift without saving it (roster form and notification).
+          3. Missed shifts (finished, never clocked in) still count as rostered hours; they need their own query and a "Did you work it?" prompt.
+          4. Lists show each shift with its employer name.
+Report:   Section 2 (design decisions before code); Section 4 (how the design changed)
+
+## 2026-10-07 — Widget clock-in: two buttons
+Context:  A widget button can't ask "on time or just now?". Recording the tap time would under-record a student who taps late (a 5:00pm start tapped at 5:40 loses 40 minutes).
+Options:  Tap time (fast, can be wrong) / two buttons (never wrong, tight on the small widget) / open the app to choose (accurate, one extra step).
+Chose:    **Two buttons on the widget:** "Started <rostered time>" and "Just now".
+Why:      Product principle "ask, don't guess" (PRODUCT.md). Accuracy is the point of the record, and the widget is the fallback for students who missed the notification, so they're the likeliest to tap late.
+Cost:     Short labels on the small widget.
+Report:   Section 2 (widget scenario); Section 4 (architecture under pressure)
+
+## 2026-10-07 — Product record and the impeccable design skill
+Context:  I installed the impeccable design skill to guide the visual design. Its first step is a product interview, which produced `PRODUCT.md` (users, purpose, positioning, constraints, evidence, principles). I confirmed the summary, kept the name Fortnightly, and chose the widget's two buttons.
+Source:   The legal definition of a fortnight is Migration Regulations 1994, Sch 8, condition 8105(3): "the period of 14 days commencing on a Monday". It's a better primary source than the Home Affairs page.
+Report:   Section 1 (evidence); AI tools (how the design skill was used)
+
 ---
 
 ## AI use log
@@ -152,6 +176,9 @@ Report:   Section 4: architecture under pressure (warn vs block, honest record);
 | 2026-10-06 | Whether payslip parsing is hard | Difficulty levels and risks | Dropped parsing; **proposed the roster + clock-prompt design myself** | — |
 | 2026-10-06 | Full plan | Web research + `PLAN.md` | (review pending) | Must verify: open the Home Affairs page in a browser (it blocked automated fetch); install Record My Hours to confirm its features |
 | 2026-10-06 | Set up the Xcode project and test the extension integration (the spike) | Target settings, App Group entitlements, data layer, spike code; ran builds and checked the store on disk | I created the targets in Xcode myself; I did the visual checks (widget, notification) | Saw the widget and custom notification in DeviceHub; AI confirmed the shared store and pending reminders from files on disk |
+| 2026-10-07 | Pick the core tests (TDD) | A longer list of candidate tests with the plausible bug each catches | **I chose 12** and declined the rest as low-risk | Mutation check on the Monday rule; the AI's claim about it was wrong and corrected |
+| 2026-10-07 | Show what the screens could look like | Throwaway HTML prototype with 3 layouts, checked in a browser | **I chose C**, and two widget clock-in buttons | Walked through a shift in the prototype; it surfaced 4 missing use-case outputs |
+| 2026-10-07 | Use the impeccable design skill | Product interview → `PRODUCT.md` | I confirmed the record and the name | Checked the product record against PLAN.md and my own answers |
 
 **Lessons so far:**
 - The AI's first extension suggestion (widget) had a weak justification. Questioning it led to a better design.

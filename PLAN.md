@@ -44,6 +44,7 @@ The two problems feed each other. Students who suspect they've gone over their h
 | Source | What it evidences |
 |---|---|
 | Department of Home Affairs, [Work restrictions for student visa holders](https://immi.homeaffairs.gov.au/visas/getting-a-visa/visa-listing/student-500/temporary-relaxation-of-working-hours-for-student-visa-holders) | 48 hrs per fortnight from 1 July 2023 while the course is in session. "A fortnight is a period of 14 days starting on a Monday." Their worked example: a breach in "the fortnight comprising the 14 days of weeks 2 and 3 (60 hours worked)". No restriction when the course is not in session. Research masters and doctoral students are exempt. *The page returned HTTP 401 to automated fetch; open it in a browser and quote it directly.* |
+| Migration Regulations 1994, [Schedule 8, condition 8105(3)](https://classic.austlii.edu.au/au/legis/cth/consol_reg/mr1994227/sch8.html) | The legal definition: "fortnight means the period of 14 days commencing on a Monday". Any Monday starts one, so fortnights overlap. |
 | Farbenblum & Berg (2020), *International Students and Wage Theft in Australia*; [UNSW news summary](https://www.unsw.edu.au/news/2020/07/wage-theft-rife-for-international-students-in-australia) | Survey of 5,000 students: more than 3 in 4 earn below the minimum casual wage. Almost two-thirds didn't seek help, "often because of visa concerns". "There's nothing to stop the labour regulator sharing information with immigration authorities if a student has worked more hours than her visa allows." |
 | Migrant Justice Institute (2026), *Off the Books*; [UNSW newsroom, 7 May 2026](https://www.unsw.edu.au/newsroom/news/2026/05/survey-hidden-system-migrant-worker-exploitation) | 9,963 responses. 65% of migrant employees paid below their legal entitlements. International students short-changed about $3.18 billion a year. The more underpaid, the more likely they receive fraudulent or no payslips. Workers fear "immigration consequences". |
 | Fair Work Ombudsman, [Record My Hours: how the app works](https://www.fairwork.gov.au/tools-and-resources/record-my-hours-app/how-the-app-works) | The existing tool: records hours automatically by location (needs "Always" location access) or manually. FWO itself notes iPhone automatic recording can fail when the app has been in the background for a long time, and that it isn't suitable where there's no coverage. Its help page does not mention visa work limits. *Install it and confirm before writing the comparison.* |
@@ -562,7 +563,7 @@ Must-have screens to clear the 5-screen minimum: Today, Roster, Roster a Shift, 
 |---|---|---|---|
 | `nothingRostered` | No upcoming shifts | "No shifts rostered" + fortnight hours | — |
 | `nextShift` | Next shift in the future | "Next: Café Roma · Sat 5:00pm" + "38 / 48 hrs" | — |
-| `clockInDue` | Rostered start passed, not clocked in | "Café Roma started 5:00pm · Not clocked in" | **Clock in** |
+| `clockInDue` | Rostered start passed, not clocked in | "Café Roma started 5:00pm · Not clocked in" | **Started 5:00pm** and **Just now** (decided 2026-10-07: never assume the tap time) |
 | `onShift` | Clocked in | "On shift · Café Roma" + `Text(clockedInAt, style: .timer)` | **Clock out** |
 | `clockOutDue` | Rostered finish passed, still on shift | "Rostered finish 10:30pm · Still clocked in" | **Clock out** |
 
