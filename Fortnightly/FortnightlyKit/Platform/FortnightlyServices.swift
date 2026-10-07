@@ -1,3 +1,4 @@
+import CoreData
 import Foundation
 
 /// The use cases wired to their repositories and platform adapters. The app and both extensions
@@ -43,6 +44,9 @@ public struct FortnightlyServices: Sendable {
     }
 
     public var currentTime: Date { now() }
+
+    /// Posted when the widget or the notification extension saved a change from their own process.
+    public static let recordsChangedElsewhere = Notification.Name.NSPersistentStoreRemoteChange
 
     // MARK: Reviewing
 

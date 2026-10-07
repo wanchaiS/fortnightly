@@ -7,4 +7,6 @@ public enum EmployerColour: String, CaseIterable, Sendable {
     case cobalt
     case bronze
     case moss
+
+    public var order: Int { Self.allCases.firstIndex(of: self)! }
 }
