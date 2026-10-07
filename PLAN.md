@@ -662,6 +662,41 @@ Same shared data as group 5; now Mon 19 Oct, 5:05pm.
 | 19 | Changing a shift's times doesn't count as overlapping itself | Thai Express rostered Thu 22, 5–11pm | Change it to 6–11pm | Saved: same shift, new start, no second shift |
 | 20 | Archiving an employer keeps their worked hours counting | Thai Express worked Tue 13 (5.5 h) and Sat 17 (6 h); Café Roma worked 18 h; no upcoming Thai Express shifts | Archive Thai Express | Thai Express no longer listed as an employer; fortnight from Mon 12 still 29.5 h |
 
+### Group 7: Jobs and course breaks (added 2026-10-07; chosen before building the screens)
+
+Café Roma is violet and Thai Express teal: the first two of the six employer colours, given in order of adding.
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 21 | An employer with the same name as a current one is rejected | Café Roma and Thai Express | Add "  cafe roma " | Rejected: already have Café Roma; still two employers |
+| 22 | A new employer gets a colour no current employer is using | Café Roma (violet), Thai Express (teal, archived), Uni Library (magenta) | Add Gelato Bar | Gelato Bar is neither violet nor magenta |
+| 23 | A course break starting on another break's last day is rejected | Mid-semester break Mon 19 – Sun 25 Oct (last day inclusive) | Record Study week Sun 25 – Fri 30 Oct | Rejected as overlapping Mid-semester break; nothing saved |
+
+### Group 8: Correcting a worked shift
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 24 | Correcting a worked shift's times keeps its rostered times | Café Roma Sat 17 rostered 9am–3pm, clocked 9am–3pm | Correct to 9am–3:15pm | Clocked out 3:15pm; still rostered 9am–3pm (the payslip comparison needs both) |
+| 25 | Correcting a worked shift's times doesn't count as overlapping itself | Same shift | Correct to 8:45am–3:15pm | Saved: same shift, no second shift |
+
+### Group 9: What the board reads
+
+Same shared data as group 5.
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 26 | Each employer's hours in a fortnight are split into worked and still rostered | Clocked in at Café Roma Mon 19 at 5:00pm (rostered to 10:30pm); now 7:00pm | Review fortnight hours | From Mon 12: Café Roma **20.25 worked + 3.5 rostered**, Thai Express **11.5 + 11** (the slices add up to the 46.25 in the centre) |
+| 27 | Two jobs on one day are both listed, and the day's total adds them | Now Mon 19, 5:05pm | Review the days of the fortnight from Mon 12 | Sat 17 lists Café Roma then Thai Express, **12.25 h** |
+| 28 | A not-working shift stays on its day but adds no hours | Thai Express Sun 18 marked not worked | Review the days | Sun 18 still lists the shift (struck through on the board), **0 h** |
+
+### Group 10: What to do now (dock and widget) and reminders
+
+| # | Test | Given | When | Then |
+|---|---|---|---|---|
+| 29 | A started shift is clock-in due until its rostered finish, then it's missed | Café Roma rostered Mon 19 5:00–10:30pm, never clocked in | Check at 10:29pm, then at 10:30pm | 10:29pm: clock-in due. 10:30pm: missed, and listed in missed shifts |
+| 30 | Still clocked in after the rostered finish is clock-out due | Clocked in at 5:00pm, rostered to 10:30pm | Check at 10:29pm, then at 10:30pm | 10:29pm: on shift. 10:30pm: clock-out due |
+| 31 | Rebuilding reminders keeps the open shift's clock-out prompts | On shift at Café Roma since 5:00pm (rostered to 10:30pm); Thai Express rostered Thu 22 5–11pm; now 7:00pm | Rebuild the reminder window | Café Roma: clock-out due 10:30pm and overdue 11:15pm, no clock-in prompts. Thai Express: all four prompts |
+
 ---
 
 ## 14. Project setup (done, `chore/project-setup`)
