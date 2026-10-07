@@ -21,6 +21,12 @@ final class InMemoryShiftRepository: ShiftRepository, @unchecked Sendable {
             .sorted { $0.rosteredStart < $1.rosteredStart }
     }
 
+    func rosteredShifts() throws -> [Shift] {
+        savedShifts
+            .filter { $0.status == .rostered }
+            .sorted { $0.rosteredStart < $1.rosteredStart }
+    }
+
     func shiftsCountingTowardWorkLimit(overlapping interval: DateInterval) throws -> [Shift] {
         savedShifts
     }
