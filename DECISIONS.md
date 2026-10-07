@@ -129,6 +129,16 @@ Surprises:
           - Tapping "Save test shift" 4 times created 4 overlapping shifts. A live example of why `RosterShift` must reject overlaps (rule R7).
 Report:   Section 4: extension design; architecture under pressure (de-risk the integration first)
 
+## 2026-10-07 — Core rules built test-first (12 tests, 4 red/green rounds)
+Context:  I chose the 12 tests myself from a longer list, keeping only those that guard a mistake that could plausibly be made (PLAN §13). Each round committed failing tests first, then the code.
+Built:    `ReviewFortnightHours`, `RosterShift`, `ClockIntoShift`, `ClockOutOfShift`, each with a typed error enum whose messages say what went wrong and what to do next.
+Findings:
+          - **A test claim that wasn't true.** I assumed the Sunday-first test calendar made every test prove fortnights start on Monday. A mutation check (deleting the Monday rule) failed only the Sunday-midnight test; weekday-only scenarios can't tell the difference. One guarding test is enough, but the claim was corrected. Lesson: check what a test actually catches instead of assuming.
+          - **Touching isn't overlapping.** Back-to-back shifts (5pm finish, 5pm start) must be allowed, so the overlap check uses strict comparisons. `DateInterval.intersects` would count touching shifts as overlapping, which is exactly what test 7 guards against.
+          - **Clock-out reads before it saves.** If reading the fortnight data failed after saving, the student would be told the clock-out "couldn't be saved" when it had been. Reading first avoids that.
+Decision: Simple guard rules I chose not to test are still enforced: finish after start, 14-hr rostering limit, already-finished shifts, archived employers, clock-in window, finish before clock-in. The tests target the rules where a mistake costs the student most (visa limit, overlaps, honest records).
+Report:   Section 4: architecture under pressure (warn vs block, honest record); AI tools (how output was checked)
+
 ---
 
 ## AI use log
