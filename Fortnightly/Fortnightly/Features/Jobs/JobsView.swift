@@ -64,7 +64,10 @@ struct JobsView: View {
 
             Section {
                 #if DEBUG
-                Button("Load sample shifts (testing only)") { model.loadSampleRoster() }
+                // Sample data never mixes with a real record, so it's only offered before any employer exists.
+                if model.employers.isEmpty && model.archivedEmployers.isEmpty {
+                    Button("Load sample shifts (testing only)") { model.loadSampleRoster() }
+                }
                 #endif
             } footer: {
                 Text("Fortnightly helps you track your hours. It isn't legal advice: check your own visa conditions in VEVO.")
