@@ -1,0 +1,283 @@
+<!doctype html>
+<!--
+  PROTOTYPE — throwaway decision mocks, not the app.
+  The same Fortnightly home screen (variant C structure, same fake data, Mon 19 Oct 2026 at 5:05pm)
+  drawn in the three directions on offer, so they can be compared by eye. Native layout and controls
+  are held constant; only type, palette, density and the signature move change.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PROTOTYPE · Fortnightly visual directions</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; background: #cfd4dc; font: 15px/1.35 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", sans-serif; color: #111; -webkit-font-smoothing: antialiased; }
+.note { background: #101418; color: #e7e9ec; padding: 10px 20px; font-size: 13px; }
+.note b { color: #fff; }
+.row { display: flex; gap: 36px; justify-content: center; align-items: flex-start; flex-wrap: wrap; padding: 26px 20px 40px; }
+figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+figcaption { width: 390px; font-size: 14px; color: #2b2f36; }
+figcaption b { display: block; font-size: 16px; color: #111; margin-bottom: 2px; }
+.phone { width: 390px; height: 844px; border-radius: 54px; background: #0a0a0b; padding: 11px; box-shadow: 0 24px 50px -12px rgba(15, 20, 30, .45); }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden; display: flex; flex-direction: column; }
+.status { height: 50px; flex: none; display: flex; align-items: flex-end; justify-content: space-between; padding: 0 30px 7px; font-weight: 600; font-size: 15px; font-variant-numeric: tabular-nums; }
+.status svg { display: block; }
+.scroll { flex: 1; overflow: hidden; }
+.num { font-variant-numeric: tabular-nums; }
+button { font: inherit; border: 0; cursor: pointer; }
+.seg { display: flex; border-radius: 9px; padding: 2px; margin: 0 16px; }
+.seg button { flex: 1; border-radius: 7px; padding: 7px 4px; font-size: 13px; font-weight: 600; background: none; }
+.homebar { position: absolute; bottom: 8px; left: 50%; width: 134px; height: 5px; margin-left: -67px; border-radius: 3px; background: #111; }
+
+/* ───────── A · Semester timetable ───────── */
+.tt { --ink: #16204a; --ground: #eef0f6; --card: #fff; --rule: #d9dde8; --muted: #5b6275; --act: #ffc21a; --ok: #2b8a3e; --near: #d9480f; --over: #c92a2a; --roma: #6f45e8; --thai: #0f8fa8; background: var(--ground); color: var(--ink); }
+.tt .shell { background: var(--ink); color: #fff; flex: none; padding-bottom: 14px; }
+.tt .status { color: #fff; }
+.tt .titlebar { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 16px 10px; }
+.tt h1 { margin: 0; font-size: 34px; letter-spacing: -.6px; line-height: 1.05; }
+.tt .tools { display: flex; gap: 18px; align-items: center; padding-bottom: 6px; color: #fff; font-weight: 600; font-size: 16px; }
+.tt .seg { background: rgba(255,255,255,.14); }
+.tt .seg button { color: rgba(255,255,255,.88); }
+.tt .seg button.on { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.tt .gauge { display: flex; align-items: center; gap: 16px; padding: 16px 18px 6px; }
+.tt .gauge .read b { display: block; font-size: 30px; letter-spacing: -.5px; line-height: 1.05; }
+.tt .gauge .read span { font-size: 13px; color: var(--muted); }
+.tt .gauge .read .state { display: inline-block; margin-top: 6px; font-size: 13px; font-weight: 600; }
+.tt .span { padding: 0 18px 8px; font-size: 13px; color: var(--muted); }
+.tt .board { position: relative; margin: 2px 12px 0; background: var(--card); border-radius: 14px; padding: 8px 6px 8px 0; }
+.tt .heads, .tt .week { display: grid; grid-template-columns: 46px repeat(7, 1fr); column-gap: 3px; }
+.tt .heads span { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: .3px; padding-bottom: 4px; }
+.tt .heads span.today { color: var(--ink); }
+.tt .week { height: 96px; align-items: stretch; transition: opacity .45s cubic-bezier(.2, .8, .2, 1); }
+.tt .week.out { opacity: .32; }
+.tt .wk { font-size: 10.5px; color: var(--muted); line-height: 1.2; padding: 6px 0 0 8px; }
+.tt .wk b { display: block; color: var(--ink); font-size: 11px; }
+.tt .day { position: relative; border-top: 1px solid var(--rule); padding: 4px 2px 3px; display: flex; flex-direction: column; }
+.tt .day .d { font-size: 11px; color: var(--muted); }
+.tt .day.today .d { color: #fff; background: var(--ink); border-radius: 9px; width: 18px; height: 18px; line-height: 18px; text-align: center; font-weight: 700; }
+.tt .blocks { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; gap: 2px; }
+.tt .blk { border-radius: 4px; min-height: 6px; }
+.tt .blk.worked { background: var(--c); }
+.tt .blk.rostered { border: 2px solid var(--c); background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--c) 18%, #fff) 0 3px, #fff 3px 6px); }
+.tt .blk.due { box-shadow: 0 0 0 2px var(--act); }
+.tt .h { font-size: 11px; font-weight: 600; text-align: center; padding-top: 2px; }
+.tt .flag { position: absolute; top: 3px; right: 2px; width: 14px; height: 14px; border-radius: 7px; background: var(--near); color: #fff; font-size: 10px; font-weight: 800; line-height: 14px; text-align: center; }
+.tt .window { position: absolute; left: 46px; right: 3px; top: 26px; height: 192px; border: 2px solid var(--ink); border-radius: 10px; pointer-events: none; transition: transform .55s cubic-bezier(.16, 1, .3, 1); }
+.tt .window.later { transform: translateY(96px); }
+.tt .legend { display: flex; gap: 14px; padding: 10px 18px 0; font-size: 12px; color: var(--muted); }
+.tt .legend i { display: inline-block; width: 14px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.tt .dock { flex: none; background: var(--ink); color: #fff; padding: 12px 16px 26px; border-radius: 18px 18px 0 0; }
+.tt .dock b { font-size: 17px; }
+.tt .dock p { margin: 2px 0 10px; font-size: 13px; color: rgba(255,255,255,.75); }
+.tt .dock .acts { display: flex; gap: 8px; }
+.tt .dock .acts button { flex: 1; border-radius: 12px; padding: 12px 6px; font-weight: 700; font-size: 15px; }
+.tt .dock .go { background: var(--act); color: var(--ink); }
+.tt .dock .alt { background: rgba(255,255,255,.14); color: #fff; }
+.tt .homebar { background: #fff; }
+
+/* ───────── B · Roster sheet & highlighter ───────── */
+.rs { --ink: #1d1d1f; --paper: #fbfbf8; --rule: #1d1d1f; --hair: #cfd0cb; --muted: #66665f; --roma: #ffe14d; --thai: #ff9ad5; background: var(--paper); color: var(--ink); }
+.rs .titlebar { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 16px 10px; }
+.rs h1 { margin: 0; font-size: 34px; letter-spacing: -.6px; }
+.rs .tools { font-weight: 600; font-size: 16px; padding-bottom: 6px; display: flex; gap: 18px; }
+.rs .seg { background: #ecece7; }
+.rs .seg button.on { background: #fff; box-shadow: 0 1px 2px rgba(0,0,0,.18); }
+.rs .tally { margin: 18px 16px 10px; border-top: 2px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 10px 2px; display: flex; justify-content: space-between; align-items: baseline; }
+.rs .tally b { font-size: 34px; letter-spacing: -.5px; }
+.rs .tally span { color: var(--muted); font-size: 13px; }
+.rs .meterline { position: relative; margin: 0 18px 14px; height: 18px; }
+.rs .meterline .track { position: absolute; inset: 7px 0; border-top: 1px dashed var(--hair); }
+.rs .meterline .worked { position: absolute; left: 0; top: 3px; height: 12px; background: #ffd43b; mix-blend-mode: multiply; border-radius: 2px; }
+.rs .meterline .rost { position: absolute; top: 3px; height: 12px; background: rgba(255, 212, 59, .38); border-radius: 2px; }
+.rs .meterline .m48 { position: absolute; top: -3px; bottom: -3px; width: 2px; background: #d6336c; }
+.rs table { width: calc(100% - 32px); margin: 0 16px; border-collapse: collapse; font-size: 13px; }
+.rs th { text-align: left; font-size: 11px; font-weight: 700; padding: 0 4px 4px; border-bottom: 2px solid var(--rule); }
+.rs td { border-bottom: 1px solid var(--hair); padding: 5px 4px; height: 28px; position: relative; }
+.rs td.day { width: 74px; color: var(--muted); }
+.rs td.day b { color: var(--ink); }
+.rs td.hrs { text-align: right; width: 44px; font-weight: 600; }
+.rs .hl { position: relative; padding: 1px 4px; }
+.rs .hl::before { content: ""; position: absolute; inset: 2px -2px 1px; background: var(--c); mix-blend-mode: multiply; transform: skewX(-8deg); border-radius: 2px; z-index: 0; }
+.rs .hl.rostered::before { opacity: .45; }
+.rs .hl span { position: relative; z-index: 1; }
+.rs tr.today td { background: #f1f1ea; }
+.rs tr.out td { color: #aaa9a2; }
+.rs .dock { flex: none; border-top: 2px solid var(--rule); padding: 12px 16px 26px; background: #fff; }
+.rs .dock b { font-size: 17px; }
+.rs .dock p { margin: 2px 0 10px; font-size: 13px; color: var(--muted); }
+.rs .dock .acts { display: flex; gap: 8px; }
+.rs .dock .acts button { flex: 1; border-radius: 12px; padding: 12px 6px; font-weight: 700; font-size: 15px; }
+.rs .dock .go { background: var(--ink); color: #fff; }
+.rs .dock .alt { background: #ecece7; color: var(--ink); }
+
+/* ───────── C · Standard iOS ───────── */
+.st { --blue: #007aff; --green: #34c759; --orange: #ff9500; --gray: #8e8e93; background: #f2f2f7; color: #000; }
+.st .titlebar { display: flex; justify-content: space-between; align-items: flex-end; padding: 2px 16px 10px; }
+.st h1 { margin: 0; font-size: 34px; letter-spacing: -.4px; }
+.st .tools { color: var(--blue); font-size: 17px; padding-bottom: 6px; display: flex; gap: 18px; }
+.st .seg { background: #e3e3e8; }
+.st .seg button.on { background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.st .ringwrap { display: flex; flex-direction: column; align-items: center; padding: 14px 0 6px; }
+.st .ringwrap p { margin: 6px 0 0; color: var(--gray); font-size: 13px; }
+.st .group { background: #fff; border-radius: 12px; margin: 10px 16px 0; overflow: hidden; }
+.st .cell { display: flex; justify-content: space-between; padding: 11px 14px; border-bottom: 1px solid #e5e5ea; font-size: 15px; }
+.st .cell:last-child { border-bottom: 0; }
+.st .cell span:last-child { color: var(--gray); }
+.st .cell .dot { display: inline-block; width: 9px; height: 9px; border-radius: 5px; margin-right: 8px; }
+.st .dock { flex: none; background: rgba(249,249,249,.94); border-top: 1px solid #d1d1d6; padding: 12px 16px 26px; }
+.st .dock b { font-size: 17px; }
+.st .dock p { margin: 2px 0 10px; font-size: 13px; color: var(--gray); }
+.st .dock .acts { display: flex; gap: 8px; }
+.st .dock .acts button { flex: 1; border-radius: 12px; padding: 12px 6px; font-weight: 600; font-size: 15px; }
+.st .dock .go { background: var(--blue); color: #fff; }
+.st .dock .alt { background: #e5e5ea; color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="note"><b>PROTOTYPE — throwaway decision mocks.</b> The same home screen and data (Mon 19 Oct, 5:05pm: Café Roma started at 5:00 and isn't clocked in yet) in each direction. Layout and controls are held constant; only the look changes. In the timetable, tap the two fortnights to see the one-week slide.</div>
+<div class="row">
+
+  <!-- A · Semester timetable -->
+  <figure>
+    <div class="phone"><div class="screen tt">
+      <div class="shell">
+        <div class="status"><span class="num">5:05</span><svg width="62" height="12" viewBox="0 0 62 12"><g fill="#fff"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><rect x="34" y="0.5" width="24" height="11" rx="3" fill="none" stroke="#fff"/><rect x="36" y="2.5" width="18" height="7" rx="1.5"/><rect x="59" y="4" width="2" height="4" rx="1"/></g></svg></div>
+        <div class="titlebar"><h1>Fortnight</h1><div class="tools"><span>Jobs</span><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="#fff" stroke-width="2.2" stroke-linecap="round"/></svg></div></div>
+        <div class="seg" id="tt-seg"><button class="on" data-f="0">From Mon 12 Oct</button><button data-f="1">From Mon 19 Oct</button></div>
+      </div>
+      <div class="scroll">
+        <div class="gauge">
+          <svg width="96" height="96" viewBox="0 0 96 96" id="tt-ring"></svg>
+          <div class="read"><b class="num" id="tt-total">46.25 h</b><span>of 48 · <span class="num" id="tt-split">29.75 worked, 16.5 rostered</span></span><br><span class="state" id="tt-state" style="color:var(--near)">1.75 h left before the limit</span></div>
+        </div>
+        <div class="span num" id="tt-span">Mon 12 – Sun 25 Oct</div>
+        <div class="board">
+          <div class="heads"><span></span><span class="today">M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span><span>S</span></div>
+          <div id="tt-weeks"></div>
+          <div class="window" id="tt-window"></div>
+        </div>
+        <div class="legend"><span><i style="background:var(--roma)"></i>Café Roma</span><span><i style="background:var(--thai)"></i>Thai Express</span><span><i style="border:2px solid var(--muted);background:#fff"></i>Rostered</span></div>
+      </div>
+      <div class="dock">
+        <b>Café Roma started at 5:00pm</b>
+        <p>You haven't clocked in. Rostered until 10:30pm.</p>
+        <div class="acts"><button class="go">Started 5:00pm</button><button class="alt">Just now</button></div>
+      </div>
+      <div class="homebar"></div>
+    </div></div>
+    <figcaption><b>The roll · Semester timetable</b>Navy shell like a uni portal, employers as timetable subject colours, solid blocks for worked and outlined for rostered, yellow reserved for "act now". The fortnight frame slides one week at a time over three weeks, so the overlap is visible.</figcaption>
+  </figure>
+
+  <!-- B · Roster sheet & highlighter -->
+  <figure>
+    <div class="phone"><div class="screen rs">
+      <div class="status"><span class="num">5:05</span><svg width="62" height="12" viewBox="0 0 62 12"><g fill="#1d1d1f"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><rect x="34" y="0.5" width="24" height="11" rx="3" fill="none" stroke="#1d1d1f"/><rect x="36" y="2.5" width="18" height="7" rx="1.5"/><rect x="59" y="4" width="2" height="4" rx="1"/></g></svg></div>
+      <div class="titlebar"><h1>Fortnight</h1><div class="tools"><span>Jobs</span><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="#1d1d1f" stroke-width="2.2" stroke-linecap="round"/></svg></div></div>
+      <div class="seg"><button class="on">From Mon 12 Oct</button><button>From Mon 19 Oct</button></div>
+      <div class="scroll">
+        <div class="tally"><b class="num">46.25</b><span class="num">of 48 h · 1.75 h left</span></div>
+        <div class="meterline"><div class="track"></div><div class="worked" style="width:51.7%"></div><div class="rost" style="left:51.7%;width:28.7%"></div><div class="m48" style="left:83.5%"></div></div>
+        <table class="num">
+          <tr><th>Day</th><th>Shift</th><th style="text-align:right">Hrs</th></tr>
+          <tr><td class="day"><b>Mon</b> 12</td><td><span class="hl" style="--c:var(--roma)"><span>Café Roma 7–1</span></span></td><td class="hrs">6</td></tr>
+          <tr><td class="day"><b>Tue</b> 13</td><td><span class="hl" style="--c:var(--thai)"><span>Thai Express 5–10:30</span></span></td><td class="hrs">5.5</td></tr>
+          <tr><td class="day"><b>Wed</b> 14</td><td><span class="hl" style="--c:var(--roma)"><span>Café Roma 7–1</span></span></td><td class="hrs">6</td></tr>
+          <tr class="out"><td class="day"><b>Thu</b> 15</td><td></td><td class="hrs"></td></tr>
+          <tr><td class="day"><b>Fri</b> 16</td><td><span class="hl" style="--c:var(--thai)"><span>Thai Express 5–11</span></span></td><td class="hrs">6</td></tr>
+          <tr><td class="day"><b>Sat</b> 17</td><td><span class="hl" style="--c:var(--roma)"><span>Café Roma 9–3:15</span></span></td><td class="hrs">6.25</td></tr>
+          <tr><td class="day"><b>Sun</b> 18</td><td><span class="hl rostered" style="--c:var(--thai)"><span>Thai Express 5–10 · not clocked in</span></span></td><td class="hrs">5</td></tr>
+          <tr class="today"><td class="day"><b>Mon</b> 19</td><td><span class="hl rostered" style="--c:var(--roma)"><span>Café Roma 5–10:30</span></span></td><td class="hrs">5.5</td></tr>
+          <tr class="out"><td class="day"><b>Tue</b> 20</td><td></td><td class="hrs"></td></tr>
+          <tr class="out"><td class="day"><b>Wed</b> 21</td><td></td><td class="hrs"></td></tr>
+          <tr><td class="day"><b>Thu</b> 22</td><td><span class="hl rostered" style="--c:var(--thai)"><span>Thai Express 5–11</span></span></td><td class="hrs">6</td></tr>
+        </table>
+      </div>
+      <div class="dock">
+        <b>Café Roma started at 5:00pm</b>
+        <p>You haven't clocked in. Rostered until 10:30pm.</p>
+        <div class="acts"><button class="go">Started 5:00pm</button><button class="alt">Just now</button></div>
+      </div>
+      <div class="homebar"></div>
+    </div></div>
+    <figcaption><b>Impeccable's pick · Roster sheet &amp; highlighter</b>The back-room roster: ruled table, black rules on white stock, each employer a highlighter colour, faint when rostered and solid when worked, 48 h as a margin rule. Closest to a spreadsheet; the most familiar of the three.</figcaption>
+  </figure>
+
+  <!-- C · Standard iOS -->
+  <figure>
+    <div class="phone"><div class="screen st">
+      <div class="status"><span class="num">5:05</span><svg width="62" height="12" viewBox="0 0 62 12"><g fill="#000"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/><rect x="34" y="0.5" width="24" height="11" rx="3" fill="none" stroke="#000"/><rect x="36" y="2.5" width="18" height="7" rx="1.5"/><rect x="59" y="4" width="2" height="4" rx="1"/></g></svg></div>
+      <div class="titlebar"><h1>Fortnight</h1><div class="tools"><span>Jobs</span><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="#007aff" stroke-width="2.2" stroke-linecap="round"/></svg></div></div>
+      <div class="seg"><button class="on">Mon 12 – Sun 25 Oct</button><button>Mon 19 Oct – Sun 1 Nov</button></div>
+      <div class="scroll">
+        <div class="ringwrap"><svg width="170" height="170" viewBox="0 0 170 170"><circle cx="85" cy="85" r="68" fill="none" stroke="#e5e5ea" stroke-width="18"/><circle cx="85" cy="85" r="68" fill="none" stroke="#ffd8a8" stroke-width="18" stroke-dasharray="411 428" transform="rotate(-90 85 85)"/><circle cx="85" cy="85" r="68" fill="none" stroke="#ff9500" stroke-width="18" stroke-dasharray="265 428" stroke-linecap="round" transform="rotate(-90 85 85)"/><text x="85" y="88" text-anchor="middle" font-size="32" font-weight="700" class="num">46.25</text><text x="85" y="110" text-anchor="middle" font-size="13" fill="#8e8e93">of 48 hrs</text></svg><p>Close to limit · 29.75 worked, 16.5 rostered</p></div>
+        <div class="group">
+          <div class="cell"><span><span class="dot" style="background:#af52de"></span>Café Roma</span><span class="num">23.75 hrs</span></div>
+          <div class="cell"><span><span class="dot" style="background:#30b0c7"></span>Thai Express</span><span class="num">22.5 hrs</span></div>
+        </div>
+        <div class="group">
+          <div class="cell"><span>Today · Café Roma</span><span class="num">5:00 – 10:30pm</span></div>
+          <div class="cell"><span>Thu 22 · Thai Express</span><span class="num">5:00 – 11:00pm</span></div>
+          <div class="cell"><span>Sun 18 · Thai Express</span><span style="color:#ff9500">Not clocked in</span></div>
+        </div>
+      </div>
+      <div class="dock">
+        <b>Café Roma started at 5:00pm</b>
+        <p>You haven't clocked in. Rostered until 10:30pm.</p>
+        <div class="acts"><button class="go">Started 5:00pm</button><button class="alt">Just now</button></div>
+      </div>
+      <div class="homebar"></div>
+    </div></div>
+    <figcaption><b>Standard iOS</b>Apple's own Health and Fitness look: system colours, an activity ring, grouped lists. No world of its own, played straight.</figcaption>
+  </figure>
+
+</div>
+<script>
+// Timetable: three weeks (12, 19, 26 Oct); the 14-day fortnight frame covers two and slides by one.
+const C = { roma: 'var(--roma)', thai: 'var(--thai)' };
+const weeks = [
+  { label: 'Wk of', date: '12 Oct', days: [
+    { d: 12, s: [['roma', 6, 'worked']] }, { d: 13, s: [['thai', 5.5, 'worked']] }, { d: 14, s: [['roma', 6, 'worked']] },
+    { d: 15, s: [] }, { d: 16, s: [['thai', 6, 'worked']] }, { d: 17, s: [['roma', 6.25, 'worked']] },
+    { d: 18, s: [['thai', 5, 'rostered']], missed: true } ] },
+  { label: 'Wk of', date: '19 Oct', days: [
+    { d: 19, s: [['roma', 5.5, 'rostered due']], today: true }, { d: 20, s: [] }, { d: 21, s: [] },
+    { d: 22, s: [['thai', 6, 'rostered']] }, { d: 23, s: [] }, { d: 24, s: [] }, { d: 25, s: [] } ] },
+  { label: 'Wk of', date: '26 Oct', days: [
+    { d: 26, s: [] }, { d: 27, s: [] }, { d: 28, s: [] }, { d: 29, s: [] }, { d: 30, s: [] }, { d: 31, s: [] }, { d: 1, s: [] } ] },
+];
+const fortnights = [
+  { total: 46.25, worked: 29.75, rostered: 16.5, span: 'Mon 12 – Sun 25 Oct', state: '1.75 h left before the limit', colour: 'var(--near)' },
+  { total: 11.5, worked: 0, rostered: 11.5, span: 'Mon 19 Oct – Sun 1 Nov', state: '36.5 h left', colour: 'var(--ok)' },
+];
+const fmt = h => String(Math.round(h * 100) / 100);
+document.getElementById('tt-weeks').innerHTML = weeks.map((w, i) => `<div class="week" data-w="${i}"><div class="wk">${w.label}<b>${w.date}</b></div>${w.days.map(day => {
+  const hrs = day.s.reduce((a, s) => a + s[1], 0);
+  return `<div class="day ${day.today ? 'today' : ''}"><span class="d num">${day.d}</span>${day.missed ? '<span class="flag" title="Finished without a clock-in">?</span>' : ''}<div class="blocks">${day.s.map(([e, h, k]) => `<div class="blk ${k}" style="--c:${C[e]};height:${Math.round(h / 12 * 52)}px"></div>`).join('')}</div><div class="h num">${hrs ? fmt(hrs) : ''}</div></div>`;
+}).join('')}</div>`).join('');
+
+function ring(f) {
+  const r = 38, C2 = 2 * Math.PI * r, w = f.worked / 48 * C2, ro = f.rostered / 48 * C2;
+  const tick = 2 * Math.PI - Math.PI / 2;
+  return `<circle cx="48" cy="48" r="${r}" fill="none" stroke="#dfe2ec" stroke-width="10"/>
+    <circle cx="48" cy="48" r="${r}" fill="none" stroke="#16204a" stroke-width="10" stroke-dasharray="${w} ${C2}" transform="rotate(-90 48 48)"/>
+    <circle cx="48" cy="48" r="${r}" fill="none" stroke="#16204a" stroke-opacity=".35" stroke-width="10" stroke-dasharray="0 ${w} ${ro} ${C2}" transform="rotate(-90 48 48)"/>
+    <line x1="48" y1="2" x2="48" y2="18" stroke="#16204a" stroke-width="2.5"/>
+    <text x="48" y="53" text-anchor="middle" font-size="15" font-weight="700" fill="#16204a">${Math.round(f.total / 48 * 100)}%</text>`;
+}
+function show(i) {
+  const f = fortnights[i];
+  document.getElementById('tt-ring').innerHTML = ring(f);
+  document.getElementById('tt-total').textContent = `${fmt(f.total)} h`;
+  document.getElementById('tt-split').textContent = `${fmt(f.worked)} worked, ${fmt(f.rostered)} rostered`;
+  const st = document.getElementById('tt-state'); st.textContent = f.state; st.style.color = f.colour;
+  document.getElementById('tt-span').textContent = f.span;
+  document.getElementById('tt-window').classList.toggle('later', i === 1);
+  document.querySelectorAll('#tt-weeks .week').forEach(w => w.classList.toggle('out', i === 0 ? w.dataset.w === '2' : w.dataset.w === '0'));
+  document.querySelectorAll('#tt-seg button').forEach(b => b.classList.toggle('on', Number(b.dataset.f) === i));
+}
+document.getElementById('tt-seg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) show(Number(b.dataset.f)); });
+show(0);
+</script>
+</body>
+</html>
